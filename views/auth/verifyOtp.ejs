@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify OTP</title>
+
+    <link rel="stylesheet" href="/css/verifyOtp.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="left">
+
+        <img src="/images/signup/login.jpg" alt="Watch">
+
+    </div>
+
+    <div class="right">
+
+        <h1 class="logo">CHRONIX</h1>
+
+        <div class="card">
+
+            <h2>Verify OTP</h2>
+
+            <p>
+                Enter the 6-digit verification code sent to your email.
+            </p>
+
+            <% if(error){ %>
+
+                <div class="alert">
+                    <%= error %>
+                </div>
+
+            <% } %>
+
+           <form action="<%= typeof action !== 'undefined' ? action : '/verify-otp' %>" method="POST" novalidate>
+
+                <div class="otp-boxes">
+
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+
+                </div>
+
+                <input type="hidden" name="otp" id="fullOtp">
+
+                <p id="timer">01:00</p>
+
+                <button class="btn">
+                    Verify OTP
+                </button>
+
+            </form>
+
+            <div id="resendArea">
+
+                <p>
+                    Didn't receive the code?
+                </p>
+
+                <form action= "<%= typeof resendAction !== 'undefined' ? resendAction : '/resend-otp' %>" method="POST" novalidate>
+
+                    <button class="linkBtn">
+                        Resend OTP
+                    </button>
+
+                </form>
+
+            </div>
+
+            <a href="/login" class="back">
+                ← Back to Login
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const boxes=document.querySelectorAll(".otp");
+
+boxes.forEach((box,index)=>{
+
+    box.addEventListener("input",()=>{
+
+        if(box.value.length===1 && index<boxes.length-1){
+
+            boxes[index+1].focus();
+
+        }
+
+        document.getElementById("fullOtp").value=
+        [...boxes].map(i=>i.value).join("");
+
+    });
+
+    box.addEventListener("keydown",(e)=>{
+
+        if(e.key==="Backspace" && !box.value && index>0){
+
+            boxes[index-1].focus();
+
+        }
+
+    });
+
+});
+
+let seconds=60;
+
+const timer=document.getElementById("timer");
+
+const resend=document.getElementById("resendArea");
+
+resend.style.display="none";
+
+const count=setInterval(()=>{
+
+    let min=Math.floor(seconds/60);
+
+    let sec=seconds%60;
+
+    timer.innerHTML=
+    `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+
+    seconds--;
+
+    if(seconds<0){
+
+        clearInterval(count);
+
+        timer.style.display="none";
+
+        resend.style.display="block";
+
+    }
+
+},1000);
+
+</script>
+
+</body>
+</html>

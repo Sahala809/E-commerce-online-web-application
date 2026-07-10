@@ -1,0 +1,549 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.top-bar{
+
+    background:#f3f3f3;
+    padding:10px 0;
+
+}
+
+.top-bar a{
+
+    text-decoration:none;
+    color:#000;
+    margin-left:30px;
+    font-size:13px;
+}
+
+.logo{
+
+    font-size:35px;
+    font-weight:700;
+    letter-spacing:2px;
+
+}
+
+.navbar{
+
+    padding:20px 0;
+}
+
+.nav-link{
+
+    margin:0 10px;
+    color:#000;
+}
+
+.search-box{
+
+    border-radius:30px;
+    width:180px;
+}
+
+.icons a{
+
+    color:#000;
+    margin-left:15px;
+    font-size:18px;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+
+    padding:80px 0;
+
+}
+
+.hero-image{
+
+    width:100%;
+    height:430px;
+    object-fit:cover;
+
+}
+
+.hero-content h2{
+
+    font-size:72px;
+
+    font-weight:800;
+
+    letter-spacing:2px;
+
+}
+
+.hero-content h1{
+
+    font-size:120px;
+
+    font-weight:900;
+
+    color:transparent;
+
+    -webkit-text-stroke:2px #444;
+
+    line-height:1;
+
+}
+
+.hero-content p{
+
+    letter-spacing:6px;
+
+    font-size:14px;
+
+    margin:25px 0;
+
+}
+
+.hero-btn{
+
+    background:#000;
+
+    color:#fff;
+
+    padding:14px 45px;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+}
+
+.hero-btn:hover{
+
+    background:#333;
+
+    color:#fff;
+
+}
+
+/*=============== BRANDS ===============*/
+
+.brands{
+
+    padding:50px 0;
+
+}
+
+.brand-name{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    transition:.3s;
+
+}
+
+.brand-name:hover{
+
+    color:#c89b3c;
+
+    cursor:pointer;
+
+}
+
+/*============= CATEGORY SECTION =============*/
+
+.category-card{
+
+    position:relative;
+
+    display:block;
+
+    overflow:hidden;
+
+    border-radius:10px;
+
+    text-decoration:none;
+
+}
+
+.category-card img{
+
+    width:100%;
+
+    height:500px;
+
+    object-fit:cover;
+
+    transition:.5s;
+
+}
+
+.category-card:hover img{
+
+    transform:scale(1.08);
+
+}
+
+.overlay{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,.35);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.overlay h2{
+
+    color:white;
+
+    font-size:38px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+}
+
+/*========== NEW ARRIVALS ==========*/
+
+.section-title{
+
+    font-size:40px;
+    font-weight:700;
+
+}
+
+.category-buttons{
+
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+
+}
+
+.category-btn{
+
+    border:none;
+    background:#f3f3f3;
+    padding:12px 30px;
+    border-radius:30px;
+    font-weight:600;
+    transition:.3s;
+
+}
+
+.category-btn:hover,
+.category-btn.active{
+
+    background:#000;
+    color:#fff;
+
+}
+
+.product-card{
+
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+    transition:.3s;
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.product-card:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.product-image{
+
+    position:relative;
+
+}
+
+.product-image img{
+
+    width:100%;
+    height:280px;
+    object-fit:cover;
+
+}
+
+.wishlist{
+
+    position:absolute;
+    top:15px;
+    right:15px;
+
+    width:40px;
+    height:40px;
+
+    background:#fff;
+
+    border-radius:50%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    z-index:5;
+
+}
+
+.product-info{
+
+    padding:20px;
+    text-align:center;
+
+}
+
+.product-info h5{
+
+    margin-bottom:10px;
+
+}
+
+.rating{
+
+    color:#ffc107;
+    margin-bottom:10px;
+
+}
+
+.product-info h4{
+
+    font-weight:700;
+
+}
+
+/* =========================PROMO BANNER========================= */
+
+.promo-banner{
+    background:#f8f9fa;
+}
+
+.offer-tag{
+    display:inline-block;
+    background:#000;
+    color:#fff;
+    padding:8px 18px;
+    border-radius:30px;
+    font-size:14px;
+    letter-spacing:1px;
+}
+
+.banner-title{
+    font-size:3rem;
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:20px;
+}
+
+.banner-title span{
+    color:#e63946;
+}
+
+.banner-text{
+    color:#666;
+    font-size:17px;
+    margin-bottom:30px;
+}
+
+.banner-btn{
+    background:#000;
+    color:#fff;
+    padding:12px 35px;
+    border-radius:50px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.banner-btn:hover{
+    background:#e63946;
+    color:#fff;
+}
+
+.banner-img{
+    max-height:500px;
+    object-fit:cover;
+    border-radius:20px;
+}
+
+/* =========================== CUSTOMER REVIEWS =========================== */
+
+.reviews{
+    background:#fff;
+}
+
+.section-subtitle{
+    color:#888;
+    letter-spacing:2px;
+    font-size:14px;
+    font-weight:600;
+}
+
+.section-title{
+    font-size:2.4rem;
+    font-weight:700;
+    margin-top:10px;
+}
+
+.review-card{
+    background:#fff;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+    height:100%;
+}
+
+.review-card:hover{
+    transform:translateY(-8px);
+}
+
+.stars{
+    color:#FFC107;
+    font-size:22px;
+    margin-bottom:20px;
+}
+
+.review-text{
+    color:#666;
+    line-height:1.8;
+    min-height:110px;
+}
+
+.review-user{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.review-user img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.review-user h6{
+    margin:0;
+    font-weight:600;
+}
+
+.review-user small{
+    color:#888;
+}
+
+
+/* ===========================
+   FOOTER
+=========================== */
+
+.footer{
+    background:#111;
+    color:#fff;
+}
+
+.footer-logo{
+    font-size:2rem;
+    font-weight:700;
+}
+
+.footer-logo span{
+    color:#ff4d4d;
+}
+
+.footer-text{
+    color:#bbb;
+    line-height:1.8;
+    margin:20px 0;
+}
+
+.footer h5{
+    margin-bottom:20px;
+    font-weight:600;
+}
+
+.footer-links{
+    list-style:none;
+    padding:0;
+}
+
+.footer-links li{
+    margin-bottom:12px;
+}
+
+.footer-links a{
+    color:#bbb;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.footer-links a:hover{
+    color:#fff;
+    padding-left:5px;
+}
+
+.footer-contact{
+    list-style:none;
+    padding:0;
+}
+
+.footer-contact li{
+    margin-bottom:15px;
+    color:#bbb;
+}
+
+.footer-contact i{
+    color:#fff;
+    margin-right:10px;
+}
+
+.social-links{
+    display:flex;
+    gap:15px;
+}
+
+.social-links a{
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#222;
+    color:#fff;
+    font-size:18px;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.social-links a:hover{
+    background:#ff4d4d;
+}
+
+.footer hr{
+    border-color:#333;
+}
+
+.footer-bottom{
+    color:#999;
+}
