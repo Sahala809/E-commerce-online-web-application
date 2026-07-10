@@ -24,7 +24,9 @@ import { isLogin } from "../middleware/userAuth.js";
 
 const router = express.Router();
 
-router.get("/", loadHome);
+
+router.get("/home", isLogin, loadHome)
+router.get("/", isLogin, loadHome);
 
 router.get(
     "/auth/google",

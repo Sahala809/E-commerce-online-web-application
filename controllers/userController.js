@@ -262,9 +262,11 @@ export const resendOtp = async (req, res) => {
 };
 
 export const loadLogin = (req, res) => {
-    res.render("auth/login", {
-        error: null
-    });
+    if (req.session.user) {
+        return res.redirect("/");
+    }
+
+    res.render("auth/login");
 };
 
 export const login = async (req, res) => {
