@@ -9,6 +9,10 @@ import { checkUserExists } from "../services/userService.js";
 import { generateOtp } from "../utils/generateOtp.js";
 import { sendOtp } from "../utils/sendOtp.js"
 
+import { signupService } from "../services/signupService.js"
+import { verifySignupOtpService } from "../services/signupService.js";
+import { resendSignupOtpService } from "../services/signupService.js";
+
 import { validateLogin } from "../services/validationService.js";
 
 import { 
@@ -22,9 +26,11 @@ import {
 
 export const loadHome = (req, res) => {
 
-    res.render("user/home", {
-        user: req.session.user || null
-    });
+     if (!req.session.user) {
+        return res.redirect("/login");
+    }
+
+    res.render("user/home");
 
 };
 
@@ -41,83 +47,30 @@ export const signup = async (req, res) => {
 
     try {
 
-        // Validate form
-        const error = validateSignup(req.body);
-
-        if (error) {
-            return res.render("auth/signup", {
-                error,
-                formData: req.body
-            });
-        }
-
-        const { name, email, phone, password } = req.body;
-
-        // Check existing user
-        const exists = await checkUserExists(email, phone);
-
-        if (exists) {
-            return res.render("auth/signup", {
-                error: exists,
-                formData: req.body
-            });
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Generate OTP
-        const otp = generateOtp();
-
-        // Hash OTP
-        const hashedOtp = await bcrypt.hash(otp, 10);
-
-        // Delete previous OTP
-        await Otp.deleteOne({ email });
-
-        // Save OTP
-        await Otp.create({
-            email,
-            otp: hashedOtp,
-            expiresAt: new Date(Date.now() +  30 * 1000)
-        });
-
-        // Store user data in session
-        req.session.signupData = {
-            name,
-            email,
-            phone,
-            password: hashedPassword
-        };
-
-        // Send OTP
-        await sendOtp(email, otp);
-
-        // Print OTP in terminal
-        console.log("\n===============================");
-        console.log("EMAIL :", email);
-        console.log("OTP   :", otp);
-        console.log("===============================\n");
-
-        return res.redirect("/verify-otp");
+        await signupService(req, res);
 
     } catch (error) {
 
-        console.log("SIGNUP ERROR:", error);
+        console.log(error);
 
         return res.render("auth/signup", {
             error: "Something went wrong. Please try again.",
             formData: req.body
         });
+
     }
+
 };
 
 // Load OTP Page
 export const loadVerifyOtp = (req, res) => {
+console.log("Load Verify OTP Session:", req.session.signupData);
+
     res.render("auth/verifyOtp", {
         error: null,
         action:"/verify-otp",
-        resendAction: "/resend-otp"
+        resendAction: "/resend-otp",
+         otpExpired: false
     });
 };
 
@@ -126,94 +79,17 @@ export const verifyOtp = async (req, res) => {
 
     try {
 
-        const { otp } = req.body;
-
-        const signupData = req.session.signupData;
-
-        if (!signupData) {
-            return res.redirect("/signup");
-        }
-
-        const otpData = await Otp.findOne({
-            email: signupData.email
-        });
-
-        console.log("Current Time :", new Date());
-
-
-        if (!otpData) {
-            return res.render("auth/verifyOtp", {
-                error: "OTP not found.",
-                action: "/verify-otp",
-                resendAction: "/resend-otp",
-                otpExpired: false
-            });
-        }
-
-        console.log("Current Time :", new Date());
-        console.log("OTP Expires  :", otpData.expiresAt);
-        console.log("Expired?     :", otpData.expiresAt < new Date());
-
-        if (otpData.expiresAt < new Date()) {
-
-            await Otp.deleteOne({
-                email: signupData.email
-            });
-
-            return res.render("auth/verifyOtp", {
-                error: "OTP expired.",
-                action:"/verify-otp",
-                resendAction: "/resend-otp",
-                otpExpired: true
-            });
-        }
-
-        const isMatch = await bcrypt.compare(
-            otp.toString(),
-            otpData.otp.toString()
-        );
-
-        console.log("OTP Match:", isMatch);
-        
-        if (!isMatch) {
-
-            return res.render("auth/verifyOtp", {
-                error: "Invalid OTP.",
-                action: "/verify-otp",
-                resendAction: "/resend-otp",
-                otpExpired: false
-            });
-        }
-
-        // Create User
-        await User.create({
-            name: signupData.name,
-            email: signupData.email,
-            phone: signupData.phone,
-            password: signupData.password,
-            isVerified: true
-        });
-
-        // Delete OTP
-        await Otp.deleteOne({
-            email: signupData.email
-        });
-
-        // Clear Session
-        delete req.session.signupData;
-
-        return res.redirect("/login");
+        await verifySignupOtpService(req, res);
 
     } catch (error) {
 
-        console.log(error);
-
         return res.render("auth/verifyOtp", {
-            error: "Something went wrong.",
+            error: error.message,
             action: "/verify-otp",
             resendAction: "/resend-otp",
-            otpExpired: true
+            otpExpired: false
         });
+
     }
 
 };
@@ -223,42 +99,21 @@ export const resendOtp = async (req, res) => {
 
     try {
 
-        const signupData = req.session.signupData;
-
-        if (!signupData) {
-            return res.redirect("/signup");
-        }
-
-        const email = signupData.email;
-
-        const otp = generateOtp();
-
-        const hashedOtp = await bcrypt.hash(otp, 10);
-
-        await Otp.deleteOne({ email });
-
-        await Otp.create({
-            email,
-            otp: hashedOtp,
-            expiresAt: new Date(Date.now() +  30 * 1000)
-        });
-
-        await sendOtp(email, otp);
-
-        console.log("\n======================");
-        console.log("NEW OTP :", otp);
-        console.log("======================\n");
-
-        return res.redirect("/verify-otp");
+        await resendSignupOtpService(req, res);
 
     } catch (error) {
 
         console.log(error);
 
         return res.render("auth/verifyOtp", {
-            error: "Unable to resend OTP."
+            error: error.message,
+            action: "/verify-otp",
+            resendAction: "/resend-otp",
+            otpExpired: false
         });
+
     }
+
 };
 
 export const loadLogin = (req, res) => {
@@ -266,7 +121,10 @@ export const loadLogin = (req, res) => {
         return res.redirect("/");
     }
 
-    res.render("auth/login");
+    res.render("auth/login", {
+        error: null,
+        formData: {}
+    });
 };
 
 export const login = async (req, res) => {

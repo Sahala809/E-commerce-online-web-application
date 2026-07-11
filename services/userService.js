@@ -16,3 +16,7 @@ export const checkUserExists = async (email, phone) => {
 
     return null;
 };
+
+export const getUserByEmail = async (email) => {
+    return await User.findOne({ email });
+};

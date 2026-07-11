@@ -5,6 +5,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import session from "express-session"
 import passport from "passport";
+import nocache from "nocache";
 
 import connectDB from "./config/db.js";
 import "./config/passport.js";
@@ -43,6 +44,8 @@ app.use(passport.session());
 
 app.use(express.urlencoded({ extended:true }))
 app.use(express.json())
+
+app.use(nocache());  
 
 app.use(express.static(path.join(__dirname, "public")))
 

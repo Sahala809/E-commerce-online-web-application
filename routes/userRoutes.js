@@ -26,7 +26,7 @@ const router = express.Router();
 
 
 router.get("/home", isLogin, loadHome)
-router.get("/", isLogin, loadHome);
+router.get("/", loadHome);
 
 router.get(
     "/auth/google",
