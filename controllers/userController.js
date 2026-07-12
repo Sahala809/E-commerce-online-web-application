@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
-import Otp from "../models/otpModel.js";
 
 import { validateSignup } from "../services/validationService.js";
 import { checkUserExists } from "../services/userService.js";
@@ -26,11 +25,9 @@ import {
 
 export const loadHome = (req, res) => {
 
-     if (!req.session.user) {
-        return res.redirect("/login");
-    }
-
-    res.render("user/home");
+res.render("user/home", {
+        user: req.session.user || null
+    });
 
 };
 
@@ -285,16 +282,13 @@ export const forgotPassword = async (req, res) => {
 
         const { email } = req.body;
 
-        await sendForgotPasswordOtp(email);
-
-        req.session.resetEmail = email;
-
-        console.log("Saved Session Email:", req.session.resetEmail);
+        await sendForgotPasswordOtp(req, email);
 
         return res.render("auth/verifyOtp", {
             error: null,
             action: "/forgot-password/verify-otp",
-            resendAction: "/forgot-password/resend-otp"
+            resendAction: "/forgot-password/resend-otp",
+            otpExpired: false
         });
 
     } catch (error) {
@@ -336,7 +330,7 @@ export const resendForgotPasswordOtp = async (req, res) => {
 
     try {
 
-        await resendForgotPasswordOtpService(req.session.resetEmail);
+        await resendForgotPasswordOtpService(req,res);
 
         return res.render("auth/verifyOtp", {
             error: null,
@@ -364,6 +358,8 @@ export const resetPassword = async (req, res) => {
 
     try {
 
+        console.log(req.body);
+
         await resetPasswordService(
             req.session.resetEmail,
             req.body.password,
@@ -371,14 +367,16 @@ export const resetPassword = async (req, res) => {
         );
 
         delete req.session.resetEmail;
+        delete req.session.resetOtp;
+        delete req.session.resetOtpExpires;
 
-        delete req.session.user;
-
-        res.redirect("/login");
+        return res.redirect("/login");
 
     } catch (error) {
 
-        res.render("auth/resetPassword", {
+        console.log("RESET PASSWORD ERROR:", error.message);
+
+        return res.render("auth/resetPassword", {
             error: error.message,
             formData: {}
         });
@@ -386,4 +384,3 @@ export const resetPassword = async (req, res) => {
     }
 
 };
-

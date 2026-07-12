@@ -49,7 +49,7 @@ export const signupService = async (req, res) => {
 
     // store OTP in session
     req.session.signupOtp = otp;
-    req.session.signupOtpExpires = Date.now() + 30 * 1000;
+    req.session.signupOtpExpires = Date.now() + 60 * 1000;
 
      // Save session
     await new Promise((resolve, reject) => {
@@ -91,9 +91,14 @@ export const verifySignupOtpService = async (req,res) => {
             otpExpired: true
         });
     }
+
+    console.log("Entered OTP:", otp);
+    console.log("Session OTP:", req.session.signupOtp);
+    console.log("Expires At:", new Date(req.session.signupOtpExpires));
+    console.log("Current Time:", new Date());
     
 
-    if (Date.now() > new Date()) {
+    if (Date.now() > expires) {
 
         return res.render("auth/verifyOtp", {
             error: "OTP has expired.",
@@ -103,7 +108,7 @@ export const verifySignupOtpService = async (req,res) => {
         });
     }
 
-    if (otp !== saveOtp) {
+    if (otp !== savedOtp) {
         return res.render("auth/verifyOtp", {
             error: "Invalid OTP.",
             action: "/verify-otp",
@@ -150,7 +155,7 @@ export const resendSignupOtpService = async (req,res) => {
     const otp = generateOtp();
 
     req.session.signupOtp = otp;
-    req.session.signupOtpExpires = Date.now() + 30 * 1000;
+    req.session.signupOtpExpires = Date.now() + 0 * 1000;
 
     await new Promise((resolve, reject) => {
         req.session.save((err) => {
@@ -159,7 +164,7 @@ export const resendSignupOtpService = async (req,res) => {
         });
     });
 
-    await sendOtp(email, otp);
+    await sendOtp(signupData.email, otp);
 
     console.log("\n==========================");
     console.log("SIGNUP RESEND OTP :", otp);

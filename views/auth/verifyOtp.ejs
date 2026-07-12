@@ -93,6 +93,7 @@
 <script>
 
 const boxes=document.querySelectorAll(".otp");
+const fullOtp = document.getElementById("fullOtp");
 
 boxes.forEach((box,index)=>{
 
@@ -104,8 +105,7 @@ boxes.forEach((box,index)=>{
 
         }
 
-        document.getElementById("fullOtp").value=
-        [...boxes].map(i=>i.value).join("");
+        fullOtp.value= [...boxes].map(i=>i.value).join("");
 
     });
 
@@ -121,36 +121,47 @@ boxes.forEach((box,index)=>{
 
 });
 
-let seconds=60;
 
 const timer=document.getElementById("timer");
 
 const resend=document.getElementById("resendArea");
 
-resend.style.display="none";
+const otpExpired = <%= typeof otpExpired !== "undefined" ? otpExpired : false %>;
 
-const count=setInterval(()=>{
+if (otpExpired) {
 
-    let min=Math.floor(seconds/60);
+    timer.style.display = "none";
+    resend.style.display = "block";
 
-    let sec=seconds%60;
+} else {
 
-    timer.innerHTML=
-    `${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+    resend.style.display = "none";
 
-    seconds--;
+    let seconds = 60;
 
-    if(seconds<0){
+    timer.innerHTML = "01:00";
 
-        clearInterval(count);
+    const count = setInterval(() => {
 
-        timer.style.display="none";
+        let min = Math.floor(seconds / 60);
+        let sec = seconds % 60;
 
-        resend.style.display="block";
+        timer.innerHTML =
+            `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 
-    }
+        seconds--;
 
-},1000);
+        if (seconds < 0) {
+
+            clearInterval(count);
+
+            timer.style.display = "none";
+            resend.style.display = "block";
+
+        }
+
+    }, 1000);
+}
 
 </script>
 

@@ -1,13 +1,12 @@
 import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
-import Otp from "../models/otpModel.js";
 
 import { generateOtp } from "../utils/generateOtp.js";
 import { sendOtp } from "../utils/sendOtp.js";
 
 // Send Forgot Password OTP
-export const sendForgotPasswordOtp = async (email) => {
+export const sendForgotPasswordOtp = async (req,email) => {
 
     const user = await User.findOne({
         email: email.trim().toLowerCase()
@@ -20,19 +19,19 @@ export const sendForgotPasswordOtp = async (email) => {
     // Generate OTP
     const otp = generateOtp();
 
-    // Hash OTP
-    const hashedOtp = await bcrypt.hash(otp, 10);
+    // Save in session
+    req.session.resetEmail = email;
+    req.session.resetOtp = otp;
+    req.session.resetOtpExpires = Date.now() + 60 * 1000;
 
-    // Delete old OTP if exists
-    await Otp.deleteOne({ email });
-
-    // Save new OTP
-    await Otp.create({
-        email,
-        otp: hashedOtp,
-        expiresAt: new Date(Date.now() +  30 * 1000)
+    // Save session
+    await new Promise((resolve, reject) => {
+        req.session.save((err) => {
+            if (err) return reject(err);
+            resolve();
+        });
     });
-
+    
     // Send OTP email
     await sendOtp(email, otp);
 
@@ -44,73 +43,62 @@ export const sendForgotPasswordOtp = async (email) => {
 };
 
 export const verifyForgotPasswordOtpService = async (req, res) => {
-
-        console.log("OTP Received:", req.body.otp);
         
+    const { otp } = req.body;
 
-        const { otp } = req.body;
+    const savedOtp = req.session.resetOtp;
+    const expires = req.session.resetOtpExpires;
+    const email = req.session.resetEmail;
 
-        const email = req.session.resetEmail;
+    if (!email) {
+        return res.redirect("/forgot-password");
+    }
 
-        if (!email) {
-            return res.redirect("/forgot-password");
-        }
+    if (!savedOtp) {
 
-        const otpData = await Otp.findOne({ email });
+        return res.render("auth/verifyOtp", {
+            error: "OTP not found.",
+            action: "/forgot-password/verify-otp",
+            resendAction: "/forgot-password/resend-otp",
+            otpExpired: true
+        });
 
-        if (!otpData) {
+    }
 
-            return res.render("auth/verifyOtp", {
-                error: "OTP not found.",
-                action: "/forgot-password/verify-otp",
-                resendAction: "/forgot-password/resend-otp",
-                otpExpired: true
-            });
-
-        }
-
-        console.log("Current Time :", new Date());
-        console.log("OTP Expires  :", otpData.expiresAt);
-        console.log("Expired?     :", otpData.expiresAt < new Date());
-
-        if (otpData.expiresAt < new Date()) {
-
-            await Otp.deleteOne({ email });
-
-            return res.render("auth/verifyOtp", {
-                error: "OTP has expired.",
-                action: "/forgot-password/verify-otp",
-                resendAction: "/forgot-password/resend-otp",
-                otpExpired: true
-            });
-
-        }
-
-        const isMatch = await bcrypt.compare(
-            otp.toString(),
-            otpData.otp.toString()
-        );
-
-        console.log("OTP Match:", isMatch);
+    console.log("Entered OTP:", otp);
+    console.log("Saved OTP:", savedOtp);
+    console.log("Current Time:", new Date().toLocaleString());
+    console.log("Expires:", new Date(expires).toLocaleString());
 
 
-        if (!isMatch) {
+    if (Date.now() > expires) {
 
-            return res.render("auth/verifyOtp", {
-                error: "Invalid OTP.",
-                action: "/forgot-password/verify-otp",
-                resendAction: "/forgot-password/resend-otp",
-                otpExpired: false
-            });
+        return res.render("auth/verifyOtp", {
+            error: "OTP has expired.",
+            action: "/forgot-password/verify-otp",
+            resendAction: "/forgot-password/resend-otp",
+            otpExpired: true
+        });
 
-        }
+    }
 
-        // OTP verified
-        await Otp.deleteOne({ email });
+    if(otp !== savedOtp) {
 
-        return res.redirect("/reset-password");
+        return res.render("auth/verifyOtp", {
+            error: "Invalid OTP.",
+            action: "/forgot-password/verify-otp",
+            resendAction: "/forgot-password/resend-otp",
+            otpExpired: false
+        });
 
-    } 
+    }
+
+    delete req.session.resetOtp;
+    delete req.session.resetOtpExpires;
+
+    return res.redirect("/reset-password");
+
+} 
 
 // Reset Password Service
 export const resetPasswordService = async (
@@ -118,6 +106,10 @@ export const resetPasswordService = async (
     password,
     confirmPassword
 ) => {
+
+    console.log("Session Email:", email);
+    console.log("Password:", password);
+    console.log("Confirm Password:", confirmPassword);
 
     if (!email) {
         throw new Error("Session expired. Please try again.");
@@ -131,7 +123,11 @@ export const resetPasswordService = async (
         throw new Error("Passwords do not match.");
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+        email: email.trim().toLowerCase()
+    } );
+
+    console.log("User Found:", user);
 
     if (!user) {
         throw new Error("User not found.");
@@ -156,13 +152,14 @@ export const resetPasswordService = async (
 
 };
 
-export const resendForgotPasswordOtpService = async (email) => {
+export const resendForgotPasswordOtpService = async (req) => {
+    
+    const email = req.session.resetEmail;
 
     if (!email) {
         throw new Error("Session expired. Please try again.");
     }
 
-    // Check user exists
     const user = await User.findOne({
         email: email.trim().toLowerCase()
     });
@@ -174,17 +171,15 @@ export const resendForgotPasswordOtpService = async (email) => {
     // Generate OTP
     const otp = generateOtp();
 
-    // Hash OTP
-    const hashedOtp = await bcrypt.hash(otp, 10);
+    req.session.resetOtp = otp;
+    req.session.resetOtpExpires = Date.now() + 60 * 1000; 
 
-    // Delete previous OTP
-    await Otp.deleteOne({ email });
-
-    // Save new OTP
-    await Otp.create({
-        email,
-        otp: hashedOtp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+    // Save session before redirecting
+    await new Promise((resolve, reject) => {
+        req.session.save((err) => {
+            if (err) return reject(err);
+            resolve();
+        });
     });
 
     // Send OTP
@@ -193,4 +188,6 @@ export const resendForgotPasswordOtpService = async (email) => {
     console.log("\n==========================");
     console.log("RESEND OTP :", otp);
     console.log("==========================\n");
+
+    return true;
 };
