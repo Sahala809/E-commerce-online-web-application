@@ -1,0 +1,106 @@
+<%- include("../../partials/header") %>
+<%- include("../../partials/navbar") %>
+<link rel="stylesheet" href="/css/profile/sidebar.css">
+<link rel="stylesheet" href="/css/profile/changeEmail.css">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="profile-container">
+
+    <!-- Sidebar -->
+    <%- include("../../partials/profileSidebar") %>
+
+    <!-- Right Content -->
+
+    <section class="profile-content">
+
+        <div class="content-header">
+
+            <h2>Change Email</h2>
+
+            <p>
+                Update your email address. An OTP will be sent to your new email for verification.
+            </p>
+
+        </div>
+
+        <% if(error){ %>
+
+            <div class="error-box">
+                <%= error %>
+            </div>
+
+        <% } %>
+
+        <% if(success){ %>
+
+            <div class="success-box">
+                <%= success %>
+            </div>
+
+        <% } %>
+
+        <div class="profile-form-card">
+
+            <form action="/profile/change-email" method="POST" novalidate>
+
+            
+
+                <!-- New Email -->
+
+                <div class="form-group">
+
+                    <label>Enter New Email Address</label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter new email"
+                        required>
+
+                </div>
+
+                <!-- Buttons -->
+
+                <div class="button-group">
+
+                    <button
+                        type="submit"
+                        class="save-btn">
+
+                        <i class="bi bi-envelope-check"></i>
+
+                        Send OTP
+
+                    </button>
+
+                </div>
+
+                <div class="back-link">
+
+                    <a href="/profile">
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Back to Profile
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+
+<div class="profile-bottom">
+
+    CHRONIX • Terms & Conditions • Privacy Policy
+
+</div>
+
+</body>
+</html>

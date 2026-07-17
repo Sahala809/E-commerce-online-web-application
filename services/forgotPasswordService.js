@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
 
-import { generateOtp } from "../utils/generateOtp.js";
-import { sendOtp } from "../utils/sendOtp.js";
+import generateOtp from "../utils/generateOtp.js";
+import sendOtp from "../utils/sendOtp.js";
 
 // Send Forgot Password OTP
 export const sendForgotPasswordOtp = async (req,email) => {

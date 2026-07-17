@@ -12,7 +12,7 @@ import "./config/passport.js";
 
 
 import userRoutes from "./routes/userRoutes.js"
-import { sendOtp } from "./utils/sendOtp.js";
+import sendOtp from "./utils/sendOtp.js";
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/", userRoutes);
-console.log(userRoutes);
+
 
 
 const PORT = process.env.PORT 

@@ -1,0 +1,159 @@
+<%- include("../../partials/header") %>
+<%- include("../../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/profile/sidebar.css">
+<link rel="stylesheet" href="/css/profile/myProfile.css">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="profile-container">
+    <!-- ===========================
+         RIGHT CONTENT
+    ============================ -->
+
+    <%- include("../../partials/profileSidebar") %>
+
+    <!-- ===========================
+         RIGHT CONTENT
+    ============================ -->
+
+    <section class="profile-content">
+
+        <div class="content-header">
+
+            <h2>My Profile</h2>
+
+            <p>
+                Manage your personal information and account settings.
+            </p>
+
+        </div>
+
+        <!-- Success Message -->
+        <% if(success){ %>
+
+            <div class="success-box">
+                <i class="bi bi-check-circle-fill"></i>
+                <%= success %>
+            </div>
+
+        <% } %>
+
+        <!-- Error Message -->
+        <% if(error){ %>
+
+            <div class="error-box">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <%= error %>
+            </div>
+
+        <% } %>
+
+        <div class="profile-form-card">
+
+            <form action="/profile" method="POST" novalidate>
+                                <!-- Full Name -->
+
+                <div class="form-group">
+
+                    <label>Full Name</label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        value="<%= user.name %>"
+                        required>
+
+                </div>
+
+                <!-- Email -->
+
+                <div class="form-group">
+
+                    <label>Email Address</label>
+
+                    <div class="email-box">
+
+                        <input
+                            type="email"
+                            value="<%= user.email %>"
+                            readonly>
+
+                        <a href="/profile/change-email" class="edit-email">
+                            <i class="bi bi-pencil-square"></i>
+                            Edit
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <!-- Phone -->
+
+                <div class="form-group">
+
+                    <label>Phone Number</label>
+
+                    <input
+                        type="text"
+                        name="phone"
+                        value="<%= user.phone || '' %>">
+
+                </div>
+
+                
+
+                <!-- Buttons -->
+
+                <div class="button-group">
+
+                    <button
+                        type="submit"
+                        class="save-btn">
+
+                        <i class="bi bi-check-circle"></i>
+
+                        Save Changes
+
+                    </button>
+
+                    <a
+                        href="/change-password"
+                        class="password-btn">
+
+                        <i class="bi bi-shield-lock"></i>
+
+                        Change Password
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+
+<!-- Bottom Text -->
+
+<div class="profile-bottom">
+
+    CHRONIX • Terms & Conditions • Privacy Policy
+
+</div>
+
+<script>
+setTimeout(() => {
+    const success = document.querySelector(".success-box");
+    if (success) {
+        success.style.display = "none";
+    }
+}, 3000);
+</script>
+
+</body>
+
+</html>

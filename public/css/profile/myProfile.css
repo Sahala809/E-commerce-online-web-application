@@ -1,0 +1,156 @@
+.profile-content{
+    flex:1;
+}
+
+.content-header{
+    margin-bottom:25px;
+}
+
+.content-header h2{
+    font-size:32px;
+}
+
+.content-header p{
+    color:#777;
+}
+
+.profile-form-card{
+    background:#fff;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.form-group{
+    margin-bottom:25px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:500;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    height:52px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:0 18px;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+    outline:none;
+    border-color:#111;
+}
+
+.email-box{
+    display:flex;
+    gap:15px;
+}
+
+.email-box input{
+    flex:1;
+    background:#f8f8f8;
+}
+
+.edit-email{
+    width:120px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-decoration:none;
+    background:#111;
+    color:#fff;
+    border-radius:10px;
+}
+
+.edit-email:hover{
+    background:#333;
+}
+
+.button-group{
+    display:flex;
+    gap:15px;
+    margin-top:30px;
+}
+
+.save-btn,
+.password-btn{
+    height:50px;
+    padding:0 25px;
+    border-radius:10px;
+    text-decoration:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+}
+
+.save-btn{
+    background:#111;
+    color:#fff;
+    border:none;
+}
+
+.password-btn{
+    border:1px solid #111;
+    color:#111;
+}
+
+.password-btn:hover{
+    background:#111;
+    color:#fff;
+}
+
+.success-box{
+    background:#e8f8ec;
+    color:#2e7d32;
+    border:1px solid #b8e6c2;
+    padding:15px 18px;
+    border-radius:10px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:500;
+}
+
+.success-box i{
+    font-size:18px;
+}
+
+.error-box{
+    background:#ffe7e7;
+    color:#c62828;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.profile-bottom{
+    width:90%;
+    margin:25px auto;
+    text-align:right;
+    color:#999;
+    font-size:13px;
+}
+
+@media(max-width:992px){
+
+    .button-group{
+        flex-direction:column;
+    }
+
+    .email-box{
+        flex-direction:column;
+    }
+
+    .edit-email{
+        width:100%;
+        height:50px;
+    }
+
+}

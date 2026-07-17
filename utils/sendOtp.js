@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-export const sendOtp = async (email, otp) => {
+const sendOtp = async (email, otp) => {
 
     try {
 
@@ -46,3 +46,5 @@ export const sendOtp = async (email, otp) => {
     }
 
 };
+
+export default sendOtp;

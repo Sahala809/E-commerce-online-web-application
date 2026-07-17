@@ -21,11 +21,21 @@ import {
 } from "../controllers/userController.js";
 
 import { isLogin } from "../middleware/userAuth.js";
+import { noCache } from "../middleware/noCache.js";
 
+import {
+    loadMyProfile,
+    updateProfile,
+    loadChangePassword,
+    changePassword,
+    loadChangeEmail,
+    sendChangeEmailOtp,
+    loadVerifyChangeEmailOtp
+} from "../controllers/userController.js";
 const router = express.Router();
 
 
-router.get("/home", isLogin, loadHome)
+router.get("/home", isLogin, noCache, loadHome)
 router.get("/", loadHome);
 
 router.get(
@@ -71,7 +81,18 @@ router.post("/reset-password", resetPassword)
 router.get("/login" , loadLogin)
 router.post("/login", login);
 
+// routes/userRoutes.js
 
+router.get("/profile", isLogin, loadMyProfile);
+router.post("/profile", isLogin, updateProfile);
+
+router.get("/change-password", isLogin, loadChangePassword);
+router.post("/change-password", isLogin, changePassword);
+
+router.get("/profile/change-email", isLogin, loadChangeEmail);
+router.post("/profile/change-email", isLogin, sendChangeEmailOtp);
+router.get("/profile/verify-email", isLogin, loadVerifyChangeEmailOtp);
+// router.post("/profile/verify-email", isLogin, verifyChangeEmailOtp);
 
 router.get("/logout", logout)
 

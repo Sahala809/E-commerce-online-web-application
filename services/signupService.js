@@ -5,8 +5,8 @@ import User from "../models/userModel.js";
 import { validateSignup } from "./validationService.js";
 import { checkUserExists } from "./userService.js";
 
-import { generateOtp } from "../utils/generateOtp.js";
-import { sendOtp } from "../utils/sendOtp.js";
+import generateOtp from "../utils/generateOtp.js";
+import sendOtp from "../utils/sendOtp.js";
 
 export const signupService = async (req, res) => {
 
