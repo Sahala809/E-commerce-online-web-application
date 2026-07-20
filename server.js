@@ -64,7 +64,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/", userRoutes);
+
+app.use("/user", userRoutes);
 
 
 

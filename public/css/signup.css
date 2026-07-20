@@ -139,10 +139,14 @@ body{
     position:relative;
 }
 
+.password-box input{
+    padding-right:45px;   /* Prevent text from overlapping the icon */
+}
+
 .toggle-password{
     position:absolute;
-    right:20px;
-    top:50%;
+    right: 20px;
+    top:15%;
     transform:translateY(-50%);
     cursor:pointer;
     color:#777;

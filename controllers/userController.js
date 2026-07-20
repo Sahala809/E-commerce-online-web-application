@@ -2,36 +2,38 @@ import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
 
-import { validateSignup } from "../services/validationService.js";
-import { checkUserExists } from "../services/userService.js";
+//import { checkUserExists } from "../services/userService.js";
 
 import generateOtp from "../utils/generateOtp.js";
 import sendOtp from "../utils/sendOtp.js"
 
-import { signupService } from "../services/signupService.js"
-import { verifySignupOtpService } from "../services/signupService.js";
-import { resendSignupOtpService } from "../services/signupService.js";
+import { 
+    signupService,
+    verifySignupOtpService,
+    resendSignupOtpService
+} from "../services/authentication/signupService.js"
 
-import { validateLogin } from "../services/validationService.js";
+import { loginService } from "../services/authentication/loginService.js";
 
 import { 
-    sendForgotPasswordOtp,
+    forgotPasswordService,
     verifyForgotPasswordOtpService,
     resendForgotPasswordOtpService,
     resetPasswordService
- } from "../services/forgotPasswordService.js";
+ } from "../services/authentication/forgotPasswordService.js";
 
-import {
-    getMyProfile,
-    updateMyProfile
-} from "../services/profile/profileService.js";
+// import {
+//     getMyProfile,
+//     updateMyProfile
+// } from "../services/profile/profileService.js";
 
-import { changePasswordService } from "../services/profile/changePasswordService.js";
+// import { changePasswordService } from "../services/profile/changePasswordService.js";
 
-import { 
-    changeEmailOtpService,
-    verifyChangeEmailOtpService
-} from "../services/profile/changeEmailOtpService.js";
+// import { 
+//     changeEmailOtpService,
+//     verifyChangeEmailOtpService
+// } from "../services/profile/changeEmailOtpService.js";
+//import { error } from "console";
 //load home page
 
 export const loadHome = (req, res) => {
@@ -42,59 +44,57 @@ res.render("user/home", {
 
 };
 
-// Load Signup Page
 export const loadSignup = (req, res) => {
-    res.render("auth/signup", {
-        error: null,
-        formData: {}
+    if (req.session.user) {
+        return res.redirect("/");
+    }
+
+    res.render("user/auth/signup",{
+        formData:{},                 
+        error: {}
     });
 };
 
-// Signup
+
 export const signup = async (req, res) => {
 
     try {
 
-        await signupService(req, res);
+         await signupService(req, res);
 
-    } catch (error) {
+    } catch (err) {
 
-        console.log(error);
+        console.log("SIGNUP ERROR: ",err);
 
-        return res.render("auth/signup", {
-            error: "Something went wrong. Please try again.",
+        return res.render("user/auth/signup",{
+            
+            error: {
+                general: "Something went wrong. Please try again."
+            },
             formData: req.body
-        });
-
+        })
     }
 
 };
-
-// Load OTP Page
 export const loadVerifyOtp = (req, res) => {
-console.log("Load Verify OTP Session:", req.session.signupData);
 
-    res.render("auth/verifyOtp", {
+    return res.render("user/auth/verifyOtp", {
         error: null,
-        action:"/verify-otp",
-        resendAction: "/resend-otp",
-         otpExpired: false
+        otpExpired: false
     });
 };
 
-// Verify OTP
 export const verifyOtp = async (req, res) => {
 
     try {
 
         await verifySignupOtpService(req, res);
 
-    } catch (error) {
+    } catch (err) {
+        console.error("VERIFY OTP ERROR:", err);
 
-        return res.render("auth/verifyOtp", {
-            error: error.message,
-            action: "/verify-otp",
-            resendAction: "/resend-otp",
+        return res.render("user/auth/verifyOtp", {
+            error: "Something went wrong. Please try again.",
             otpExpired: false
         });
 
@@ -102,22 +102,19 @@ export const verifyOtp = async (req, res) => {
 
 };
 
-// Resend OTP
 export const resendOtp = async (req, res) => {
 
     try {
 
         await resendSignupOtpService(req, res);
 
-    } catch (error) {
+    } catch (err) {
 
-        console.log(error);
+        console.log(err);
 
-        return res.render("auth/verifyOtp", {
-            error: error.message,
-            action: "/verify-otp",
-            resendAction: "/resend-otp",
-            otpExpired: false
+        return res.render("user/auth/verifyOtp", {
+            error: "Something went wrong. Please try again.",
+            otpExpired: true
         });
 
     }
@@ -129,7 +126,7 @@ export const loadLogin = (req, res) => {
         return res.redirect("/");
     }
 
-    res.render("auth/login", {
+    res.render("user/auth/login", {
         error: null,
         formData: {}
     });
@@ -139,65 +136,17 @@ export const login = async (req, res) => {
 
     try {
 
-        const { email, password } = req.body;
+        await loginService(req, res)
 
-        // Check all fields
-        const error = validateLogin(req.body);
+    } catch (err) {
 
-        if (error) {
-            return res.render("auth/login", {
-                error,
-                formData: req.body
-            });
-        }
+        console.log(err);
 
-        // Find user
-        const user = await User.findOne({ 
-            email:email.trim().toLowerCase()
-         });
-
-         console.log(user);
-
-        if (!user) {
-
-            return res.render("auth/login", {
-                error: "Invalid email or password."
-            });
-        }
-
-        // Check if blocked
-        if (user.isBlocked) {
-
-            return res.render("auth/login", {
-                error: "Your account has been blocked."
-            });
-        }
-
-        // Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (!isMatch) {
-
-            return res.render("auth/login", {
-                error: "Invalid email or password."
-            });
-        }
-
-        // Create session
-        req.session.user = {
-            id: user._id,
-            name: user.name,
-            email: user.email
-        };
-
-        return res.redirect("/");
-
-    } catch (error) {
-
-        console.log(error);
-
-        return res.render("auth/login", {
-            error: "Something went wrong."
+        return res.render("user/auth/login", {
+            error: {
+                general: "Something went wrong."
+            },
+            formData: req.body
         });
     }
 
@@ -228,17 +177,15 @@ export const googleCallback = async (req, res) => {
         const user = req.user;
 
         if (!user) {
-            return res.redirect("/login");
+            return res.redirect("/user/login");
         }
 
-        // Check if the user is blocked
         if (user.isBlocked) {
-            return res.render("auth/login", {
+            return res.render("user/auth/login", {
                 error: "Your account has been blocked."
             });
         }
 
-        // Create session
         req.session.user = {
             id: user._id,
             name: user.name,
@@ -247,67 +194,47 @@ export const googleCallback = async (req, res) => {
 
         return res.redirect("/");
 
-    } catch (error) {
+    } catch (err) {
 
-        console.log("GOOGLE LOGIN ERROR:", error);
+        console.log("GOOGLE LOGIN ERROR:", err);
 
-        return res.render("auth/login", {
-            error: "Google login failed. Please try again."
+        return res.render("user/auth/login", {
+            error: {
+                general: "Google login failed. Please try again."
+            }
         });
 
     }
 
 };
 
-// Load Reset Password Page
-export const loadResetPassword = (req, res) => {
-
-    // If user didn't verify OTP, don't allow access
-    if (!req.session.resetEmail) {
-        return res.redirect("/forgot-password");
-    }
-
-    res.render("auth/resetPassword", {
-        error: null,
-        formData: {}
-    });
-
-};
 
 export const loadForgotPassword = (req, res) => {
-
-    if (req.session.user) {
+    if(req.session.user){
         return res.redirect("/");
     }
 
-    res.render("auth/forgotPassword", {
-        error: null,
-        formData: {}
+    return res.render("user/auth/forgotPassword", {
+        error: {},
+        formData : {}
     });
-
 };
+
 
 export const forgotPassword = async (req, res) => {
 
     try {
+    
+        await forgotPasswordService(req, res)
 
-        const { email } = req.body;
+    } catch (err) {
 
-        await sendForgotPasswordOtp(req, email);
+        console.log("FORGOT PASSWORD ERROR:",err);
 
-        return res.render("auth/verifyOtp", {
-            error: null,
-            action: "/forgot-password/verify-otp",
-            resendAction: "/forgot-password/resend-otp",
-            otpExpired: false
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        return res.render("auth/forgotPassword", {
-            error: error.message,
+        return res.render("user/auth/forgotPassword", {
+            error: {
+                general: "Something went wrong. Please try again."
+            },
             formData: req.body
         });
 
@@ -315,21 +242,32 @@ export const forgotPassword = async (req, res) => {
 
 };
 
+export const loadForgotPasswordVerifyOtp = (req, res) => {
+
+    if (!req.session.resetEmail) {
+        return res.redirect("/user/forgot-password");
+    }
+
+    return res.render("user/auth/verifyOtpForgotPassword", {
+        error: null,
+        otpExpired: false
+    });
+
+};
+
 export const verifyForgotPasswordOtp = async (req, res) => {
 
     try {
 
-        return await verifyForgotPasswordOtpService(req, res);
+        await verifyForgotPasswordOtpService(req, res);
 
 
-    } catch (error) {
+    } catch (err) {
 
-        console.log(error);
+        console.log("VERIFY FORGOT PASSWORD OTP ERROR:",err);
 
-        res.render("auth/verifyOtp", {
-            error: "Something went wrong",
-            action: "/forgot-password/verify-otp",
-            resendAction: "/forgot-password/resend-otp",
+        res.render("user/auth/verifyOtpForgotPassword", {
+            error: "Something went wrong. Please try again",
             otpExpired: false
         });
 
@@ -343,21 +281,12 @@ export const resendForgotPasswordOtp = async (req, res) => {
 
         await resendForgotPasswordOtpService(req,res);
 
-        return res.render("auth/verifyOtp", {
-            error: null,
-            action: "/forgot-password/verify-otp",
-            resendAction: "/forgot-password/resend-otp",
-            otpExpired: false
-        });
+    } catch (err) {
 
-    } catch (error) {
+        console.log("RESEND FORGOT PASSWORD OTP ERROR:", err);
 
-        console.log(error);
-
-        return res.render("auth/verifyOtp", {
-            error: error.message,
-            action: "/forgot-password/verify-otp",
-            resendAction: "/forgot-password/resend-otp",
+        return res.render("user/auth/verifyOtpForgotPassword", {
+            error: "Something went wrong. Please try again",
             otpExpired: true
         });
 
@@ -365,30 +294,32 @@ export const resendForgotPasswordOtp = async (req, res) => {
 
 };
 
+export const loadResetPassword = (req, res) => {
+
+    if (!req.session.resetEmail) {
+        return res.redirect("/user/forgot-password");
+    }
+
+    res.render("user/auth/resetPassword", {
+        error: {},
+        formData: {}
+    });
+
+};
+
 export const resetPassword = async (req, res) => {
 
     try {
+        await resetPasswordService(req, res)
 
-        console.log(req.body);
+    } catch (err) {
 
-        await resetPasswordService(
-            req.session.resetEmail,
-            req.body.password,
-            req.body.confirmPassword
-        );
+        console.log("RESET PASSWORD ERROR:", err);
 
-        delete req.session.resetEmail;
-        delete req.session.resetOtp;
-        delete req.session.resetOtpExpires;
-
-        return res.redirect("/login");
-
-    } catch (error) {
-
-        console.log("RESET PASSWORD ERROR:", error.message);
-
-        return res.render("auth/resetPassword", {
-            error: error.message,
+        return res.render("user/auth/resetPassword", {
+            error: {
+                general: "Something went wrong. Please try again."
+            },
             formData: {}
         });
 
@@ -399,23 +330,18 @@ export const resetPassword = async (req, res) => {
 
 // controllers/profileController.js
 
-export const loadMyProfile = async (req, res) => {
+export const loadProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.session.user.id);
 
-        const success = req.session.success;
-        req.session.success = null;
+        const user = await User.findById(req.session.user.user);
 
         res.render("user/profile/myProfile", {
-            user,
-            error: null,
-            success,
-            activePage: "profile"
+            user
         });
 
-    } catch (error) {
-        console.log(error);
-        res.redirect("/");
+    } catch (err) {
+        console.log("LOAD PROFILE ERROR:", err);
+        return res.redirect("/user/home");
     }
 };
 
@@ -498,66 +424,66 @@ export const changePassword = async (req, res) => {
 
 
 
-export const loadChangeEmail = async (req, res) => {
+// export const loadChangeEmail = async (req, res) => {
 
-    try {
+//     try {
 
-        const user = await User.findById(req.session.user.id);
+//         const user = await User.findById(req.session.user.id);
 
-        res.render("user/profile/changeEmail", {
-            user,
-            error: null,
-            success: null,
-            activePage: "profile"
-        });
+//         res.render("user/profile/changeEmail", {
+//             user,
+//             error: null,
+//             success: null,
+//             activePage: "profile"
+//         });
 
-    } catch (error) {
+//     } catch (error) {
 
-        console.log(error);
+//         console.log(error);
 
-        res.redirect("/profile");
+//         res.redirect("/profile");
 
-    }
+//     }
 
-};
+// };
 
-export const loadVerifyChangeEmailOtp = async (req, res) => {
-    try {
-        res.render("user/profile/verifyChangeEmailOtp");
-    } catch (error) {
-        console.log(error);
-    }
-};
+// export const loadVerifyChangeEmailOtp = async (req, res) => {
+//     try {
+//         res.render("user/profile/verifyChangeEmailOtp");
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
 
-export const sendChangeEmailOtp = async (req, res) => {
+// export const sendChangeEmailOtp = async (req, res) => {
 
-    try {
+//     try {
 
-        const newEmail = req.body.email;
+//         const newEmail = req.body.email;
 
-        const otp = await changeEmailOtpService(newEmail);
+//         const otp = await changeEmailOtpService(newEmail);
 
-        // Store temporarily in session
-        req.session.changeEmail = {
+//         // Store temporarily in session
+//         req.session.changeEmail = {
 
-            email: newEmail,
-            otp: otp
+//             email: newEmail,
+//             otp: otp
 
-        };
+//         };
 
-        res.redirect("/profile/verify-email");
+//         res.redirect("/profile/verify-email");
 
-    } catch (error) {
+//     } catch (error) {
 
-        const user = await User.findById(req.session.user.id);
+//         const user = await User.findById(req.session.user.id);
 
-        res.render("user/profile/changeEmail", {
-            user,
-            error: error.message,
-            success: null,
-            activePage: "profile"
-        });
+//         res.render("user/profile/changeEmail", {
+//             user,
+//             error: error.message,
+//             success: null,
+//             activePage: "profile"
+//         });
 
-    }
+//     }
 
-};
+// };

@@ -57,7 +57,7 @@
 
                             <div class="mb-4">
 
-                                <a href="/auth/google" class="btn btn-outline-primary w-100">
+                                <a href="/user/auth/google" class="btn btn-outline-primary w-100">
 
                                     <img
                                     src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
@@ -75,27 +75,30 @@
 
                             </div>
 
-                            <% if(typeof error !== "undefined" && error ){ %>
-
+                            <% if (error && error.general) { %>
                                 <div class="alert alert-danger">
-
-                                    <%= error %>
-
+                                    <%= error.general %>
                                 </div>
-
                             <% } %>
 
-                            <form action="/login" method="POST" autocomplete="off" novalidate>
+                            <form action="/user/login" method="POST" autocomplete="off" novalidate>
 
                                 <div class="mb-3">
 
                                     <input
                                     type="email"
+                                    id="email"
                                     class="form-control"
                                     name="email"
                                     autocomplete="email"
                                     placeholder="Email"
+                                    value="<%= formData?.email || '' %>"
                                     required>
+                                    <% if (error && error.email) { %>
+                                        <small class="text-danger">
+                                            <%= error.email %>
+                                        </small>
+                                    <% } %>
 
                                 </div>
 
@@ -108,6 +111,11 @@
                                     autocomplete="new-password"
                                     placeholder="Password"
                                     required>
+                                    <% if (error && error.password) { %>
+                                        <small class="text-danger">
+                                            <%= error.password %>
+                                        </small>
+                                    <% } %>
 
                                 </div>
 
@@ -126,13 +134,13 @@
 
                                     Don't have an account?
 
-                                    <a href="/signup">
+                                    <a href="/user/signup">
                                         Sign Up
                                     </a>
 
                                 </p>
 
-                                <a href="/forgot-password">
+                                <a href="/user/forgot-password">
 
                                     Forgot Password?
 

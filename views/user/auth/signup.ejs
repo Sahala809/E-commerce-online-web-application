@@ -45,7 +45,7 @@
 
             <div class="mb-4">
 
-                    <a href="/auth/google" class="btn btn-outline-primary w-100">
+                    <a href="/user/auth/google" class="btn btn-outline-primary w-100">
 
                         <img
                         src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
@@ -61,13 +61,13 @@
                 <span>OR</span>
             </div>
 
-            <% if (typeof error !== "undefined" && error) { %>
+            <% if (error && error.general) { %>
                 <div class="alert alert-danger">
-                    <%= error %>
+                    <%= error.general %>
                 </div>
             <% } %>
 
-            <form id="signupForm" action="/signup" method="POST" autocomplete="off" novalidate>
+            <form id="signupForm" action="/user/signup" method="POST" autocomplete="off" novalidate>
 
                 <div class="row">
 
@@ -79,6 +79,11 @@
                             class="form-control" 
                             value="<%= formData ? formData.name : '' %>"
                             placeholder="Full Name">
+                        <% if (error && error.name) { %>
+                            <small class="text-danger">
+                                <%= error.name %>
+                            </small>
+                        <% } %>
 
                     </div>
 
@@ -92,7 +97,11 @@
                             autocomplete="email"
                             value="<%= formData ? formData.email : '' %>"
                             placeholder="Email Address">
-
+                        <% if(error && error.email) { %>
+                         <small class="text-danger">
+                                <%= error.email %>
+                            </small>
+                        <% } %>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -104,7 +113,11 @@
                             name="phone"
                             value="<%= formData ? formData.phone : '' %>"
                             placeholder="Phone Number">
-
+                        <% if (error && error.phone) { %>
+                        <small class="text-danger">
+                            <%= error.phone %>
+                        </small>
+                        <% } %>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -129,8 +142,16 @@
                             autocomplete="new-password"
                             placeholder="Password">
 
-                        <i class="bi bi-eye-slash toggle-password"></i>
+                           
 
+                        <i class="bi bi-eye-slash toggle-password"></i>
+                    
+                            <% if (error && error.password) { %>
+                                <small class="text-danger">
+                                    <%= error.password %>
+                                </small>
+                            <% } %>
+                        
                     </div>
 
                     <div class="col-md-6 mb-3 password-box">
@@ -144,6 +165,16 @@
 
                         <i class="bi bi-eye-slash toggle-password"></i>
 
+                    
+
+                            <% if (error && error.confirmPassword) { %>
+                                <small class="text-danger">
+                                    <%= error.confirmPassword %>
+                                </small>
+                            <% } %>
+
+                        
+
                     </div>
 
                 </div>
@@ -156,7 +187,7 @@
 
             <p class="login-link">
                 Already have an account?
-                <a href="/login">Login</a>
+                <a href="/user/login">Login</a>
             </p>
 
         </div>

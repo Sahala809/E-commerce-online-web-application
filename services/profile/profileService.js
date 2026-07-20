@@ -1,43 +1,46 @@
 import User from "../../models/userModel.js";
+import { validateProfile } from "./validationService.js"
 
-export const getMyProfile = async (userId) => {
-    return await User.findById(userId);
-};
 
-export const updateMyProfile = async (userId, data) => {
+export const editProfileService = async (userId, data) => {
+
+    const error = validateProfile(req.body);
+
+    if (Object.keys(error).length > 0) {
+
+        const user = await User.findById(req.session.user);
+
+        return res.render("user/profile/myProfile", {
+            user,
+            error
+        });
+
+    }   
+
     const { name, phone } = data;
 
-    const user = await User.findById(userId);
+    const existingPhone = await User.findOne({ 
+        phone,
+        _id: { $ne: req.session.user }
+    });
 
-    if (!user) {
-        throw new Error("User not found.");
+    if (existingPhone) {
+
+        const user = await User.findById(req.session.user);
+
+        return res.render("user/profile/myProfile", {
+            user,
+            error: {
+                phone: "Phone number already exists."
+            }
+        });
+
     }
-
-    if (!name || name.trim() === "") {
-        throw new Error("Name is required.");
-    }
-
-    if (name.trim().length < 3) {
-        throw new Error("Name must be at least 3 characters.");
-    }
-
-    const phoneRegex = /^[6-9]\d{9}$/;
-
-    if (!phoneRegex.test(phone.trim())) {
-        throw new Error("Invalid phone number.");
-    }
-
-    if (
-        user.name === data.name &&
-        user.phone === data.phone
-    ) {
-        throw new Error("No changes were made.");
-    }
-
+    
     user.name = name.trim();
     user.phone = phone.trim();
 
     await user.save();
 
-    return user;
+     return res.redirect("/user/profile");
 };
