@@ -30,8 +30,10 @@ import {
     loadChangePassword,
     changePassword,
     loadChangeEmail,
-    sendChangeEmailOtp,
-    loadVerifyChangeEmailOtp
+    changeEmail,
+    loadVerifyChangeEmailOtp,
+    verifyChangeEmailOtp,
+    resendChangeEmailOtp
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -63,7 +65,7 @@ router.post("/signup", signup);
 router.get("/login" , loadLogin)
 router.post("/login", login);
 
-router.get("/logout", logout)
+router.get("/logout",isLogin, logout)
 
 router.get("/verify-otp", loadVerifyOtp);
 router.post("/verify-otp", verifyOtp);
@@ -83,13 +85,15 @@ router.post("/reset-password", resetPassword)
 router.get("/profile", isLogin, loadProfile);
 router.post("/profile/edit", isLogin, editProfile);
 
-// router.get("/change-password", isLogin, loadChangePassword);
-// router.post("/change-password", isLogin, changePassword);
+router.get("/profile/edit-password", isLogin, loadChangePassword);
+router.post("/profile/edit-password", isLogin, changePassword);
 
-// router.get("/profile/change-email", isLogin, loadChangeEmail);
-// router.post("/profile/change-email", isLogin, sendChangeEmailOtp);
-// router.get("/profile/verify-email", isLogin, loadVerifyChangeEmailOtp);
-// // router.post("/profile/verify-email", isLogin, verifyChangeEmailOtp);
+router.get("/profile/edit-email", isLogin, loadChangeEmail);
+router.post("/profile/edit-email", isLogin, changeEmail);
+
+router.get("/profile/verify-email-otp", isLogin, loadVerifyChangeEmailOtp);
+router.post("/profile/verify-email-otp", isLogin, verifyChangeEmailOtp);
+router.post("/profile/resend-email-otp", isLogin, resendChangeEmailOtp);
 
 
 

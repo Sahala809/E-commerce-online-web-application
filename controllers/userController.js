@@ -22,19 +22,15 @@ import {
     resetPasswordService
  } from "../services/authentication/forgotPasswordService.js";
 
-// import {
-//     getMyProfile,
-//     updateMyProfile
-// } from "../services/profile/profileService.js";
+import { editProfileService } from "../services/profile/profileService.js";
 
-// import { changePasswordService } from "../services/profile/changePasswordService.js";
+import { changePasswordService } from "../services/profile/changePasswordService.js";
 
-// import { 
-//     changeEmailOtpService,
-//     verifyChangeEmailOtpService
-// } from "../services/profile/changeEmailOtpService.js";
-//import { error } from "console";
-//load home page
+import { 
+    changeEmailService,
+    verifyChangeEmailOtpService,
+    resendChangeEmailOtpService
+} from "../services/profile/changeEmailOtpService.js";
 
 export const loadHome = (req, res) => {
 
@@ -158,12 +154,12 @@ export const logout = (req, res) => {
 
         if (err) {
             console.log(err);
-            return res.redirect("/");
+            return res.redirect("/user/home");
         }
 
         res.clearCookie("connect.sid");
 
-        res.redirect("/login");
+        res.redirect("/user/login");
 
     });
 
@@ -182,17 +178,16 @@ export const googleCallback = async (req, res) => {
 
         if (user.isBlocked) {
             return res.render("user/auth/login", {
-                error: "Your account has been blocked."
+                error: {
+                general: "Your account has been blocked."
+                }
             });
         }
 
-        req.session.user = {
-            id: user._id,
-            name: user.name,
-            email: user.email
-        };
+        req.session.user = user._id;
+        await req.session.save();
 
-        return res.redirect("/");
+        return res.redirect("/user/home");
 
     } catch (err) {
 
@@ -328,15 +323,21 @@ export const resetPassword = async (req, res) => {
 };
 
 
-// controllers/profileController.js
+/////// user ///////
 
 export const loadProfile = async (req, res) => {
     try {
 
-        const user = await User.findById(req.session.user.user);
-
+        const user = await User.findById(req.session.user);
+        const success = req.session.success;
+        delete req.session.success;
+        
         res.render("user/profile/myProfile", {
-            user
+            user,
+            formData: user,
+            activePage: "profile",
+            success,
+            error: null
         });
 
     } catch (err) {
@@ -345,77 +346,56 @@ export const loadProfile = async (req, res) => {
     }
 };
 
-export const updateProfile = async (req, res) => {
+export const editProfile = async (req, res) => {
     try {
 
-        await updateMyProfile(req.session.user.id, req.body);
+        await editProfileService(req, res);
 
-        req.session.success = "Profile updated successfully.";
+    } catch (err) {
 
-        res.redirect("/profile");
+        console.error("EDIT PROFILE ERROR:", err);
 
-    } catch (error) {
+        const user = await User.findById(req.session.user);
 
-        const user = await getMyProfile(req.session.user.id);
-        user.name = req.body.name;
-        user.phone = req.body.phone;
-        res.render("user/profile/myProfile", {
+        return res.render("user/profile/myProfile", {
             user,
-            error: error.message,
+            formData: req.body,
+            activePage: "profile",
             success:null,
-            activePage: "profile"
+            error: {
+                general: "Something went wrong. Please try again."
+            }
         });
     }
 };
 
 export const loadChangePassword = async (req, res) => {
-    console.log("Load Change Password");
-    try {
-
-        const user = await User.findById(req.session.user.id);
-        console.log(user);
-
-        res.render("user/profile/changePassword", {
-            user,
-            error: null,
-            success: null,
-            activePage: "password"
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.redirect("/profile");
-
-    }
-
+    
+    return res.render("user/profile/changePassword",{
+        error: {},
+        success: null,
+        formData:{},
+        activePage:"changePassword"
+    })
 };
 
 export const changePassword = async (req, res) => {
 
     try {
 
-        await changePasswordService(
-            req.session.user.id,
-            req.body.currentPassword,
-            req.body.newPassword,
-            req.body.confirmPassword
-        );
+        await changePasswordService(req, res);
 
-        req.session.success = "Password changed successfully.";
+    } catch (err) {
 
-        return res.redirect("/profile");
-
-    } catch (error) {
-
-        const user = await User.findById(req.session.user.id);
+        console.log("CHANGE PASSWORD ERROR:", err);
 
         return res.render("user/profile/changePassword", {
-            user,
-            error: error.message,
+            error: {
+                general: "Something went wrong. Please try again."
+            },
             success: null,
-            activePage: "password"
+            formData:req.body,
+            activePage: "changePassword"
         });
 
     }
@@ -423,67 +403,113 @@ export const changePassword = async (req, res) => {
 };
 
 
+export const loadChangeEmail = async (req, res) => {
 
-// export const loadChangeEmail = async (req, res) => {
+    try {
 
-//     try {
+        const user = await User.findById(req.session.user);
 
-//         const user = await User.findById(req.session.user.id);
+        res.render("user/profile/changeEmail", {
+            user,
+            error: {},
+            success: null,
+            formData: {},
+            activePage: "changeEmail"
+        });
 
-//         res.render("user/profile/changeEmail", {
-//             user,
-//             error: null,
-//             success: null,
-//             activePage: "profile"
-//         });
+    } catch (err) {
 
-//     } catch (error) {
+        console.log("LOAD CHANGE EMAIL ERROR:", err);
 
-//         console.log(error);
+        return res.redirect("/user/profile");
 
-//         res.redirect("/profile");
+    }
 
-//     }
+};
 
-// };
 
-// export const loadVerifyChangeEmailOtp = async (req, res) => {
-//     try {
-//         res.render("user/profile/verifyChangeEmailOtp");
-//     } catch (error) {
-//         console.log(error);
-//     }
-// };
+export const changeEmail = async (req, res) => {
 
-// export const sendChangeEmailOtp = async (req, res) => {
+    try {
 
-//     try {
+        await changeEmailService(req, res);
 
-//         const newEmail = req.body.email;
+    } catch (err) {
 
-//         const otp = await changeEmailOtpService(newEmail);
+        console.log("CHANGE EMAIL ERROR:", err);
 
-//         // Store temporarily in session
-//         req.session.changeEmail = {
+        const user = await User.findById(req.session.user);
 
-//             email: newEmail,
-//             otp: otp
+        return res.render("user/profile/changeEmail", {
+            user,
+            error: {
+                general: "Something went wrong. Please try again."
+            },
+            success: null,
+            formData: req.body,
+            activePage: "changeEmail"
+        });
 
-//         };
+    }
 
-//         res.redirect("/profile/verify-email");
+};
 
-//     } catch (error) {
 
-//         const user = await User.findById(req.session.user.id);
+export const loadVerifyChangeEmailOtp = async(req, res) => {
 
-//         res.render("user/profile/changeEmail", {
-//             user,
-//             error: error.message,
-//             success: null,
-//             activePage: "profile"
-//         });
+    const user = await User.findById(req.session.user);
 
-//     }
+    res.render("user/profile/verifyChangeEmailOtp", {
+        user,
+        error: null,
+        success: null,
+        formData: {},
+        activePage: "changeEmail"
+    });
 
-// };
+}
+
+
+export const verifyChangeEmailOtp = async (req, res) => {
+
+    try {
+
+        await verifyChangeEmailOtpService(req, res);
+
+    } catch (err) {
+
+        console.log("VERIFY CHANGE EMAIL OTP ERROR:", err);
+
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            error: {
+                general: "Something went wrong. Please try again."
+            },
+            success: null,
+            formData: req.body
+        });
+
+    }
+
+};
+
+export const resendChangeEmailOtp = async (req, res) => {
+
+    try {
+
+        await resendChangeEmailOtpService(req, res);
+
+    } catch (err) {
+
+        console.log("RESEND CHANGE EMAIL OTP ERROR:", err);
+
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            error: {
+                general: "Unable to resend OTP. Please try again."
+            },
+            success: null,
+            formData: {}
+        });
+
+    }
+
+};

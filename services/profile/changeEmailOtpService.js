@@ -2,52 +2,187 @@ import User from "../../models/userModel.js";
 import generateOtp from "../../utils/generateOtp.js";
 import sendOtp from "../../utils/sendOtp.js";
 
-export const changeEmailOtpService = async (newEmail) => {
+import { validateChangeEmail } from "./validationService.js";
 
-    // Check if email is already registered
+
+export const changeEmailService = async (req, res) => {
+
+    const error = validateChangeEmail(req);
+
+    if (Object.keys(error).length > 0) {
+
+        const user = await User.findById(req.session.user);
+
+        return res.render("user/profile/changeEmail", {
+            user,
+            error,
+            success: null,
+            formData: req.body,
+            activePage: "changeEmail"
+        });
+
+    }
+
+    const { email } = req.body;
+
+    const user = await User.findById(req.session.user);
+
+    // Check if the new email is the same as the current email
+    if (user.email === email.trim().toLowerCase()) {
+
+        return res.render("user/profile/changeEmail", {
+            user,
+            error: {
+                email: "Please enter a different email address."
+            },
+            success: null,
+            formData: req.body,
+            activePage: "changeEmail"
+        });
+
+    }
+
+    // Check if the email is already registered
     const existingUser = await User.findOne({
-        email: newEmail.toLowerCase().trim()
+        email: email.trim().toLowerCase()
     });
 
     if (existingUser) {
-        throw new Error("Email already exists.");
+
+        return res.render("user/profile/changeEmail", {
+            user,
+            error: {
+                email: "Email already exists."
+            },
+            success: null,
+            formData: req.body,
+            activePage: "changeEmail"
+        });
+
     }
 
-    // Generate OTP
-    const otp = generateOtp();
+    const otp = generateOtp()
 
-    // Send OTP to the new email
-    await sendOtp(newEmail, otp);
+    console.log("\n==========================");
 
-    return otp;
+    console.log("EMAIL :", email);
+
+    console.log("OTP   :", otp);
+
+    console.log("==========================\n");
+
+    await sendOtp(email, otp);
+
+    // Store data in session
+    req.session.changeEmailOtp = otp;
+    req.session.changeEmail = email.trim().toLowerCase();
+    req.session.changeEmailOtpExpires = Date.now() +  60 * 1000;
+
+    await req.session.save();
+
+    // Redirect to OTP page
+    return res.redirect("/user/profile/verify-email-otp");
 
 };
 
 
-export const verifyChangeEmailOtpService = async (
-    userId,
-    enteredOtp,
-    sessionData
-) => {
+export const verifyChangeEmailOtpService = async (req, res) => {
 
-    if (!sessionData) {
-        throw new Error("OTP expired. Please try again.");
+    const { otp } = req.body;
+
+    const expires = req.session.changeEmailOtpExpires;
+    const savedOtp = req.session.changeEmailOtp;
+
+    // Check if OTP exists
+    if (!savedOtp) {
+
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            error: "OTP not found. Please request a new OTP.",
+            success: null,
+            formData: req.body
+        });
+
     }
 
-    if (enteredOtp !== sessionData.otp) {
-        throw new Error("Invalid OTP.");
+    // Check expiry
+    if (Date.now() > expires) {
+
+        delete req.session.changeEmailOtp;
+        delete req.session.changeEmailOtpExpires;
+
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            error: "OTP has expired.",
+            success: null,
+            formData: req.body,
+            otpExpired: true
+        });
+
     }
 
-    const user = await User.findById(userId);
+    // Verify OTP
+    if (otp !== savedOtp) {
 
-    if (!user) {
-        throw new Error("User not found.");
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            error:"Invalid OTP.",
+    
+            success: null,
+            formData: req.body,
+            otpExpired:false
+        });
+
     }
 
-    user.email = sessionData.email;
+    // Update email
+    const user = await User.findById(req.session.user);
+
+    user.email = req.session.changeEmail;
 
     await user.save();
 
-    return true;
+    // Clear session
+    delete req.session.changeEmailOtp;
+    delete req.session.changeEmail;
+    delete req.session.changeEmailOtpExpires;
 
+    req.session.success = "Email updated successfully.";
+
+    return res.redirect("/user/profile");
+
+};
+
+
+export const resendChangeEmailOtpService = async (req, res) => {
+
+    const email = req.session.changeEmail;
+
+    if (!email) {
+
+        return res.redirect("/user/profile/edit-email");
+
+    }
+
+    // Generate new OTP
+    const otp = generateOtp();
+
+    // Send OTP
+    await sendOtp(email, otp);
+
+    // Update session
+    req.session.changeEmailOtp = otp;
+    req.session.changeEmailOtpExpires = Date.now() + 60 * 1000;
+
+    console.log("\n==========================");
+    console.log("SIGNUP RESEND OTP :", otp);
+    console.log("==========================\n");
+
+     req.session.save(() => {
+
+        return res.render("user/profile/verifyChangeEmailOtp", {
+            success: "A new OTP has been sent to your email.",
+            error: null,
+            formData: {},
+            otpExpired: false
+        });
+
+    });
 };

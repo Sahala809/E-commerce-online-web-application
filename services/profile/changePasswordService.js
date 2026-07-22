@@ -1,62 +1,64 @@
 import bcrypt from "bcrypt";
 import User from "../../models/userModel.js";
 
-export const changePasswordService = async (
-    userId,
-    currentPassword,
-    newPassword,
-    confirmPassword
-) => {
+import { validateChangePassword } from "./validationService.js";
 
-    // Check empty fields
-    if (!currentPassword || !newPassword || !confirmPassword) {
-        throw new Error("Please fill all fields.");
+export const changePasswordService = async (req, res) => {
+
+    const error = validateChangePassword(req, res);
+console.log(req.body);
+    if (Object.keys(error).length > 0) {
+
+        return res.render("user/profile/changePassword", {
+            error,
+            formData: req.body,
+            success: null,
+            activePage: "changePassword"
+        });
+
     }
+    const { currentPassword, newPassword } = req.body;
 
-    // New & Confirm Password match
-    if (newPassword !== confirmPassword) {
-        throw new Error("New password and confirm password do not match.");
-    }
+    const user = await User.findById(req.session.user);
 
-    // Find user
-    const user = await User.findById(userId);
-
-    if (!user) {
-        throw new Error("User not found.");
-    }
-
-    // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
-        throw new Error("Current password is incorrect.");
+
+        return res.render("user/profile/changePassword", {
+            error: {
+                currentPassword: "Current password is incorrect."
+            },
+            formData: req.body,
+            success: null,
+            activePage: "changePassword"
+        });
+
     }
 
-    // Prevent same password
-    const isOldPassword = await bcrypt.compare(newPassword, user.password);
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
 
-    if (isOldPassword) {
-        throw new Error("New password must be different from the current password.");
+    if (isSamePassword) {
+
+        return res.render("user/profile/changePassword", {
+            error: {
+                newPassword: "New password cannot be the same as the current password."
+            },
+            formData: req.body,
+            success: null,
+            activePage: "changePassword"
+        });
+
     }
 
-    // Password strength
-    const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    if (!passwordRegex.test(newPassword)) {
-        throw new Error(
-            "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character."
-        );
-    }
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Save
     user.password = hashedPassword;
 
     await user.save();
 
-    return true;
+    req.session.success = "Password changed successfully.";
+
+    return res.redirect("/user/profile")
 
 };

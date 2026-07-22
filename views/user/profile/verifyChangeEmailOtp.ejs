@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify OTP</title>
+
+    <link rel="stylesheet" href="/css/verifyOtp.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="left">
+
+        <img src="/images/signup/login.jpg" alt="Watch">
+
+    </div>
+
+    <div class="right">
+
+        <h1 class="logo">CHRONIX</h1>
+
+        <div class="card">
+
+            <h2>Verify OTP</h2>
+
+            <p>
+                Enter the 6-digit verification code sent to your email.
+            </p>
+
+            <% if (error) { %>
+                <div class="alert">
+                    <%= error %>
+                </div>
+            <% } %>
+
+           <form action="/user/profile/verify-email-otp" method="POST" novalidate>
+
+                <div class="otp-boxes">
+
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+                    <input type="text" maxlength="1" class="otp">
+
+                </div>
+
+                <input type="hidden" name="otp" id="fullOtp">
+
+                <p id="timer">01:00</p>
+
+                <button class="btn">
+                    Verify OTP
+                </button>
+
+            </form>
+
+            <div id="resendArea">
+
+                <p>
+                    Didn't receive the code?
+                </p>
+
+                <form action= "/user/profile/resend-email-otp" method="POST" novalidate>
+
+                    <button type="submit" class="linkBtn" >
+                        Resend OTP
+                    </button>
+
+                </form>
+
+            </div>
+
+            <a href="/user/profile/edit-email" class="back">
+                ← Back 
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const boxes=document.querySelectorAll(".otp");
+const fullOtp = document.getElementById("fullOtp");
+
+boxes.forEach((box,index)=>{
+
+    box.addEventListener("input",()=>{
+
+        if(box.value.length===1 && index<boxes.length-1){
+
+            boxes[index+1].focus();
+
+        }
+
+        fullOtp.value= [...boxes].map(i=>i.value).join("");
+
+    });
+
+    box.addEventListener("keydown",(e)=>{
+
+        if(e.key==="Backspace" && !box.value && index>0){
+
+            boxes[index-1].focus();
+
+        }
+
+    });
+
+});
+
+
+const timer=document.getElementById("timer");
+
+const resend=document.getElementById("resendArea");
+
+const otpExpired = <%= typeof otpExpired !== "undefined" ? otpExpired : false %>;
+
+if (otpExpired) {
+
+    timer.style.display = "none";
+    resend.style.display = "block";
+
+} else {
+
+    resend.style.display = "none";
+
+    let seconds = 60;
+
+    timer.innerHTML = "01:00";
+
+    const count = setInterval(() => {
+
+        let min = Math.floor(seconds / 60);
+        let sec = seconds % 60;
+
+        timer.innerHTML =
+            `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+
+        seconds--;
+
+        if (seconds < 0) {
+
+            clearInterval(count);
+
+            timer.style.display = "none";
+            resend.style.display = "block";
+
+        }
+
+    }, 1000);
+}
+
+</script>
+
+</body>
+</html>

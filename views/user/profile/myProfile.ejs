@@ -1,5 +1,5 @@
-<%- include("../../partials/header") %>
-<%- include("../../partials/navbar") %>
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
 
 <link rel="stylesheet" href="/css/profile/sidebar.css">
 <link rel="stylesheet" href="/css/profile/myProfile.css">
@@ -11,7 +11,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
          RIGHT CONTENT
     ============================ -->
 
-    <%- include("../../partials/profileSidebar") %>
+    <%- include("../partials/profileSidebar") %>
 
     <!-- ===========================
          RIGHT CONTENT
@@ -30,28 +30,22 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
         </div>
 
         <!-- Success Message -->
-        <% if(success){ %>
-
+        <% if (success && typeof success === "string") { %>
             <div class="success-box">
-                <i class="bi bi-check-circle-fill"></i>
                 <%= success %>
             </div>
-
         <% } %>
 
         <!-- Error Message -->
-        <% if(error){ %>
-
+        <% if (error && error.general) { %>
             <div class="error-box">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                <%= error %>
+                <%= error.general %>
             </div>
-
         <% } %>
 
         <div class="profile-form-card">
 
-            <form action="/profile" method="POST" novalidate>
+            <form action="/user/profile/edit" method="POST" novalidate>
                                 <!-- Full Name -->
 
                 <div class="form-group">
@@ -61,8 +55,13 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
                     <input
                         type="text"
                         name="name"
-                        value="<%= user.name %>"
+                        value="<%= formData ? formData.name : user.name %>"
                         required>
+                    <% if (error && error.name) { %>
+                        <small class="text-danger">
+                            <%= error.name %>
+                        </small>
+                    <% } %>
 
                 </div>
 
@@ -79,7 +78,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
                             value="<%= user.email %>"
                             readonly>
 
-                        <a href="/profile/change-email" class="edit-email">
+                        <a href="/user/profile/edit-email" class="edit-email">
                             <i class="bi bi-pencil-square"></i>
                             Edit
                         </a>
@@ -97,7 +96,12 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
                     <input
                         type="text"
                         name="phone"
-                        value="<%= user.phone || '' %>">
+                        value="<%= formData ? formData.phone : (user.phone || '') %>"
+                    <% if (error && error.phone) { %>
+                        <small class="text-danger">
+                            <%= error.phone %>
+                        </small>
+                    <% } %>
 
                 </div>
 
@@ -118,7 +122,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
                     </button>
 
                     <a
-                        href="/change-password"
+                        href="/user/profile/edit-password"
                         class="password-btn">
 
                         <i class="bi bi-shield-lock"></i>
@@ -147,10 +151,11 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
 
 <script>
 setTimeout(() => {
-    const success = document.querySelector(".success-box");
-    if (success) {
-        success.style.display = "none";
-    }
+
+    document.querySelector(".success-box")?.remove();
+
+    document.querySelector(".error-box")?.remove();
+
 }, 3000);
 </script>
 
