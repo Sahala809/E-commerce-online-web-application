@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
+import Address from "../models/addressModel.js";
 
 //import { checkUserExists } from "../services/userService.js";
 
@@ -32,13 +33,24 @@ import {
     resendChangeEmailOtpService
 } from "../services/profile/changeEmailOtpService.js";
 
+import { 
+    addAddressService,
+    editAddressService,
+    deleteAddressService,
+    setDefaultAddressService
+} from "../services/address/addressService.js";
+
 export const loadHome = (req, res) => {
 
-res.render("user/home", {
+    
+
+    res.render("user/home", {
         user: req.session.user || null
     });
 
 };
+
+
 
 export const loadSignup = (req, res) => {
     if (req.session.user) {
@@ -119,7 +131,7 @@ export const resendOtp = async (req, res) => {
 
 export const loadLogin = (req, res) => {
     if (req.session.user) {
-        return res.redirect("/");
+        return res.redirect("/user/home");
     }
 
     res.render("user/auth/login", {
@@ -509,6 +521,164 @@ export const resendChangeEmailOtp = async (req, res) => {
             success: null,
             formData: {}
         });
+
+    }
+
+};
+
+
+export const loadAddressList = async (req, res) => {
+
+    try {
+
+        const userAddresses = await Address.findOne({
+                userId: req.session.user
+            });
+
+            console.log(userAddresses);
+
+            return res.render("user/address/addressList", {
+                userAddresses,
+                activePage: "address"
+            });
+
+        
+    } catch (err) {
+
+        console.log("LOAD ADDRESS LIST ERROR:", err);
+
+        return res.redirect("/");
+
+    }
+
+};
+
+export const loadAddAddress = async (req, res) => {
+
+    try {
+
+        const success = req.session.success || null;
+        delete req.session.success;
+
+        return res.render("user/address/addAddress", {
+        error: {},
+        success,
+        formData: {},
+        activePage: "address"
+    });
+
+
+    } catch (err) {
+
+        console.log("LOAD ADD ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address");
+
+    }
+
+};
+
+export const addAddress = async (req, res) => {
+
+    try {
+
+        await addAddressService(req, res);
+
+    } catch (err) {
+
+        console.log("ADD ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address/add");
+
+    }
+
+};
+
+export const loadEditAddress = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const userAddresses = await Address.findOne({
+            userId: req.session.user
+        });
+
+        if (!userAddresses) {
+
+            return res.redirect("/user/address");
+
+        }
+
+        const address = userAddresses.addresses.id(id);
+
+        if (!address) {
+
+            return res.redirect("/user/address");
+
+        }
+
+        return res.render("user/address/editAddress", {
+            address,
+            formData: req.body,
+            error: {},
+            activePage: "address"
+        });
+
+
+    } catch (err) {
+
+        console.log("LOAD EDIT ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address");
+
+    }
+
+};
+
+export const editAddress = async (req, res) => {
+
+    try {
+
+        await editAddressService(req, res);
+
+    } catch (err) {
+
+        console.log("EDIT ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address");
+
+    }
+
+};
+
+export const deleteAddress = async (req, res) => {
+
+    try {
+
+        await deleteAddressService(req, res);
+
+    } catch (err) {
+
+        console.log("DELETE ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address");
+
+    }
+
+};
+
+export const setDefaultAddress = async (req, res) => {
+
+    try {
+
+        await setDefaultAddressService(req, res);
+
+    } catch (err) {
+
+        console.log("SET DEFAULT ADDRESS ERROR:", err);
+
+        return res.redirect("/user/address");
 
     }
 

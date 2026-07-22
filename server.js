@@ -6,6 +6,7 @@ import { fileURLToPath } from "url"
 import session from "express-session"
 import passport from "passport";
 import nocache from "nocache";
+import methodOverride from "method-override";
 
 import connectDB from "./config/db.js";
 import "./config/passport.js";
@@ -13,6 +14,7 @@ import "./config/passport.js";
 
 import userRoutes from "./routes/userRoutes.js"
 import sendOtp from "./utils/sendOtp.js";
+import adminRouter from "./routes/adminRoutes.js"
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
@@ -38,7 +40,7 @@ app.use(
 
 
 
-
+app.use(methodOverride("_method"));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -66,7 +68,7 @@ app.use((req, res, next) => {
 
 
 app.use("/user", userRoutes);
-
+app.use("/admin", adminRouter)
 
 
 const PORT = process.env.PORT 

@@ -1,0 +1,264 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/address/addAddress.css">
+
+<div class="address-container">
+
+    <div class="address-card">
+
+        <div class="card-header">
+
+            <h2>Add Address</h2>
+
+            <p>
+                Enter your shipping details for exclusive luxury delivery.
+            </p>
+
+        </div>
+
+        <form action="/user/address/add" method="POST" novalidate>
+
+            <!-- Row 1 -->
+
+            <div class="row">
+
+                <div class="form-group">
+
+                    <label>Full Name</label>
+
+                    <input
+                        type="text"
+                        name="fullName"
+                        value="<%= formData ? formData.fullName : '' %>">
+
+                    <% if (error && error.fullName) { %>
+                        <small class="text-danger">
+                            <%= error.fullName %>
+                        </small>
+                    <% } %>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Phone Number</label>
+
+                    <input
+                        type="text"
+                        name="phone"
+                        value="<%= formData ? formData.phone : '' %>">
+
+                    <% if (error && error.phone) { %>
+                        <small class="text-danger">
+                            <%= error.phone %>
+                        </small>
+                    <% } %>
+
+                </div>
+
+            </div>
+
+            <!-- House Name -->
+
+            <div class="form-group">
+
+                <label>House Name</label>
+
+                <input
+                    type="text"
+                    name="houseName"
+                    value="<%= formData ? formData.houseName : '' %>">
+
+                <% if (error && error.houseName) { %>
+                    <small class="text-danger">
+                        <%= error.houseName %>
+                    </small>
+                <% } %>
+
+            </div>
+
+            <!-- Street -->
+
+            <div class="form-group">
+
+                <label>Street</label>
+
+                <input
+                    type="text"
+                    name="street"
+                    value="<%= formData ? formData.street : '' %>">
+
+                <% if (error && error.street) { %>
+                    <small class="text-danger">
+                        <%= error.street %>
+                    </small>
+                <% } %>
+
+            </div>
+
+            <!-- District -->
+
+            <div class="form-group">
+
+                <label>District</label>
+
+                <input
+                    type="text"
+                    name="district"
+                    value="<%= formData ? formData.district : '' %>">
+
+                <% if (error && error.district) { %>
+                    <small class="text-danger">
+                        <%= error.district %>
+                    </small>
+                <% } %>
+
+            </div>
+
+            <!-- City / State / Pincode -->
+
+            <div class="row">
+
+                <div class="form-group">
+
+                    <label>City</label>
+
+                    <input
+                        type="text"
+                        name="city"
+                        value="<%= formData ? formData.city : '' %>">
+
+                    <% if (error && error.city) { %>
+                        <small class="text-danger">
+                            <%= error.city %>
+                        </small>
+                    <% } %>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>State</label>
+
+                    <input
+                        type="text"
+                        name="state"
+                        value="<%= formData ? formData.state : '' %>">
+
+                    <% if (error && error.state) { %>
+                        <small class="text-danger">
+                            <%= error.state %>
+                        </small>
+                    <% } %>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Pincode</label>
+
+                    <input
+                        type="text"
+                        name="pincode"
+                        value="<%= formData ? formData.pincode : '' %>">
+
+                    <% if (error && error.pincode) { %>
+                        <small class="text-danger">
+                            <%= error.pincode %>
+                        </small>
+                    <% } %>
+
+                </div>
+
+            </div>
+
+            <!-- Country -->
+
+            <div class="form-group">
+
+                <label>Country</label>
+
+                <select name="country">
+
+                    <option value="">Select Country</option>
+
+                    <option value="India"
+                        <%= formData && formData.country === "India" ? "selected" : "" %>>
+                        India
+                    </option>
+
+                    <option value="UAE"
+                        <%= formData && formData.country === "UAE" ? "selected" : "" %>>
+                        UAE
+                    </option>
+
+                    <option value="USA"
+                        <%= formData && formData.country === "USA" ? "selected" : "" %>>
+                        USA
+                    </option>
+
+                </select>
+
+                <% if (error && error.country) { %>
+                    <small class="text-danger">
+                        <%= error.country %>
+                    </small>
+                <% } %>
+
+            </div>
+
+            <!-- Default Address -->
+
+            <div class="checkbox">
+
+                <input
+                    type="checkbox"
+                    id="default"
+                    name="isDefault"
+                    value="true"
+                    <%= formData && formData.isDefault ? "checked" : "" %>>
+
+                <label for="default">
+                    Set as default address
+                </label>
+
+            </div>
+
+            <!-- Buttons -->
+
+            <div class="button-group">
+
+                <button
+                    type="submit"
+                    class="save-btn">
+
+                    Save Address
+
+                </button>
+
+                <a
+                    href="/user/address"
+                    class="cancel-btn">
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="profile-bottom">
+
+    CHRONIX • Terms & Conditions • Privacy Policy
+
+</div>
+
+</body>
+
+</html>

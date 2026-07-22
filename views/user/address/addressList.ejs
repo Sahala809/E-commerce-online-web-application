@@ -1,0 +1,231 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/address/addressList.css">
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="address-container">
+
+    <h2>Saved Addresses</h2>
+
+    <div class="address-card">
+
+        <% if (userAddresses && userAddresses.addresses.length > 0) { %>
+
+            <% userAddresses.addresses.forEach(address => { %>
+
+                <div class="address-item">
+
+                    <div class="address-icon">
+
+                        <% if (address.isDefault) { %>
+
+                            <i class="bi bi-house-door"></i>
+
+                        <% } else { %>
+
+                            <i class="bi bi-geo-alt"></i>
+
+                        <% } %>
+
+                    </div>
+
+                    <div class="address-details">
+
+                        <h4>
+
+                            <%= address.fullName %>
+
+                            <% if (address.isDefault) { %>
+
+                                <span class="default-badge">
+                                    Default
+                                </span>
+
+                            <% } %>
+
+                        </h4>
+
+                        <p>
+
+                            <%= address.houseName %>,
+                            <%= address.street %>,
+                            <%= address.district %>
+
+                        </p>
+
+                        <p>
+
+                            <%= address.city %>,
+                            <%= address.state %>,
+                            <%= address.country %>
+
+                        </p>
+
+                        <p>
+
+                            PIN : <%= address.pincode %>
+
+                        </p>
+
+                        <p>
+
+                            Phone : <%= address.phone %>
+
+                        </p>
+
+                    </div>
+
+                    <div class="dropdown">
+
+                        <button
+                            type="button"
+                            class="menu-btn">
+
+                            <i class="bi bi-three-dots"></i>
+
+                        </button>
+
+                        <div class="dropdown-content">
+
+                            <form
+                                action="/user/address/edit/<%= address._id %>">
+
+                                <button type="submit">
+                                    <i class="bi bi-pencil"></i>
+
+                                    Edit
+                                </button>
+
+                                
+
+                            </form>
+
+                            <form
+                                action="/user/address/delete/<%= address._id %>?_method=DELETE"
+                                method="POST">
+
+                                <button type="submit">
+
+                                    <i class="bi bi-trash"></i>
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                            <% if (!address.isDefault) { %>
+
+                                <form
+                                    action="/user/address/default/<%= address._id %>?_method=PATCH"
+                                    method="POST">
+
+                                    <button type="submit">
+
+                                        <i class="bi bi-check-circle"></i>
+
+                                        Default
+
+                                    </button>
+
+                                </form>
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <% }) %>
+
+        <% } else { %>
+
+            <div class="empty-address">
+
+                <i class="bi bi-geo-alt"></i>
+
+                <h3>No Address Found</h3>
+
+                <p>
+                    You haven't added any address yet.
+                </p>
+
+            </div>
+
+        <% } %>
+
+        <div class="add-btn-wrapper">
+
+            <a
+                href="/user/address/add"
+                class="add-btn">
+
+                <i class="bi bi-plus-circle"></i>
+
+                Add Address
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="profile-bottom">
+
+    CHRONIX • Terms & Conditions • Privacy Policy
+
+</div>
+
+<script>
+
+const menus = document.querySelectorAll(".menu-btn");
+
+menus.forEach(menu => {
+
+    menu.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+        const dropdown = this.nextElementSibling;
+
+        document.querySelectorAll(".dropdown-content").forEach(item => {
+
+            if (item !== dropdown) {
+
+                item.style.display = "none";
+
+            }
+
+        });
+
+        dropdown.style.display =
+            dropdown.style.display === "block"
+            ? "none"
+            : "block";
+
+    });
+
+});
+
+window.addEventListener("click", () => {
+
+    document.querySelectorAll(".dropdown-content").forEach(item => {
+
+        item.style.display = "none";
+
+    });
+
+});
+
+</script>
+
+</body>
+
+</html>

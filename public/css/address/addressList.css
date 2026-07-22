@@ -1,0 +1,140 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#fff;
+    font-family:'Poppins',sans-serif;
+}
+
+.address-container{
+    width:90%;
+    max-width:900px;
+    margin:80px auto;
+}
+
+.address-container h2{
+    text-align:center;
+    font-size:40px;
+    margin-bottom:40px;
+    font-family:"Times New Roman",serif;
+}
+
+.address-card{
+    background:#f5f5f5;
+    padding:40px;
+    border-radius:12px;
+}
+
+.address-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    padding:25px 0;
+    border-bottom:1px solid #ddd;
+}
+
+.address-item:last-of-type{
+    border-bottom:none;
+}
+
+.address-icon{
+    font-size:22px;
+    color:#333;
+    width:40px;
+}
+
+.address-details{
+    flex:1;
+}
+
+.address-details h4{
+    font-size:20px;
+    margin-bottom:8px;
+    color:#222;
+}
+
+.address-details p{
+    color:#555;
+    line-height:1.8;
+}
+
+.dropdown{
+    position:relative;
+}
+
+.menu-btn{
+    border:none;
+    background:none;
+    font-size:24px;
+    cursor:pointer;
+}
+
+.dropdown-content{
+    position:absolute;
+    right:0;
+    top:35px;
+    background:#fff;
+    min-width:120px;
+    border-radius:8px;
+    overflow:hidden;
+    display:none;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    z-index:10;
+}
+
+.dropdown-content a,
+.dropdown-content button{
+    width:100%;
+    display:block;
+    padding:12px 16px;
+    text-decoration:none;
+    border:none;
+    background:none;
+    cursor:pointer;
+    text-align:left;
+    color:#333;
+    font-size:15px;
+}
+
+.dropdown-content a:hover,
+.dropdown-content button:hover{
+    background:#f2f2f2;
+}
+
+.add-btn-wrapper{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:35px;
+}
+
+.add-btn{
+    display:inline-block;
+    padding:14px 35px;
+    background:#000;
+    color:#fff;
+    text-decoration:none;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.add-btn:hover{
+    background:#333;
+}
+
+.profile-bottom{
+    margin-top:80px;
+    text-align:center;
+    padding:25px;
+    border-top:1px solid #ddd;
+    color:#666;
+    font-size:14px;
+}
+
+.text-danger{
+    color:red;
+    font-size:13px;
+}

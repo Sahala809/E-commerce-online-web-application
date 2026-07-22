@@ -36,10 +36,21 @@ import {
     resendChangeEmailOtp
 } from "../controllers/userController.js";
 
+import {
+    loadAddressList,
+    loadAddAddress,
+    addAddress,
+    loadEditAddress,
+    editAddress,
+    deleteAddress,
+    setDefaultAddress
+} from "../controllers/userController.js"
+import nocache from "nocache";
+
 const router = express.Router();
 
 
-router.get("/home", loadHome)
+router.get("/home",isLogin, noCache, loadHome)
 router.get("/", loadHome);
 
 router.get(
@@ -59,13 +70,13 @@ router.get(
 );
 
 
-router.get("/signup", loadSignup);
+router.get("/signup", noCache, loadSignup);
 router.post("/signup", signup);
 
-router.get("/login" , loadLogin)
+router.get("/login" , noCache, loadLogin)
 router.post("/login", login);
 
-router.get("/logout",isLogin, logout)
+router.get("/logout",isLogin , logout)
 
 router.get("/verify-otp", loadVerifyOtp);
 router.post("/verify-otp", verifyOtp);
@@ -82,7 +93,7 @@ router.get("/reset-password", loadResetPassword)
 router.post("/reset-password", resetPassword)
 
 
-router.get("/profile", isLogin, loadProfile);
+router.get("/profile", isLogin, noCache, loadProfile);
 router.post("/profile/edit", isLogin, editProfile);
 
 router.get("/profile/edit-password", isLogin, loadChangePassword);
@@ -95,6 +106,16 @@ router.get("/profile/verify-email-otp", isLogin, loadVerifyChangeEmailOtp);
 router.post("/profile/verify-email-otp", isLogin, verifyChangeEmailOtp);
 router.post("/profile/resend-email-otp", isLogin, resendChangeEmailOtp);
 
+router.get("/address", isLogin,loadAddressList)
+
+router.get("/address/add", isLogin , loadAddAddress)
+router.post("/address/add", isLogin, addAddress)
+
+router.get("/address/edit/:id", isLogin, loadEditAddress)
+router.patch("/address/edit/:id", isLogin, editAddress)
+
+router.delete("/address/delete/:id", isLogin, deleteAddress)
+router.patch("/address/default/:id", isLogin, setDefaultAddress)
 
 
 export default router;
