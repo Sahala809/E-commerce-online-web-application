@@ -133,8 +133,14 @@ export const loadLogin = (req, res) => {
         return res.redirect("/user/home");
     }
 
+    const successMessage = req.session.successMessage;
+    delete req.session.successMessage;
+
     res.render("user/auth/login", {
         error: null,
+        success:{
+            general:successMessage
+        },
         formData: {}
     });
 };

@@ -43,7 +43,10 @@
                     value="<%= formData?.email || '' %>">
 
                 <% if (errors?.email) { %>
-                    <p class="error"><%= errors.email %></p>
+                    <small class="text-danger">
+                        <p class="error"><%= errors.email %></p>
+                    </small>
+                    
                 <% } %>
 
             </div>
@@ -59,7 +62,10 @@
                     class="form-control">
 
                 <% if (errors?.password) { %>
-                    <p class="error"><%= errors.password %></p>
+                    <small class="text-danger">
+                        <p class="error"><%= errors.password %></p>
+                    </small>
+                    
                 <% } %>
 
             </div>

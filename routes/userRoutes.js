@@ -1,5 +1,6 @@
 import express from "express";
 import passport from "passport";
+import nocache from "nocache";
 
 import {
     googleCallback,
@@ -45,7 +46,7 @@ import {
     deleteAddress,
     setDefaultAddress
 } from "../controllers/userController.js"
-import nocache from "nocache";
+
 
 const router = express.Router();
 

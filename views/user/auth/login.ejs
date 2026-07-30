@@ -75,6 +75,12 @@
 
                             </div>
 
+                            <% if (success && success.general) { %>
+                                <div class="alert alert-success">
+                                    <%= success.general %>
+                                </div>
+                            <% } %>
+
                             <% if (error && error.general) { %>
                                 <div class="alert alert-danger">
                                     <%= error.general %>
@@ -161,6 +167,14 @@
     </div>
 
 </div>
+<script>
+    setTimeout(() => {
 
+    document.querySelector(".alert")?.remove();
+
+    document.querySelector(".alert")?.remove();
+
+}, 3000);
+</script>
 </body>
 </html>

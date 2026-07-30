@@ -1,5 +1,5 @@
 import express from "express"
-
+import nocache from "nocache";
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ import {
 import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
 
 import { noCache } from "../middleware/noCache.js";
-import nocache from "nocache";
+
 
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
@@ -29,7 +29,7 @@ router.get("/logout", isAdminLogin, noCache, adminLogout)
 
 router.get("/dashboard", isAdminLogin, noCache, loadDashboard)
 
-router.get('/users', isAdminLogin,nocache, loadUsers)
+router.get('/users', isAdminLogin,noCache, loadUsers)
 router.get('/users/:id', loadUserDetails)
 router.patch('/block/:id',isAdminLogin, blockUser)
 router.patch('/unblock/:id', isAdminLogin, unblockUser)

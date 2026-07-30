@@ -206,6 +206,7 @@ export const resetPasswordService = async (req, res) => {
     delete req.session.resetEmail;
     await req.session.save();
 
+    req.session.successMessage = "Password reset successfully. Please log in with your new password.";
     return res.redirect("/user/login");
 
 };
