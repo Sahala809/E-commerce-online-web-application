@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/userDetails.css">
+
+<body>
+
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="main">
+
+        <%- include("../partials/navbar") %>
+
+        <div class="content">
+
+            
+
+            <div class="page-title">
+                <h1>User Details</h1>
+                <p>View customer information</p>
+            </div>
+
+            <% if(message){ %>
+                <div class="alert">
+                    <%= message %>
+                </div>
+            <% } %>
+
+
+            <div class="user-card">
+
+                <div class="user-top">
+
+                    <div class="avatar">
+                        👤
+                    </div>
+
+                    <% if(user.isBlocked){ %>
+                        <span class="blocked-status">Blocked</span>
+                    <% } else { %>
+                        <span class="active-status">Active</span>
+                    <% } %>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" value="<%= user.name %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" value="<%= user.email %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" value="<%= user.phone %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Referral Code</label>
+                    <input type="text" value="<%= user.referralCode || '-' %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" value="User" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <input type="text" value="<%= user.isBlocked ? 'Blocked' : 'Active' %>" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea readonly>
+                        <%= address ? `${address.houseName},
+                        ${address.city},
+                        ${address.state},
+                        ${address.pincode}` : "No default address" %>
+                    </textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Joined Date</label>
+                    <input
+                        type="text"
+                        value="<%= new Date(user.createdAt).toLocaleDateString('en-GB') %>"
+                        readonly
+                    >
+                </div>
+
+                <div class="action-btn">
+                    
+
+                    <% if(user.isBlocked){ %>
+
+                        <form action="/admin/unblock/<%= user._id %>?_method=PATCH" method="POST">
+                            <button type="submit" class="unblock-btn">
+                                Unblock User
+                            </button>
+                        </form>
+
+                    <% } else { %>
+
+                        <form action="/admin/block/<%= user._id %>?_method=PATCH" method="POST">
+                            <button type="submit" class="block-btn">
+                                Block User
+                            </button>
+                        </form>
+
+                    <% } %>
+
+                    <a href="/admin/users" class="cancel-btn">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -10,16 +10,29 @@ import {
     adminLogout
 } from "../controllers/adminController.js"
 
+import {
+    loadUsers,
+    loadUserDetails,
+    blockUser,
+    unblockUser
+} from "../controllers/adminController.js"
+
 import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
 
 import { noCache } from "../middleware/noCache.js";
+import nocache from "nocache";
 
-router.get("/login", isAdminLogout, noCache, loadAdminLogin)
-router.post("/login", isAdminLogout, adminLogin);
-
-router.get("/dashboard", isAdminLogin, noCache, loadDashboard)
+router.get("/login", noCache,loadAdminLogin)
+router.post("/login", adminLogin);
  
 router.get("/logout", isAdminLogin, noCache, adminLogout)
+
+router.get("/dashboard", isAdminLogin, noCache, loadDashboard)
+
+router.get('/users', isAdminLogin,nocache, loadUsers)
+router.get('/users/:id', loadUserDetails)
+router.patch('/block/:id',isAdminLogin, blockUser)
+router.patch('/unblock/:id', isAdminLogin, unblockUser)
 
 
 export default router;

@@ -76,7 +76,7 @@ router.post("/signup", signup);
 router.get("/login" , noCache, loadLogin)
 router.post("/login", login);
 
-router.get("/logout",isLogin , logout)
+router.get("/logout" , logout)
 
 router.get("/verify-otp", loadVerifyOtp);
 router.post("/verify-otp", verifyOtp);
@@ -91,7 +91,6 @@ router.post("/forgot-password/resend-otp", resendForgotPasswordOtp)
 
 router.get("/reset-password", loadResetPassword)
 router.post("/reset-password", resetPassword)
-
 
 router.get("/profile", isLogin, noCache, loadProfile);
 router.post("/profile/edit", isLogin, editProfile);

@@ -1,18 +1,73 @@
-<div class="sidebar">
+<aside class="sidebar">
 
     <h3>CHRONIX</h3>
 
     <ul>
 
-        <li><a href="/admin/dashboard">Dashboard</a></li>
+        <li>
+            <a href="/admin/dashboard"
+                class="<%= activePage === 'dashboard' ? 'active' : '' %>">
+                Dashboard
+            </a>
+        </li>
 
-        <li><a href="/admin/users">Users</a></li>
+        <li>
+            <a href="/admin/users"
+                class="<%= activePage === 'users' ? 'active' : '' %>">
+                Users
+            </a></li>
 
-        <li><a href="/admin/categories">Categories</a></li>
+        <li>
+            <a href="/admin/categories"
+                class="<%= activePage == 'categories' ? 'active' : '' %>">
+                Categories
+            </a>
+        </li>
 
-        <li><a href="/admin/products">Products</a></li>
+        <li>
+            <a href="/admin/brands"
+                class="<%= activePage === 'brands' ? 'active' : '' %>">
+                Brands
+            </a>
+        </li>
 
-        <li><a href="/admin/orders">Orders</a></li>
+    
+
+        <li>
+            <a href="/admin/products"
+                class="<%= activePage === 'products' ? 'active' : '' %>">
+                Products
+            </a>
+        </li>
+
+        <li>
+            <a href="/admin/orders"
+                class="<%= activePage === 'orders' ? 'active' : '' %>">
+                Orders
+            </a>
+        </li>
+
+        <li>
+            <a href="/admin/coupons"
+            class="<%= activePage === 'coupons' ? 'active' : '' %>">
+                Coupons
+            </a>
+        </li>
+
+        <li>
+            <a href="/admin/offers"
+            class="<%= activePage === 'offers' ? 'active' : '' %>">
+                Offer Management
+            </a>
+        </li>
+
+        <li>
+            <a href="/admin/analytics"
+            class="<%= activePage === 'analytics' ? 'active' : '' %>">
+                Analytics
+            </a>
+        </li>
+
 
     </ul>
 
@@ -25,4 +80,4 @@
 
     </div>
 
-</div>
+</aside>

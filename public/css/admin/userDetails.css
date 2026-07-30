@@ -1,0 +1,185 @@
+/* ================= Content ================= */
+
+.content{
+    padding:30px;
+    background:#f5f6fa;
+    min-height:100vh;
+}
+
+/* ================= Page Title ================= */
+
+.page-title{
+    margin-bottom:25px;
+}
+
+.page-title h1{
+    font-size:32px;
+    color:#111827;
+    margin-bottom:5px;
+}
+
+.page-title p{
+    color:#6b7280;
+    font-size:15px;
+}
+
+
+/* ================= User Card ================= */
+
+.user-card{
+    max-width:750px;
+    background:#fff;
+    padding:35px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+/* ================= Profile Header ================= */
+
+.user-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#e5e7eb;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:42px;
+}
+
+/* ================= Status ================= */
+
+.active-status{
+    background:#d1fae5;
+    color:#065f46;
+    padding:8px 18px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.blocked-status{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:8px 18px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+/* ================= Form ================= */
+
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    color:#374151;
+    font-weight:600;
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    background:#f9fafb;
+    font-size:15px;
+    color:#111827;
+}
+
+.form-group input:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:#d4af37;
+}
+
+.form-group textarea{
+    resize:none;
+    height:100px;
+}
+
+/* ================= Buttons ================= */
+.action-btn{
+    margin-top:30px;
+    display:flex;
+    justify-content:space-around;
+    align-items: center;
+    
+}
+.cancel-btn{
+    display:inline-block;
+    min-width:150px;
+    padding:12px 24px;
+    text-align:center;
+    text-decoration:none;
+    background:#111827;
+    color:#fff;
+    border-radius:8px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.cancel-btn:hover{
+    background:rgb(65, 63, 63);
+    color:#ebedf0;
+}
+.block-btn,
+.unblock-btn{
+    display:inline-block;
+    padding:12px 24px;
+    color:#fff;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.block-btn{
+    background:#dc3545;
+}
+
+.block-btn:hover{
+    background:#bb2d3b;
+}
+
+.unblock-btn{
+    background:#198754;
+}
+
+.unblock-btn:hover{
+    background:#157347;
+}
+
+/* ================= Responsive ================= */
+
+@media(max-width:768px){
+
+    .user-card{
+        padding:20px;
+    }
+
+    .user-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .page-title h1{
+        font-size:26px;
+    }
+
+    .block-btn,
+    .unblock-btn{
+        width:100%;
+        text-align:center;
+    }
+
+}

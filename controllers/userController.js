@@ -41,9 +41,7 @@ import {
 } from "../services/address/addressService.js";
 
 export const loadHome = (req, res) => {
-
     
-
     res.render("user/home", {
         user: req.session.user || null
     });
@@ -53,6 +51,7 @@ export const loadHome = (req, res) => {
 
 
 export const loadSignup = (req, res) => {
+    
     if (req.session.user) {
         return res.redirect("/");
     }
@@ -162,19 +161,16 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
 
-    req.session.destroy((err) => {
+    delete req.session.user;
 
+    req.logout(function (err) {
         if (err) {
-            console.log(err);
-            return res.redirect("/user/home");
+            return next(err);
         }
 
-        res.clearCookie("connect.sid");
-
-        res.redirect("/user/login");
-
-    });
-
+    res.redirect("/user/login");
+    })
+    
 };
 
 

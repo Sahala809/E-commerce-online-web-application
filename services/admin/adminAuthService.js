@@ -5,17 +5,17 @@ import Admin from "../../models/adminModel.js";
 import { validateAdminLogin } from "./validationService.js";
 
 export const adminLoginService = async (req, res) => {
-    console.log("BODY:", req.body);
 
-    const error = validateAdminLogin(req.body);
+    const result = validateAdminLogin(req.body);
 
-    if (Object.keys(error).length > 0) {
+    
+    if (!result.success) {
 
         return res.render("admin/auth/login", {
-            error,
+            errors: result.errors,
+            message:null,
             formData: req.body
         });
-
     }
 
     const { email, password } = req.body;
@@ -23,26 +23,28 @@ export const adminLoginService = async (req, res) => {
     const admin = await Admin.findOne({
         email: email.trim().toLowerCase()
     });
-console.log("ADMIN:", admin);
+
+    console.log("ADMIN:", admin);
+
     if (!admin) {
 
         return res.render("admin/auth/login", {
-            error: {
-                general: "Invalid email or password."
-            },
+            errors: {},
+            message: "Invalid email or password.",
             formData: req.body
         });
 
     }
 
     const isMatch = password === admin.password;
-console.log("PASSWORD MATCH:", isMatch);
+
+    console.log("PASSWORD MATCH:", isMatch);
+
     if (!isMatch) {
 
         return res.render("admin/auth/login", {
-            error: {
-                general: "Invalid email or password."
-            },
+            errors:{},
+            message: "Invalid email or password.",
             formData: req.body
         });
 

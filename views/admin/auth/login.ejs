@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chronix Admin Login</title>
 
-    <link rel="stylesheet" href="/css/admin/auth/login.css">
+    <link rel="stylesheet" href="/css/admin/login.css">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -19,17 +19,19 @@
         <h2>CHRONIX</h2>
         <h5>Admin Login</h5>
 
-        <% if(error && error.general){ %>
-
-            <div class="alert alert-danger">
-                <%= error.general %>
-            </div>
-
-        <% } %>
+        
 
         <form action="/admin/login" method="POST" novalidate autocomplete="off">
 
             <div class="mb-3">
+
+                <% if(message){ %>
+
+                    <div class="alert alert-danger">
+                        <%= message %>
+                    </div>
+
+                <% } %>
 
                 <label>Email</label>
 
@@ -40,12 +42,8 @@
                     class="form-control"
                     value="<%= formData?.email || '' %>">
 
-                <% if(error && error.email){ %>
-
-                    <small class="text-danger">
-                        <%= error.email %>
-                    </small>
-
+                <% if (errors?.email) { %>
+                    <p class="error"><%= errors.email %></p>
                 <% } %>
 
             </div>
@@ -60,12 +58,8 @@
                     autocomplete="new-password"
                     class="form-control">
 
-                <% if(error && error.password){ %>
-
-                    <small class="text-danger">
-                        <%= error.password %>
-                    </small>
-
+                <% if (errors?.password) { %>
+                    <p class="error"><%= errors.password %></p>
                 <% } %>
 
             </div>
