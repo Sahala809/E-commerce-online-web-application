@@ -16,6 +16,7 @@ import {
     loadCategoryService,
     addCategoryService
 } from "../services/admin/categoryService.js"
+import Category from "../models/categoryModel.js";
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -239,7 +240,7 @@ export const loadCategory = async (req,res) =>{
 export const loadAddCategory = (req,res) =>{
     return res.render('admin/category/addCategory', {
         activePage: "Category",
-        pageTitle: "Add Category",
+        pageTitle: "Category",
         message:"",
         errors: {},
         formData: {},
@@ -254,7 +255,7 @@ export const addCategory = async(req,res) => {
         if(!result.success){
             return res.render("admin/category/addCategory", {
                 activePage: "category",
-                pageTitle : "Add Category",
+                pageTitle : "Category",
                 message: result.message,
                 errors: result.errors,
                 formData: req.body
@@ -270,7 +271,7 @@ export const addCategory = async(req,res) => {
 
         return res.render("admin/category/addCategory", {
             activePage: "category",
-            pageTitle: "Add Category",
+            pageTitle: "Category",
             message: "Something went wrong",
             errors: {},
             formData: req.body
@@ -278,5 +279,40 @@ export const addCategory = async(req,res) => {
         
     }
 } 
+
+export const loadEditCategory = async (req,res) =>{
+    try {
+        
+        const {id} = req.params
+        const category = await Category.findById(id)
+
+        if(!category){
+            return res.redirect('/admin/category')
+        }
+
+        return res.render('admin/category/editCategory', {
+            activePage: "Category",
+            pageTitle: "Category",
+            category,
+            message:"",
+            errors: {},
+            formData: {}
+
+        })
+            
+    } catch (error) {
+        console.log(error);
+
+        return res.render('admin/category', {
+            activePage: "Category",
+            pageTitle: "Category",
+            message:"Something went wrong",
+            errors: {},
+            formData: {},
+
+        })
+    }
+    
+}
 
 
