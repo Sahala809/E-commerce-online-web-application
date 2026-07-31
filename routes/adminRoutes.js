@@ -17,6 +17,10 @@ import {
     unblockUser
 } from "../controllers/adminController.js"
 
+import {
+    loadCategory
+} from "../controllers/adminController.js"
+
 import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
 
 import { noCache } from "../middleware/noCache.js";
@@ -34,5 +38,6 @@ router.get('/users/:id', loadUserDetails)
 router.patch('/block/:id',isAdminLogin, blockUser)
 router.patch('/unblock/:id', isAdminLogin, unblockUser)
 
+router.get("/category", loadCategory)
 
 export default router;

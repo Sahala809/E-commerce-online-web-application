@@ -148,8 +148,8 @@ export const verifySignupOtpService = async (req,res) => {
     delete req.session.signupOtpExpires;
     
     await req.session.save();
-    req.session.successMessage = "User created successfully. Please login.";
     
+
     return res.redirect("/user/login");
 };
 

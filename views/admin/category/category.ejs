@@ -1,0 +1,126 @@
+<%- include("../partials/header") %>
+
+<div class="d-flex">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-grow-1">
+
+        <%- include("../partials/navbar", { pageTitle: "Category" }) %>
+
+        <div class="container-fluid mt-4">
+
+            <!-- Your Category Table -->
+
+            <div class="page-title">
+
+                <h1>Category Management</h1>
+
+                <p>Add, edit, and manage product categories.</p>
+
+            </div>
+            
+            <% if(message){ %>
+                <div class="alert alert-success">
+                    <%= message %>
+                </div>
+            <% } %>
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <% if(categories.length > 0){ %>
+
+                        <% categories.forEach((category,index)=>{ %>
+
+                            <tr>
+
+                                <td><%= index + 1 %></td>
+
+                                <td><%= category.categoryName %></td>
+
+                                <td><%= category.description %></td>
+
+                                <td>
+
+                                    <% if(category.isActive){ %>
+
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+
+                                    <% }else{ %>
+
+                                        <span class="badge bg-danger">
+                                            Blocked
+                                        </span>
+
+                                    <% } %>
+
+                                </td>
+
+                                <td>
+                                    <%= category.createdAt.toLocaleDateString() %>
+                                </td>
+
+                                <td>
+
+                                    <a href="/admin/category/edit/<%= category._id %>"
+                                    class="btn btn-warning btn-sm">
+                                        Edit
+                                    </a>
+
+                                    <% if(category.isActive){ %>
+
+                                        <a href="/admin/category/block/<%= category._id %>"
+                                        class="btn btn-danger btn-sm">
+                                            Block
+                                        </a>
+
+                                    <% }else{ %>
+
+                                        <a href="/admin/category/unblock/<%= category._id %>"
+                                        class="btn btn-success btn-sm">
+                                            Unblock
+                                        </a>
+
+                                    <% } %>
+
+                                </td>
+
+                            </tr>
+
+                        <% }) %>
+
+                    <% }else{ %>
+
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                No Categories Found
+                            </td>
+                        </tr>
+
+                    <% } %>
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<%- include("../partials/footer") %>

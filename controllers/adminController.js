@@ -4,6 +4,7 @@ import {
     adminLoginService
 } from "../services/admin/adminAuthService.js";
 
+
 import { dashboardService } from "../services/admin/dashbordService.js"
 
 import { 
@@ -11,7 +12,9 @@ import {
     loadUserDetailsService
  } from "../services/admin/usersService.js";
 
-
+import {
+    loadCategoryService
+} from "../services/admin/categoryService.js"
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -54,6 +57,7 @@ export const loadDashboard = async (req, res) => {
             return  res.render('admin/dashboard',{
 
                 activePage: "dashboard",
+                pageTitle: "Dashboard",
                 totalUsers:0,
                 totalProducts:0,
                 totalOrders: 0,
@@ -65,6 +69,7 @@ export const loadDashboard = async (req, res) => {
 
         return res.render('admin/dashboard', {
             activePage: "dashboard",
+            pageTitle: "Dashboard",
             totalUsers: result.totalUsers,
             totalProducts:result.totalProducts,
             totalOrders: result.totalOrders,
@@ -108,6 +113,7 @@ export const loadUsers = async (req, res) => {
 console.log("SEARCH VALUE:", req.query.search);
         return res.render("admin/users/users", {
             activePage: "users",
+            pageTitle: "Users",
             users: result.users,
             totalUsers: result.totalUsers,
             activeUsers: result.activeUsers,
@@ -123,6 +129,7 @@ console.log("SEARCH VALUE:", req.query.search);
 
         return res.render("admin/users/users", {
             activePage: "users",
+            pageTitle: "Users",
             users: [],
             totalUsers: 0,
             activeUsers: 0,
@@ -140,6 +147,7 @@ export const loadUserDetails = async (req, res) => {
     console.log(result.address);
     res.render("admin/users/userDetails", {
         activePage:"users",
+        pageTitle: "Users",
         user: result.user,
         address: result.address,
         message: ""
@@ -192,5 +200,36 @@ export const unblockUser = async (req, res) => {
     }
 }
 
+
+export const loadCategory = async (req,res) =>{
+    try {
+        const result = await loadCategoryService()
+
+        return res.render("admin/category/category", {
+            activePage: "category",
+            pageTitle: "Category",
+            categories: result.categories,
+            currentPage:1,
+            totalPages:1,
+            search:"",
+            message: null
+
+        })
+    } catch (error) {
+        console.log(error)
+
+        return res.render("admin/category/category", {
+            activePage: "category",
+            categories: [],
+            currentPage:1,
+            totalPages:1,
+            search:"",
+            message:"something went wrong"
+
+        })
+        
+    }
+    
+}
 
 
