@@ -18,7 +18,9 @@ import {
 } from "../controllers/adminController.js"
 
 import {
-    loadCategory
+    loadCategory,
+    loadAddCategory,
+    addCategory
 } from "../controllers/adminController.js"
 
 import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
@@ -39,5 +41,7 @@ router.patch('/block/:id',isAdminLogin, blockUser)
 router.patch('/unblock/:id', isAdminLogin, unblockUser)
 
 router.get("/category", loadCategory)
+router.get("/category/add", loadAddCategory)
+router.post("/category/add", addCategory)
 
 export default router;

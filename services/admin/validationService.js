@@ -23,3 +23,23 @@ export const validateAdminLogin = (data) => {
     };
 
 };
+
+export const validateAddCategory = (data) => {
+    const errors = {};
+
+    const { categoryName, description } = data;
+
+    const categoryNameRegex = /^[A-Za-z ]+$/;
+
+    if (!categoryName || categoryName.trim() === "") {
+        errors.categoryName = "Category name is required";
+    } else if (!categoryNameRegex.test(categoryName.trim())) {
+        errors.categoryName = "Category name should contain only letters";
+    }
+
+    if (!description || description.trim() === "") {
+        errors.description = "Description is required";
+    }
+
+    return errors
+}

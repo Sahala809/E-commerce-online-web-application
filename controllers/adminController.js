@@ -13,7 +13,8 @@ import {
  } from "../services/admin/usersService.js";
 
 import {
-    loadCategoryService
+    loadCategoryService,
+    addCategoryService
 } from "../services/admin/categoryService.js"
 export const loadAdminLogin = (req, res) => {
 
@@ -205,6 +206,9 @@ export const loadCategory = async (req,res) =>{
     try {
         const result = await loadCategoryService()
 
+        const message = req.session.message;
+        req.session.message = null;
+
         return res.render("admin/category/category", {
             activePage: "category",
             pageTitle: "Category",
@@ -212,7 +216,7 @@ export const loadCategory = async (req,res) =>{
             currentPage:1,
             totalPages:1,
             search:"",
-            message: null
+            message
 
         })
     } catch (error) {
@@ -231,5 +235,48 @@ export const loadCategory = async (req,res) =>{
     }
     
 }
+
+export const loadAddCategory = (req,res) =>{
+    return res.render('admin/category/addCategory', {
+        activePage: "Category",
+        pageTitle: "Add Category",
+        message:"",
+        errors: {},
+        formData: {},
+
+    })
+}
+
+export const addCategory = async(req,res) => {
+    try {
+        const result = await addCategoryService(req, res)
+
+        if(!result.success){
+            return res.render("admin/category/addCategory", {
+                activePage: "category",
+                pageTitle : "Add Category",
+                message: result.message,
+                errors: result.errors,
+                formData: req.body
+            })
+        }
+
+        req.session.message = "Category added successfully";
+
+        return res.redirect("/admin/category")
+        
+    } catch (error) {
+        console.log("ADD CATEGORY ERROR:", error)
+
+        return res.render("admin/category/addCategory", {
+            activePage: "category",
+            pageTitle: "Add Category",
+            message: "Something went wrong",
+            errors: {},
+            formData: req.body
+        });
+        
+    }
+} 
 
 
