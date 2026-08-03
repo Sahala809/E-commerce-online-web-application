@@ -7,12 +7,43 @@
 body{
     font-family:Poppins,sans-serif;
     background:#f4f6f9;
+    color:#111827;
 }
 
 .wrapper{
     display:flex;
+    min-height:100vh;
 }
 
 .main{
     flex:1;
+    margin-left:250px;          /* Same width as sidebar */
+    min-height:100vh;
+    background:#f4f6f9;
+}
+
+
+a{
+    text-decoration:none;
+}
+
+ul{
+    list-style:none;
+}
+
+img{
+    max-width:100%;
+    display:block;
+}
+
+button,
+input,
+select,
+textarea{
+    font-family:inherit;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
 }

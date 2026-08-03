@@ -54,6 +54,8 @@ export const adminLoginService = async (req, res) => {
 
     await req.session.save();
 
+    req.session.successMessage = "Login successful.";
+
     return res.redirect("/admin/dashboard");
 
 };

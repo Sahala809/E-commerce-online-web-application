@@ -21,7 +21,9 @@ import {
     loadCategory,
     loadAddCategory,
     addCategory,
-    loadEditCategory
+    loadEditCategory,
+    editCategory,
+    deleteCategory
 } from "../controllers/adminController.js"
 
 import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
@@ -45,5 +47,7 @@ router.get("/category", loadCategory)
 router.get("/category/add", loadAddCategory)
 router.post("/category/add", addCategory)
 router.get("/category/edit/:id", loadEditCategory)
+router.patch('/category/edit/:id', editCategory)
+router.delete('/category/:id', deleteCategory)
 
 export default router;

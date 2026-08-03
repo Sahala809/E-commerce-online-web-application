@@ -5,7 +5,6 @@ export const dashboardService = async (req, res) => {
 
     const totalUsers = await User.countDocuments()
 
-    
 
     return {
         success: true,
@@ -15,5 +14,4 @@ export const dashboardService = async (req, res) => {
         totalRevenue:0
     }
 
-    
 }

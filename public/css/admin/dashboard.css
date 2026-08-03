@@ -14,85 +14,6 @@ body{
     min-height:100vh;
 }
 
-/* ================= Sidebar ================= */
-
-.sidebar{
-    width:250px;
-    height:100vh;
-    background:#111827;
-    color:#fff;
-
-    position:fixed;
-    top:0;
-    left:0;
-
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-}
-
-.sidebar-top{
-    width:100%;
-}
-
-.logo{
-    text-align:center;
-    padding:25px 0;
-    font-size:28px;
-    font-weight:700;
-    letter-spacing:2px;
-    border-bottom:1px solid rgba(255,255,255,.1);
-}
-
-.sidebar ul{
-    list-style:none;
-    margin-top:20px;
-}
-
-.sidebar ul li{
-    margin:6px 0;
-}
-
-.sidebar ul li a{
-    display:block;
-    padding:15px 25px;
-    color:#d1d5db;
-    text-decoration:none;
-    transition:.3s;
-    font-size:15px;
-}
-
-.sidebar ul li.active a,
-.sidebar ul li a:hover{
-    background:#1f2937;
-    color:#fff;
-    border-left:4px solid #d4af37;
-}
-
-/* Logout */
-
-.sidebar-bottom{
-    padding:20px;
-    border-top:1px solid rgba(255,255,255,.1);
-}
-
-.sidebar-bottom a{
-    display:block;
-    text-align:center;
-    text-decoration:none;
-
-    background:#d4af37;
-    color:#111827;
-
-    padding:12px;
-    border-radius:8px;
-    font-weight:600;
-    transition:.3s;
-}
-
-.sidebar-bottom a:hover{
-    background:#c59b1d;
-}
 
 /* ================= Main ================= */
 
@@ -101,29 +22,13 @@ body{
     width:calc(100% - 250px);
 }
 
-/* ================= Navbar ================= */
 
-.navbar{
-    background:#fff;
-    height:70px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 30px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.navbar h4{
-    font-size:22px;
-    font-weight:600;
-}
 
 /* ================= Content ================= */
 
 .content{
     padding:30px;
+    min-height:calc(100vh - 70px);
 }
 
 .dashboard-card{
@@ -154,8 +59,14 @@ body{
 .card{
     background:#fff;
     padding:25px;
-    border-radius:10px;
+    border-radius:12px;
     box-shadow:0 3px 10px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
 }
 
 .card h3{
@@ -183,7 +94,7 @@ body{
         width:calc(100% - 220px);
     }
 
-    .dashboard-cards{
+    .cards{
         grid-template-columns:repeat(2,1fr);
     }
 
@@ -200,7 +111,7 @@ body{
         width:100%;
     }
 
-    .dashboard-cards{
+    .cards{
         grid-template-columns:1fr;
     }
 

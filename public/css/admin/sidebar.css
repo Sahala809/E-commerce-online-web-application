@@ -1,9 +1,18 @@
+.wrapper{
+    display: flex;
+}
+
+
 .sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
     width:250px;
-    min-height:100vh;
+    height:100vh;
     background:#111827;
     color:#fff;
     padding:25px 15px;
+    overflow-y: hidden;
 }
 
 .sidebar h2{
@@ -32,6 +41,12 @@
 .sidebar a:hover,
 .sidebar a.active{
     background:#374151;
+}
+
+
+.flex-grow-1{
+    margin-left: 250px;
+    width: calc(100% - 250px);
 }
 
 .logout{

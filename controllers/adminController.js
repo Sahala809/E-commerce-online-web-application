@@ -14,7 +14,8 @@ import {
 
 import {
     loadCategoryService,
-    addCategoryService
+    addCategoryService,
+    editCategoryService
 } from "../services/admin/categoryService.js"
 import Category from "../models/categoryModel.js";
 export const loadAdminLogin = (req, res) => {
@@ -55,6 +56,12 @@ export const loadDashboard = async (req, res) => {
 
         const result = await dashboardService()
 
+        const successMessage = req.session.successMessage || "";
+        const errorMessage = req.session.errorMessage || "";
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+
         if(!result.success){
             return  res.render('admin/dashboard',{
 
@@ -64,7 +71,8 @@ export const loadDashboard = async (req, res) => {
                 totalProducts:0,
                 totalOrders: 0,
                 totalRevenue:0 ,
-                message: result.message
+                successMessage,
+                errorMessage
 
             })
         }
@@ -76,12 +84,14 @@ export const loadDashboard = async (req, res) => {
             totalProducts:result.totalProducts,
             totalOrders: result.totalOrders,
             totalRevenue:result.totalRevenue,
-            message: ""
+            successMessage,
+            errorMessage
         })
         
     } catch (error) {
         console.log("LOAD DASHBOARD ERROR:", error);
 
+        req.session.errorMessage = "Something went wrong.";
         return res.redirect("/admin/login");
 
         
@@ -205,47 +215,65 @@ export const unblockUser = async (req, res) => {
 
 export const loadCategory = async (req,res) =>{
     try {
-        const result = await loadCategoryService()
 
-        const message = req.session.message;
-        req.session.message = null;
+        const result = await loadCategoryService(req)
+
+        const successMessage = req.session.successMessage || "";
+        const errorMessage = req.session.errorMessage || "";
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
 
         return res.render("admin/category/category", {
             activePage: "category",
             pageTitle: "Category",
             categories: result.categories,
-            currentPage:1,
-            totalPages:1,
-            search:"",
-            message
+            currentPage:result.currentPage,
+            totalPages: result.totalPages,
+            search:result.search,
+            successMessage,
+            errorMessage
 
         })
     } catch (error) {
         console.log(error)
 
-        return res.render("admin/category/category", {
-            activePage: "category",
-            categories: [],
-            currentPage:1,
-            totalPages:1,
-            search:"",
-            message:"something went wrong"
+        req.session.errorMessage = "Something went wrong.";
 
-        })
+        return res.redirect("/admin/dashboard");
         
     }
     
 }
 
-export const loadAddCategory = (req,res) =>{
-    return res.render('admin/category/addCategory', {
-        activePage: "Category",
-        pageTitle: "Category",
-        message:"",
-        errors: {},
-        formData: {},
+export const loadAddCategory = async (req,res) =>{
 
-    })
+    try {
+
+        const successMessage = req.session.successMessage || "";
+        const errorMessage = req.session.errorMessage || "";
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+
+        return res.render('admin/category/addCategory', {
+            activePage: "Category",
+            pageTitle: "Category",
+            errors:{},
+            formData:{},
+            successMessage,
+            errorMessage
+
+        })
+        
+    } catch (error) {
+        console.log("LOAD ADD CATEGORY ERROR:", error)
+
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect('/admin/category')
+        
+    }
+    
 }
 
 export const addCategory = async(req,res) => {
@@ -262,20 +290,14 @@ export const addCategory = async(req,res) => {
             })
         }
 
-        req.session.message = "Category added successfully";
-
+        req.session.successMessage = "category successfully added"
         return res.redirect("/admin/category")
         
     } catch (error) {
         console.log("ADD CATEGORY ERROR:", error)
 
-        return res.render("admin/category/addCategory", {
-            activePage: "category",
-            pageTitle: "Category",
-            message: "Something went wrong",
-            errors: {},
-            formData: req.body
-        });
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect('/admin/category/add')
         
     }
 } 
@@ -301,18 +323,67 @@ export const loadEditCategory = async (req,res) =>{
         })
             
     } catch (error) {
-        console.log(error);
+        console.log("EDIT CATEGORY ERROR:", error);
 
-        return res.render('admin/category', {
-            activePage: "Category",
-            pageTitle: "Category",
-            message:"Something went wrong",
-            errors: {},
-            formData: {},
-
-        })
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect('/admin/category')
     }
     
 }
+
+
+export const editCategory = async (req, res) => {
+    try {
+
+        const { id } = req.params
+        const result = await editCategoryService(req, res)
+        const category = await Category.findById(id)
+
+        if(!result.success){
+            return res.render('admin/category/editCategory', {
+                activePage: "category",
+                pageTitle: "Category",
+                message : result.message,
+                errors: result.errors,
+                formData: req.body,
+                category
+
+            })
+        }
+
+        req.session.successMessage =  "Category updated successfully.";
+        return res.redirect("/admin/category")
+
+        
+    } catch (error) {
+        console.log("ADD CATEGORY ERROR:", error)
+
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect("/admin/category/edit");
+        
+    }
+
+    
+}
+
+
+export const deleteCategory = async (req, res) => {
+    try {
+
+        const { id } = req.params;
+
+        await Category.findByIdAndDelete(id);
+
+        req.session.message = "Category deleted successfully.";
+
+        return res.redirect("/admin/category");
+
+    } catch (error) {
+        console.log("DELETE CATEGORY ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect("/admin/category");
+    }
+};
 
 

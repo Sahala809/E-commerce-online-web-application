@@ -29,11 +29,39 @@
                 </a>
             </div>
             
-            <% if(message){ %>
+           <% if(successMessage){ %>
                 <div class="alert alert-success">
-                    <%= message %>
+                    <%= successMessage %>
                 </div>
             <% } %>
+
+            <% if(errorMessage){ %>
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+
+            <div class="toolbar">
+
+                <form action="/admin/category" method="GET">
+
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search category..."
+                        value="<%= search || '' %>">
+
+    
+
+                    <% if(search){ %>
+                        <a href="/admin/category" class="clear-btn">
+                            Clear
+                        </a>
+                    <% } %>
+
+                </form>
+
+            </div>
 
             <div class="table-card">
 
@@ -113,14 +141,16 @@
                                             </li>
 
                                             <li>
-                                                <a class="dropdown-item text-danger"
-                                                href="/admin/category/delete/<%= category._id %>"
-                                                onclick="return confirm('Are you sure you want to delete this category?')">
+                                                <form action="/admin/category/<%= category._id %>?_method=DELETE"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Are you sure you want to delete this category?')">
 
-                                                    <i class="bi bi-trash"></i>
-                                                    Delete
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash me-2"></i>
+                                                        Delete
+                                                    </button>
 
-                                                </a>
+                                                </form>
                                             </li>
 
                                         </ul>
@@ -146,6 +176,42 @@
                 </tbody>
 
             </table>
+
+            <!-- Pagination -->
+
+                <% if(totalPages > 1){ %>
+
+                <div class="pagination">
+
+                    <% if(currentPage > 1){ %>
+
+                        <a href="/admin/category?page=<%= currentPage - 1 %>&search=<%= search || '' %>">
+
+                            Previous
+
+                        </a>
+
+                    <% } %>
+
+                    <span>
+
+                        Page <%= currentPage %> of <%= totalPages %>
+
+                    </span>
+
+                    <% if(currentPage < totalPages){ %>
+
+                        <a href="/admin/category?page=<%= currentPage + 1 %>&search=<%= search || '' %>">
+
+                            Next
+
+                        </a>
+
+                    <% } %>
+
+                </div>
+
+                <% } %>
             </div>
         </div>
 
