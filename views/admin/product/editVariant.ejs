@@ -1,0 +1,238 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/addVariant.css">
+
+<body>
+
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="main">
+
+        <%- include("../partials/navbar") %>
+
+        <div class="content">
+
+            <% if(successMessage){ %>
+                <div class="alert alert-success">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+
+            <% if(errorMessage){ %>
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+
+            <div class="page-title">
+                <h1>Edit Product Variant</h1>
+                <p>Edit variant for <strong><%= product.productName %></strong></p>
+            </div>
+
+            <div class="form-card">
+
+                <form
+                    action="/admin/products/<%= product._id %>/variants/edit/<%= variant._id %>?_method=PATCH"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+                    <div class="row">
+
+                        <!-- Left Side -->
+
+                        <div class="col-lg-7">
+
+                            <h3 class="mb-4">Variant Information</h3>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Color</label>
+
+                                <input
+                                    type="text"
+                                    name="color"
+                                    class="form-control"
+                                    value="<%= formData?.color || variant.color %>">
+
+                                <% if(errors?.color){ %>
+                                    <small class="text-danger">
+                                        <%= errors.color %>
+                                    </small>
+                                <% } %>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Stock</label>
+
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    class="form-control"
+                                    value="<%= formData?.stock || variant.stock %>">
+
+                                <% if(errors?.stock){ %>
+                                    <small class="text-danger">
+                                        <%= errors.stock %>
+                                    </small>
+                                <% } %>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Price (₹)</label>
+
+                                <input
+                                    type="number"
+                                    name="price"
+                                    class="form-control"
+                                    value="<%= formData?.price || variant.price %>">
+
+                                <% if(errors?.price){ %>
+                                    <small class="text-danger">
+                                        <%= errors.price %>
+                                    </small>
+                                <% } %>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Offer Price (₹)</label>
+
+                                <input
+                                    type="number"
+                                    name="offerPrice"
+                                    class="form-control"
+                                    value="<%= formData?.offerPrice || variant.offerPrice %>">
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Status</label>
+
+                                <div class="form-check form-switch">
+
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        name="isActive"
+                                        value="true"
+                                        <%= (formData?.isActive !== undefined ? formData.isActive === "true" : variant.isActive) ? "checked" : "" %>>
+
+                                    <label class="form-check-label">
+
+                                        Active
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">Description</label>
+
+                                <textarea
+                                    rows="5"
+                                    class="form-control"
+                                    name="description"><%= formData?.description || variant.description %></textarea>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Right Side -->
+
+                        <div class="col-lg-5">
+
+                            <h3 class="mb-4">Current Images</h3>
+
+                            <div class="row mb-4">
+
+                                <% variant.images.forEach(image => { %>
+
+                                    <div class="col-6 mb-3">
+
+                                        <img
+                                            src="/uploads/variants/<%= image %>"
+                                            class="img-fluid rounded border">
+
+                                    </div>
+
+                                <% }) %>
+
+                            </div>
+
+                            <label class="form-label">
+
+                                Replace Images (Optional)
+
+                            </label>
+
+                            <div class="main-upload mb-3">
+
+                                <input
+                                    type="file"
+                                    name="images"
+                                    class="form-control"
+                                    accept="image/*"
+                                    multiple>
+
+                            </div>
+
+                            <% if(errors?.images){ %>
+
+                                <small class="text-danger">
+
+                                    <%= errors.images %>
+
+                                </small>
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-end mt-4">
+
+                        <a
+                            href="/admin/products/<%= product._id %>/variants"
+                            class="btn btn-outline-secondary me-2">
+
+                            Cancel
+
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            Update Variant
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

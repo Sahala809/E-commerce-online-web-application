@@ -1,0 +1,364 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/product.css">
+
+<body>
+
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="main">
+
+        <%- include("../partials/navbar") %>
+
+        <div class="content">
+
+            <!-- Statistics -->
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <h4>Total Products</h4>
+                    <h2><%= totalProducts %></h2>
+                </div>
+
+                <div class="stat-card">
+                    <h4>Active Products</h4>
+                    <h2><%= activeProducts %></h2>
+                </div>
+
+                <div class="stat-card">
+                    <h4>Inactive Products</h4>
+                    <h2><%= inactiveProducts %></h2>
+                </div>
+
+            </div>
+
+            <!-- Page Header -->
+
+            <div class="page-header">
+
+                <div class="page-title">
+
+                    <h1>Products</h1>
+
+                    <p>Manage all products in your store.</p>
+
+                </div>
+
+                <div>
+                    <a href="/admin/products/add" class="add-btn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add Product
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Messages -->
+
+            <% if(successMessage){ %>
+
+                <div class="alert alert-success">
+                    <%= successMessage %>
+                </div>
+
+            <% } %>
+
+            <% if(errorMessage){ %>
+
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+
+            <% } %>
+
+            <!-- Search -->
+
+            <div class="toolbar">
+
+                <form action="/admin/products" method="GET">
+
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search product..."
+                        value="<%= search || '' %>">
+
+                    <% if(search){ %>
+
+                        <a href="/admin/products" class="clear-btn">
+                            Clear
+                        </a>
+
+                    <% } %>
+
+                </form>
+
+            </div>
+
+            <!-- Search Info -->
+
+            <% if(search){ %>
+
+                <div class="search-info">
+
+                    Showing results for
+
+                    <strong>
+                        "<%= search %>"
+                    </strong>
+
+                    (<%= products.length %> product<%= products.length !== 1 ? "s" : "" %> found)
+
+                </div>
+
+            <% } %>
+
+            <!-- Table -->
+
+            <div class="table-card">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <% if(products.length === 0){ %>
+
+                        <tr>
+
+                            <td colspan="6" class="no-result">
+
+                                <% if(search){ %>
+
+                                    No products found for "<%= search %>"
+
+                                <% }else{ %>
+
+                                    No products available
+
+                                <% } %>
+
+                            </td>
+
+                        </tr>
+
+                    <% }else{ %>
+
+                        <% products.forEach((product, index ) => { %>
+
+                            <tr>
+                                <td>
+                                    <%= index + 1 %>
+                                </td>
+
+                                <td>
+
+                                    <% if(product.firstVariant && product.firstVariant.images.length > 0){ %>
+
+                                        <img
+                                            src="/uploads/variants/<%= product.firstVariant.images[0] %>"
+                                            width="60"
+                                            height="60"
+                                            style="object-fit:cover;border-radius:8px;">
+
+                                    <% } else { %>
+
+                                        No Image
+
+                                    <% } %>
+
+                                </td>
+
+                                <td>
+
+                                    <%= product.productName %>
+
+                                </td>
+
+                                <td>
+
+                                    <%= product.categoryId?.categoryName || "-" %>
+
+                                </td>
+
+                                <td>
+
+                                    <%= product.brandId?.brandName || "-" %>
+
+                                </td>
+
+                                <td>
+                                    ₹ <%= product.firstVariant?.price || "-" %>
+                                </td>
+
+                                <td>
+
+                                    <% if(product.isActive){ %>
+
+                                        <span class="status-active">
+                                            Active
+                                        </span>
+
+                                    <% }else{ %>
+
+                                        <span class="status-inactive">
+                                            Inactive
+                                        </span>
+
+                                    <% } %>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn btn-sm btn-light border-0"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+
+                                            <i class="bi bi-three-dots-vertical"></i>
+
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="/admin/products/edit/<%= product._id %>">
+
+                                                    <i class="bi bi-pencil-square me-2"></i>
+                                                    Edit Product
+
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="/admin/products/<%= product._id %>/variants">
+
+                                                    <i class="bi bi-box-seam me-2"></i>
+                                                    Manage Variants
+
+                                                </a>
+                                            </li>
+
+                                            <li><hr class="dropdown-divider"></li>
+
+                                            <li>
+                                                <form
+                                                    action="/admin/products/delete/<%= product._id %>?_method=DELETE"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Are you sure you want to delete this product?')">
+
+                                                    <button
+                                                        type="submit"
+                                                        class="dropdown-item text-danger">
+
+                                                        <i class="bi bi-trash me-2"></i>
+                                                        Delete Product
+
+                                                    </button>
+
+                                                </form>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        <% }) %>
+
+                    <% } %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Pagination -->
+
+            <div class="pagination">
+
+                <% if(currentPage > 1){ %>
+
+                    <a href="/admin/products?page=<%= currentPage-1 %>&search=<%= search || '' %>">
+
+                        Previous
+
+                    </a>
+
+                <% } %>
+
+                <span>
+
+                    Page <%= currentPage %> of <%= totalPages %>
+
+                </span>
+
+                <% if(currentPage < totalPages){ %>
+
+                    <a href="/admin/products?page=<%= currentPage+1 %>&search=<%= search || '' %>">
+
+                        Next
+
+                    </a>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+setTimeout(() => {
+
+    const alert = document.querySelector(".alert");
+
+    if(alert){
+
+        alert.remove();
+
+    }
+
+},3000);
+
+</script>
+
+</body>
+
+</html>

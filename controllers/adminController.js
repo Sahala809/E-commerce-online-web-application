@@ -1,5 +1,7 @@
 import Address from "../models/addressModel.js";
 import User from "../models/userModel.js";
+import Category from "../models/categoryModel.js";
+
 import {
     adminLoginService
 } from "../services/admin/adminAuthService.js";
@@ -17,7 +19,20 @@ import {
     addCategoryService,
     editCategoryService
 } from "../services/admin/categoryService.js"
-import Category from "../models/categoryModel.js";
+
+import {
+    loadProductService,
+    addProductService,
+    addVariantService,
+    editProductService,
+    deleteProductService,
+    editVariantService,
+    deleteVariantService
+} from "../services/admin/productService.js"
+import Product from "../models/productModel.js";
+import Variant from "../models/variantModel.js";
+
+
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -387,3 +402,387 @@ export const deleteCategory = async (req, res) => {
 };
 
 
+export const loadProduct = async (req,res) => {
+    try {
+
+        const page = Number(req.query.page) || 1;
+        const limit = 5;
+        const search = req.query.search || "";
+        
+        const result = await loadProductService(page, limit, search)
+
+        const successMessage = req.session.successMessage || "" 
+        const errorMessage = req.session.errorMessage || ""
+
+        req.session.successMessage = null
+        req.session.errorMessage = null
+
+        return res.render("admin/product/product", {
+            activePage:"product",
+            pageTitle: "Products",
+            products: result.products,
+            totalProducts: result.totalProducts,
+            activeProducts: result.activeProducts,
+            inactiveProducts: result.inactiveProducts,
+            search,
+            currentPage:page,
+            totalPages:result.totalPages,
+            search,
+            successMessage,
+            errorMessage
+          })
+        
+    } catch (error) {
+
+        console.log("LOAD PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect("/admin/dashboard")
+        
+    }
+}
+
+export const loadAddProduct = async (req, res) => {
+    try {
+
+        const categories = await Category.find({
+            isActive: true
+        })
+
+        const successMessage = req.session.successMessage || ""
+        const errorMessage = req.session.errorMessage || ""
+
+        req.session.successMessage = null
+        req.session.errorMessage = null
+        
+        return res.render("admin/product/addProduct", {
+            activePage: "product",
+            pageTitle: "Products",
+            categories,
+            brands:[],
+            formData: {},
+            errors: {},
+            successMessage,
+            errorMessage
+
+
+        })
+
+    } catch (error) {
+
+        console.log("LOAD ADD PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect("/admin/products")
+        
+    }
+}
+
+export const addProduct = async (req, res) => {
+    try {
+        
+        const result = await addProductService(req)
+
+        const categories = await Category.find({
+                isActive: true
+            });
+
+        if(!result.success){
+
+            return res.render("admin/product/addProduct", {
+                activePage: "product",
+                pageTitle: "Products",
+                categories,
+                brands:[],
+                errors: result.errors,
+                formData: req.body,
+                successMessage:"",
+                errorMessage:""
+            })
+        }
+
+
+
+        const successMessage = "Product added successfully. Now add variants."
+
+        return res.redirect(`/admin/products/${result.product._id}/variants`)
+        
+
+    } catch (error) {
+
+        console.log("ADD PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong"
+        return res.redirect("/admin/products/add")
+        
+    }
+}
+
+
+export const loadAddVariant = async (req,res) => {
+    try {
+
+        const { productId } = req.params
+
+        const product = await Product.findById(productId)
+            .populate("categoryId")
+            
+    
+        if(!product){
+            req.session.errorMessage = "Product not found."
+            return res.redirect("/admin/products")
+        }
+
+        const variants = await Variant.find({productId})
+        
+        const successMessage = req.session.successMessage || ""
+        const errorMessage = req.session.errorMessage || ""
+
+        req.session.successMessage = null
+        req.session.errorMessage = null
+
+        return res.render("admin/product/addVariant",{
+            activePage : "product",
+            pageTitle: "Product",
+            product,
+            variants,
+            errors: {},
+            formData: {},
+            successMessage,
+            errorMessage
+        })
+    } catch (error) {
+
+        console.log("LOAD ADD VARIANT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+        return res.redirect("/admin/products");
+        
+    }
+}
+
+export const addVariant = async (req, res) => {
+    try {
+        const result = await addVariantService(req)
+
+        const { productId } =req.params
+
+        if(!result.success){
+            const product = await Product.findById(productId)
+            const variants = await Variant.find({ productId })
+
+            return res.render("admin/product/addVariant", {
+                activePage: "product",
+                pageTitle: "Add Variant",
+                product,
+                variants,
+                errors: result.errors,
+                formData: req.body,
+                successMessage: "",
+                errorMessage: ""
+            });
+        }
+
+        req.session.successMessage = "Variant added successfully.";
+
+        return res.redirect(`/admin/products/${req.params.productId}/variants`)
+    } catch (error) {
+
+        console.log("ADD VARIANT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong."
+        return res.redirect(`/admin/products/${req.params.productId}/variants`)
+        
+    }
+}
+
+export const loadEditProduct = async (req,res) => {
+    try {
+        
+        const  productId  = req.params.id
+console.log("Product ID:", req.params.id);
+        const product = await Product.findById(productId)
+console.log(product);
+        if(!product){
+            req.session.errorMessage = "Product not found.";
+            return res.redirect("/admin/products");
+        }
+
+        const categories = await Category.find({isActive: true})
+
+        return res.render("admin/product/editProduct", {
+            activePage: "product",
+            pageTitle: "Edit Product",
+            product,
+            categories,
+            brands:[],
+            formData: req.body,
+            errors: {},
+            successMessage: "",
+            errorMessage: ""
+        });
+
+    } catch (error) {
+
+        console.log("LOAD EDIT PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+        return res.redirect("/admin/products");
+        
+    }
+}
+
+
+export const editProduct = async (req,res) => {
+    try {
+        
+        const result = await editProductService(req)
+
+        if(!result.success){
+            
+            return res.render("admin/product/editProduct", {
+                activePage: "product",
+                pageTitle: "Product",
+                product: result.product,
+                categories: result.categories,
+                brands: result.brands,
+                errors: result.errors,
+                formData: req.body,
+                successMessage: "",
+                errorMessage: ""
+
+            })
+        }
+
+        req.session.successMessage =  "Product updated successfully.";
+
+        return res.redirect("/admin/products")
+
+    } catch (error) {
+        console.log("EDIT PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect(`/admin/products/edit/${req.params.id}`);
+    }
+}
+
+
+export const deleteProduct = async (req, res) => {
+    try {
+
+        const result = await deleteProductService(req);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+        } else {
+            req.session.successMessage = "Product deleted successfully.";
+        }
+
+        return res.redirect("/admin/products");
+
+    } catch (error) {
+
+        console.log("DELETE PRODUCT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect("/admin/products");
+    }
+};
+
+
+export const loadEditVariant = async (req, res) => {
+    try {
+
+        const { productId, variantId } = req.params;
+
+        const product = await Product.findById(productId);
+        const variant = await Variant.findById(variantId);
+
+        if (!product || !variant) {
+            req.session.errorMessage = "Variant not found.";
+            return res.redirect(`/admin/products/${productId}/variants`);
+        }
+
+        return res.render("admin/product/editVariant", {
+            activePage: "product",
+            pageTitle: "Edit Variant",
+            product,
+            variant,
+            errors: {},
+            formData: req.body,
+            successMessage: "",
+            errorMessage: ""
+        });
+
+    } catch (error) {
+
+        console.log("LOAD EDIT VARIANT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect(`/admin/products/${req.params.productId}/variants`);
+    }
+};
+
+
+export const editVariant = async (req, res) => {
+    try {
+
+        const result = await editVariantService(req);
+
+        if (!result.success) {
+
+            const product = await Product.findById(req.params.productId);
+
+            return res.render("admin/product/editVariant", {
+                activePage: "product",
+                pageTitle: "Edit Variant",
+                product,
+                variant: result.variant,
+                errors: result.errors,
+                formData: req.body,
+                successMessage: "",
+                errorMessage: ""
+            });
+        }
+
+        req.session.successMessage = "Variant updated successfully.";
+
+        return res.redirect(`/admin/products/${req.params.productId}/variants`);
+
+    } catch (error) {
+
+        console.log("EDIT VARIANT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect(`/admin/products/${req.params.productId}/variants`);
+    }
+};
+
+
+
+export const deleteVariant = async (req, res) => {
+    try {
+
+        const result = await deleteVariantService(req);
+
+        if (!result.success) {
+            req.session.error = result.message;
+            return res.redirect(`/admin/products/${req.params.productId}/variants`);
+        }
+
+        req.session.successMessage = "Variant deleted successfully."
+        res.redirect(`/admin/products/${req.params.productId}/variants`);
+
+    } catch (error) {
+        console.log("DELETE VARIANT ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong.";
+
+        return res.redirect(`/admin/products/${req.params.productId}/variants`);
+    }
+};
