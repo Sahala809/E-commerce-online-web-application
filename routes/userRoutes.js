@@ -47,6 +47,9 @@ import {
     setDefaultAddress
 } from "../controllers/userController.js"
 
+// import {
+//     loadShop
+// } from ""
 
 const router = express.Router();
 
@@ -84,17 +87,17 @@ router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", resendOtp);
 
 router.get("/forgot-password", loadForgotPassword);
-router.post("/forgot-password", forgotPassword);
+router.patch("/forgot-password", forgotPassword);
 
 router.get("/forgot-password/verify-otp", loadForgotPasswordVerifyOtp);
 router.post("/forgot-password/verify-otp", verifyForgotPasswordOtp)
 router.post("/forgot-password/resend-otp", resendForgotPasswordOtp)
 
 router.get("/reset-password", loadResetPassword)
-router.post("/reset-password", resetPassword)
+router.patch("/reset-password", resetPassword)
 
 router.get("/profile", isLogin, noCache, loadProfile);
-router.post("/profile/edit", isLogin, editProfile);
+router.patch("/profile/edit", isLogin, editProfile);
 
 router.get("/profile/edit-password", isLogin, loadChangePassword);
 router.post("/profile/edit-password", isLogin, changePassword);
@@ -117,5 +120,5 @@ router.patch("/address/edit/:id", isLogin, editAddress)
 router.delete("/address/delete/:id", isLogin, deleteAddress)
 router.patch("/address/default/:id", isLogin, setDefaultAddress)
 
-
+//router.get("/shop", loadShop)
 export default router;

@@ -132,9 +132,10 @@
 
                     </div>
 
-                    <div class="col-md-6 mb-3 password-box">
+                    <div class="col-md-6 mb-3">
 
-                        <input
+                        <div class="password-box">
+                            <input
                             id="password"
                             type="password"
                             class="form-control"
@@ -146,6 +147,9 @@
 
                         <i class="bi bi-eye-slash toggle-password"></i>
                     
+                        </div>
+
+                        
                             <% if (error && error.password) { %>
                                 <small class="text-danger">
                                     <%= error.password %>
@@ -154,9 +158,10 @@
                         
                     </div>
 
-                    <div class="col-md-6 mb-3 password-box">
+                    <div class="col-md-6 mb-3">
 
-                        <input
+                        <div class="password-box">
+                            <input
                             id="confirmPassword"
                             type="password"
                             class="form-control"
@@ -165,6 +170,8 @@
 
                         <i class="bi bi-eye-slash toggle-password"></i>
 
+                        </div>
+                        
                     
 
                             <% if (error && error.confirmPassword) { %>

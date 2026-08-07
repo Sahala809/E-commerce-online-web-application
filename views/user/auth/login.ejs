@@ -113,6 +113,9 @@
                                     autocomplete="new-password"
                                     placeholder="Password"
                                     required>
+
+                                    <i class="bi bi-eye-slash toggle-password"></i>
+                                    
                                     <% if (error && error.password) { %>
                                         <small class="text-danger">
                                             <%= error.password %>

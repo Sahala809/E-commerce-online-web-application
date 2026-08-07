@@ -146,10 +146,14 @@ body{
 .toggle-password{
     position:absolute;
     right: 20px;
-    top:15%;
+    top:45%;
     transform:translateY(-50%);
     cursor:pointer;
     color:#777;
+}
+
+.text-danger{
+    font-size: 0.85rem;
 }
 
 /* ===========================
