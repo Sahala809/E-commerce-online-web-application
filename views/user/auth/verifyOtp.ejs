@@ -33,9 +33,10 @@
                 Enter the 6-digit verification code sent to your email.
             </p>
 
-            <% if (error) { %>
+
+            <% if (errorMessage) { %>
                 <div class="alert">
-                    <%= error %>
+                    <%= errorMessage %>
                 </div>
             <% } %>
 
@@ -90,29 +91,39 @@
 
 <script>
 
-const boxes=document.querySelectorAll(".otp");
+// ========================================
+// OTP INPUT BOXES
+// ========================================
+
+const boxes = document.querySelectorAll(".otp");
 const fullOtp = document.getElementById("fullOtp");
 
-boxes.forEach((box,index)=>{
+boxes.forEach((box, index) => {
 
-    box.addEventListener("input",()=>{
+    // When user enters a digit
+    box.addEventListener("input", () => {
 
-        if(box.value.length===1 && index<boxes.length-1){
-
-            boxes[index+1].focus();
-
+        // Move to next box
+        if (box.value.length === 1 && index < boxes.length - 1) {
+            boxes[index + 1].focus();
         }
 
-        fullOtp.value= [...boxes].map(i=>i.value).join("");
-
+        // Combine all OTP digits
+        fullOtp.value = [...boxes]
+            .map(input => input.value)
+            .join("");
     });
 
-    box.addEventListener("keydown",(e)=>{
 
-        if(e.key==="Backspace" && !box.value && index>0){
+    // Backspace → move to previous box
+    box.addEventListener("keydown", (e) => {
 
-            boxes[index-1].focus();
-
+        if (
+            e.key === "Backspace" &&
+            !box.value &&
+            index > 0
+        ) {
+            boxes[index - 1].focus();
         }
 
     });
@@ -120,36 +131,69 @@ boxes.forEach((box,index)=>{
 });
 
 
-const timer=document.getElementById("timer");
+// ========================================
+// OTP TIMER
+// ========================================
 
-const resend=document.getElementById("resendArea");
+const timer = document.getElementById("timer");
+const resend = document.getElementById("resendArea");
 
-const otpExpired = <%= typeof otpExpired !== "undefined" ? otpExpired : false %>;
 
-if (otpExpired) {
+// Get values from Express/EJS
+const otpExpired =
+    <%= typeof otpExpired !== "undefined" ? otpExpired : false %>;
+
+const expiresAt =
+    <%= typeof expiresAt !== "undefined" && expiresAt ? expiresAt : 0 %>;
+
+
+// ========================================
+// OTP ALREADY EXPIRED / NOT AVAILABLE
+// ========================================
+
+if (otpExpired || !expiresAt) {
 
     timer.style.display = "none";
     resend.style.display = "block";
 
-} else {
+}
+
+
+// ========================================
+// OTP STILL VALID
+// ========================================
+
+else {
 
     resend.style.display = "none";
 
-    let seconds = 60;
-
-    timer.innerHTML = "01:00";
-
     const count = setInterval(() => {
 
-        let min = Math.floor(seconds / 60);
-        let sec = seconds % 60;
+        // Calculate remaining time using
+        // the original server-side expiry time
+        const remaining = Math.max(
+            0,
+            Math.floor((expiresAt - Date.now()) / 1000)
+        );
 
+
+        // Minutes
+        const min = Math.floor(remaining / 60);
+
+        // Seconds
+        const sec = remaining % 60;
+
+
+        // Display timer
         timer.innerHTML =
             `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 
-        seconds--;
 
-        if (seconds < 0) {
+        // ========================================
+        // OTP EXPIRED
+        // ========================================
+
+        if (remaining <= 0) {
 
             clearInterval(count);
 
@@ -159,6 +203,7 @@ if (otpExpired) {
         }
 
     }, 1000);
+
 }
 
 </script>

@@ -1,0 +1,368 @@
+
+/* =========================================
+   CHRONIX LOGIN PAGE
+========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Poppins", Arial, sans-serif;
+    background: #f4f4f4;
+    color: #222;
+}
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 15px;
+}
+
+/* =========================================
+   LOGIN CARD
+========================================= */
+
+.login-card {
+    width: 100%;
+    max-width: 1050px;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.10);
+}
+
+/* =========================================
+   LEFT IMAGE
+========================================= */
+
+.login-image {
+    width: 100%;
+    height: 100%;
+    min-height: 620px;
+    object-fit: cover;
+    display: block;
+}
+
+/* =========================================
+   RIGHT LOGIN SECTION
+========================================= */
+
+.login-content {
+    padding: 55px 60px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* =========================================
+   LOGO
+========================================= */
+
+.chronix-logo {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+.chronix-logo h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #111;
+}
+
+.chronix-logo span {
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #888;
+}
+
+/* =========================================
+   TITLE
+========================================= */
+
+.login-title {
+    margin-bottom: 28px;
+}
+
+.login-title h3 {
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.login-title p {
+    color: #888;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* =========================================
+   GOOGLE BUTTON
+========================================= */
+
+.google-login {
+    width: 100%;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    background: #fff;
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+}
+
+.google-login img {
+    width: 20px;
+    height: 20px;
+}
+
+.google-login:hover {
+    background: #f7f7f7;
+    border-color: #aaa;
+    color: #111;
+}
+
+/* =========================================
+   OR DIVIDER
+========================================= */
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 25px 0;
+    color: #999;
+    font-size: 12px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.login-form-group {
+    margin-bottom: 22px;
+}
+
+.login-input {
+    width: 100%;
+    height: 48px;
+
+    padding: 0 14px;
+
+    border: 1px solid #d7d7d7;
+    border-radius: 6px;
+
+    font-size: 14px;
+    color: #222;
+
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+.login-input::placeholder {
+    color: #999;
+}
+
+.login-input:focus {
+    border-color: #222;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+   PASSWORD WRAPPER
+========================================= */
+
+.password-box{
+    position:relative;
+}
+
+.password-box input{
+    padding-right:45px;   /* Prevent text from overlapping the icon */
+}
+
+.toggle-password{
+    position:absolute;
+    right: 10%;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    color:#777;
+}
+
+.text-danger{
+    font-size: 0.85rem;
+}
+
+
+/* =========================================
+   FIELD ERRORS
+========================================= */
+
+.login-error {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #dc3545;
+    font-size: 12px;
+}
+
+/* =========================================
+   SUCCESS / ERROR ALERT
+========================================= */
+
+.login-alert {
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+}
+
+/* =========================================
+   SIGN IN BUTTON
+========================================= */
+
+.login-button {
+    display: block;
+    width: 80%;
+    height: 48px;
+    margin: 0 auto;
+    border: none;
+    border-radius: 6px;
+
+    background: #222;
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: all 0.2s ease;
+}
+
+.login-button:hover {
+    background: #000;
+    transform: translateY(-1px);
+}
+
+/* =========================================
+   BOTTOM LINKS
+========================================= */
+
+.login-link{
+    text-align:center;
+    margin-top:25px;
+}
+
+.login-link a{
+    text-decoration:none;
+    font-weight:600;
+}
+
+.a-link a {
+    color:#50504f;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+.forgot-link {
+    font-size: 13px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 991px) {
+
+    .login-content {
+        padding: 45px 40px;
+    }
+
+    .login-image {
+        min-height: 560px;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .login-container {
+        padding: 20px 12px;
+    }
+
+    .login-card {
+        max-width: 500px;
+    }
+
+    .login-image {
+        min-height: 280px;
+        max-height: 300px;
+    }
+
+    .login-content {
+        padding: 35px 25px;
+    }
+
+    .chronix-logo {
+        margin-bottom: 30px;
+    }
+
+    .chronix-logo h1 {
+        font-size: 27px;
+    }
+
+    .login-title h3 {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 400px) {
+
+    .login-content {
+        padding: 30px 20px;
+    }
+
+    .login-image {
+        min-height: 230px;
+    }
+
+    .chronix-logo h1 {
+        font-size: 24px;
+    }
+}

@@ -1,0 +1,273 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+<link rel="stylesheet" href="/css/shop/shop.css">
+<main class="shop-container">
+
+     <div class="breadcrumb">
+        <a href="/user/home">Home</a>
+        <span>›</span>
+        <span>Shop</span>
+    </div>
+
+    <div class="shop-title-section">
+        <h1 class="shop-title">SHOP</h1>
+        <p class="shop-subtitle">
+            Find the perfect watch for every moment
+        </p>
+    </div>
+
+    <div class="shop-layout">
+
+        <aside class="shop-sidebar">
+            <!-- filters -->
+
+            <div class="filter-heading">
+
+                <i class="bi bi-sliders"></i>
+
+                <span>Filters</span>
+
+            </div>
+
+            <!-- CATEGORY -->
+
+            <div class="filter-section">
+
+                <div class="filter-title">
+
+                    <span>category</span>
+
+                    <i class="bi bi-chevron-up"></i>
+
+                </div>
+
+                <% categories.forEach(category => { %>
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        name="category"
+                        value="<%= category._id %>"
+                    >
+
+                    <span>
+                        <%= category.name %>
+                    </span>
+
+                </label>
+
+                <% }) %>
+
+            </div>
+                    
+
+        <!-- Brand -->
+
+        <div class="filter-section">
+
+            <div class="filter-title">
+
+                <span>Brand</span>
+
+                <i class="bi bi-chevron-up"></i>
+
+            </div>
+
+            <small class="text-muted">
+                No brands available
+            </small>
+
+            <!-- Brand values will be added later -->
+
+        </div>
+
+        <div class="filter-section">
+
+            <div class="filter-title">
+                <span>Price</span>
+                <i class="bi bi-chevron-up"></i>
+            </div>
+
+            <div class="price-values">
+                <span>₹0</span>
+                <span>₹50,000</span>
+            </div>
+
+            <input
+                type="range"
+                class="price-slider"
+                min="0"
+                max="50000"
+                value="50000"
+            >
+
+        </div>
+
+        <!-- Color -->
+
+        <div class="filter-section">
+
+            <div class="filter-title">
+                <span>Color</span>
+                <i class="bi bi-chevron-up"></i>
+            </div>
+
+            <% if (colors && colors.length > 0) { %>
+
+                <% colors.forEach(color => { %>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            name="color"
+                            value="<%= color.toLowerCase() %>"
+                        >
+
+                        <span>
+                            <%= color %>
+                        </span>
+
+                    </label>
+
+                <% }) %>
+
+            <% } else { %>
+
+                <small class="text-muted">
+                    No colors available
+                </small>
+
+            <% } %>
+
+        </div>
+
+        </aside>
+
+        <section class="shop-content">
+
+            <div class="shop-toolbar">
+                <!-- product count -->
+                <!-- sorting -->
+            </div>
+
+            <div class="product-grid">
+
+                <% products.forEach(product => { %>
+
+                    <% if (product.variants.length > 0) { %>
+
+                        <% const variant = product.variants[0]; %>
+
+                        <div class="product-card">
+
+                            <div class="product-image">
+                        
+                                <img
+                                    src="/uploads/variants/<%= variant.images[0] %>"
+                                    alt="<%= product.productName %>"
+                                >
+
+                                <!-- Wishlist -->
+                                <button
+                                    type="button"
+                                    class="wishlist-btn"
+                                    title="Add to Wishlist"
+                                >
+                                    <i class="bi bi-heart"></i>
+                                </button>
+
+
+                            </div>
+
+                            <div class="product-info">
+
+                                <h3 class="product-name">
+                                    <%= product.productName %>
+                                </h3>
+
+                                <!--Price-->
+
+                                <div class="product-price">
+
+                                    <% if(
+                                        variant.offerPrice > 0 &&
+                                        variant.offerPrice < variant.price
+                                    ) { %>
+                                        <span class="offer-price">
+                                            ₹<%= variant.offerPrice %>
+                                        </span>
+
+                                        <del class="original-price">
+                                            ₹<%= variant.price %>
+                                        </del>
+
+                                        <% } else { %>
+                                            <span class="offer-price">
+                                                ₹<%= variant.price %>
+                                            </span>
+                                        <% } %>
+                                </div>
+
+
+                                <!-- Add to Cart -->
+                                <button
+                                    type="button"
+                                    class="add-cart-btn"
+                                    title="Add to Cart"
+                                >
+                                    <span>Add to Cart</span>
+                                    <i class="bi bi-cart-plus"></i>
+                                    
+                                </button>
+
+
+                            </div>
+
+                        </div>
+
+                    <% } %>
+
+                <% }) %>
+
+            </div>
+            <div class="pagination-container">
+                <!-- pagination -->
+            </div>
+
+        </section>
+
+    </div>
+
+
+</main>
+
+<script>
+    const colorCheckboxes = document.querySelectorAll(
+        'input[name="color"]'
+    );
+
+    colorCheckboxes.forEach(checkbox => {
+
+        checkbox.addEventListener("change", () => {
+
+            const selectedColors = [
+                ...document.querySelectorAll(
+                    'input[name="color"]:checked'
+                )
+            ].map(checkbox => checkbox.value);
+
+            const params = new URLSearchParams();
+
+            selectedColors.forEach(color => {
+                params.append("color", color);
+            });
+
+            window.location.href = `/user/shop?${params.toString()}`;
+        });
+
+    });
+</script>
+
+<%- include("../partials/footer") %>

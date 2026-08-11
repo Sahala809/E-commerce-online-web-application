@@ -28,6 +28,31 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
 
 });
 
+
+// Remove field error when user enters valid value
+document.querySelectorAll("input").forEach(input => {
+
+    input.addEventListener("input", function () {
+
+        const errorElement = document.getElementById(
+            this.id + "Error"
+        );
+
+        if (!errorElement) {
+            return;
+        }
+
+        if (this.value.trim() !== "") {
+            errorElement.remove();
+        }
+
+    });
+
+});
+
+
+
+
 // // =======================
 // // Validation
 // // =======================

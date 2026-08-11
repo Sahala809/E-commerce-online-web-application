@@ -61,11 +61,14 @@
                 <span>OR</span>
             </div>
 
-            <% if (error && error.general) { %>
+                        
+            <% if (errorMessage) { %>
                 <div class="alert alert-danger">
-                    <%= error.general %>
+                    <%= errorMessage %>
                 </div>
             <% } %>
+            
+
 
             <form id="signupForm" action="/user/signup" method="POST" autocomplete="off" novalidate>
 
@@ -79,9 +82,9 @@
                             class="form-control" 
                             value="<%= formData ? formData.name : '' %>"
                             placeholder="Full Name">
-                        <% if (error && error.name) { %>
-                            <small class="text-danger">
-                                <%= error.name %>
+                        <% if (errors && errors.name) { %>
+                            <small class="text-danger" id="nameError">
+                                <%= errors.name %>
                             </small>
                         <% } %>
 
@@ -97,9 +100,9 @@
                             autocomplete="email"
                             value="<%= formData ? formData.email : '' %>"
                             placeholder="Email Address">
-                        <% if(error && error.email) { %>
-                         <small class="text-danger">
-                                <%= error.email %>
+                        <% if(errors && errors.email) { %>
+                         <small class="text-danger" id="emailError">
+                                <%= errors.email %>
                             </small>
                         <% } %>
                     </div>
@@ -113,9 +116,9 @@
                             name="phone"
                             value="<%= formData ? formData.phone : '' %>"
                             placeholder="Phone Number">
-                        <% if (error && error.phone) { %>
-                        <small class="text-danger">
-                            <%= error.phone %>
+                        <% if (errors && errors.phone) { %>
+                        <small class="text-danger" id="phoneError">
+                            <%= errors.phone %>
                         </small>
                         <% } %>
                     </div>
@@ -150,9 +153,9 @@
                         </div>
 
                         
-                            <% if (error && error.password) { %>
-                                <small class="text-danger">
-                                    <%= error.password %>
+                            <% if (errors && errors.password) { %>
+                                <small class="text-danger" id="passwordError">
+                                    <%= errors.password %>
                                 </small>
                             <% } %>
                         
@@ -174,9 +177,9 @@
                         
                     
 
-                            <% if (error && error.confirmPassword) { %>
-                                <small class="text-danger">
-                                    <%= error.confirmPassword %>
+                            <% if (errors && errors.confirmPassword) { %>
+                                <small class="text-danger" id="confirmPasswordError">
+                                    <%= errors.confirmPassword %>
                                 </small>
                             <% } %>
 

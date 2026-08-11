@@ -47,9 +47,9 @@ import {
     setDefaultAddress
 } from "../controllers/userController.js"
 
-// import {
-//     loadShop
-// } from ""
+import {
+    loadShop
+} from "../controllers/userController.js"
 
 const router = express.Router();
 
@@ -71,14 +71,14 @@ router.get(
         session: true
     }),
     googleCallback
-);
+); 
 
 
 router.get("/signup", noCache, loadSignup);
 router.post("/signup", signup);
 
 router.get("/login" , noCache, loadLogin)
-router.post("/login", login);
+router.post("/login", noCache, login);
 
 router.get("/logout" , logout)
 
@@ -99,10 +99,10 @@ router.patch("/reset-password", resetPassword)
 router.get("/profile", isLogin, noCache, loadProfile);
 router.patch("/profile/edit", isLogin, editProfile);
 
-router.get("/profile/edit-password", isLogin, loadChangePassword);
+router.get("/profile/edit-password", isLogin, nocache, loadChangePassword);
 router.post("/profile/edit-password", isLogin, changePassword);
 
-router.get("/profile/edit-email", isLogin, loadChangeEmail);
+router.get("/profile/edit-email", isLogin, noCache, loadChangeEmail);
 router.post("/profile/edit-email", isLogin, changeEmail);
 
 router.get("/profile/verify-email-otp", isLogin, loadVerifyChangeEmailOtp);
@@ -120,5 +120,5 @@ router.patch("/address/edit/:id", isLogin, editAddress)
 router.delete("/address/delete/:id", isLogin, deleteAddress)
 router.patch("/address/default/:id", isLogin, setDefaultAddress)
 
-//router.get("/shop", loadShop)
+router.get("/shop", loadShop)
 export default router;

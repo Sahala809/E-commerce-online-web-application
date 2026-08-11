@@ -5,15 +5,16 @@ import User from "../../models/userModel.js";
 import { validateLogin } from "./validationService.js";
 
 export const loginService = async (req, res) => {
-    console.log("Login request:", req.body);
-    const error = validateLogin(req.body);
 
-    if (Object.keys(error).length > 0) {
+    const errors = validateLogin(req.body);
 
-        return res.render("user/auth/login", {
-            error,
+    if (Object.keys(errors).length > 0) {
+
+        return  {
+            success: false,
+            errors,
             formData: req.body
-        });
+        }
 
     }
 
@@ -21,42 +22,42 @@ export const loginService = async (req, res) => {
 
     const user = await User.findOne({
         email: email.trim().toLowerCase()
-    });
+    }).lean();
 
     console.log("User:", user);
 
     if (!user) {
-
-    return res.render("user/auth/login", {
-        error: {
-                general: "Invalid email or password."
-            },
+        req.session.errorMessage =  "Invalid email or password."
+        return {
+            success:false,
+            errors:{},
             formData: req.body
-        });
+        }
 
     }
 
     if (user.isBlocked) {
-
-    return res.render("user/auth/login", {
-            error: {
-                general: "Your account has been blocked."
-            },
+        req.session.errorMessage = "Your account has been blocked."
+        return {
+            success:false,
+            errors:{},
             formData: req.body
-        });
+        };
 
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    
     console.log("Password match:", isMatch);
-    if (!isMatch) {
 
-        return res.render("user/auth/login", {
-            error: {
-                general: "Invalid email or password."
-            },
+    if (!isMatch) {
+        req.session.errorMessage =  "Invalid email or password."
+
+        return {
+            success: false,
+            errors: {},
             formData: req.body
-        });
+        }
 
     }
 
@@ -64,5 +65,7 @@ export const loginService = async (req, res) => {
 
     await req.session.save();
 
-    return res.redirect("/user/home");
+    return {
+        success:true
+    }
 };

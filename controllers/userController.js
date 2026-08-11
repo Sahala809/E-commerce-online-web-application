@@ -40,6 +40,11 @@ import {
     setDefaultAddressService
 } from "../services/address/addressService.js";
 
+import {
+    loadShopService
+} from "../services/shop/shopService.js"
+
+
 export const loadHome = (req, res) => {
     
     res.render("user/home", {
@@ -58,7 +63,8 @@ export const loadSignup = (req, res) => {
 
     res.render("user/auth/signup",{
         formData:{},                 
-        error: {}
+        errors: {},
+        errorMessage: null
     });
 };
 
@@ -67,18 +73,30 @@ export const signup = async (req, res) => {
 
     try {
 
-         await signupService(req, res);
+        const result = await signupService(req, res);
 
-    } catch (err) {
+        if(!result.success){
 
-        console.log("SIGNUP ERROR: ",err);
+            return res.render("user/auth/signup", {
+                formData: req.body,
+                errors: result.errors,
+                errorMessage: null
+            })
+        }
+        
+        return res.redirect("/user/verify-otp")
+
+    } catch (error) {
+
+        console.log("SIGNUP ERROR: ",error);
+
+        const errorMessage = "Something went wrong. Please try again."
 
         return res.render("user/auth/signup",{
-            
-            error: {
-                general: "Something went wrong. Please try again."
-            },
-            formData: req.body
+        
+            formData: req.body,
+            errorMessage,
+            errors: {}
         })
     }
 
@@ -86,8 +104,9 @@ export const signup = async (req, res) => {
 export const loadVerifyOtp = (req, res) => {
 
     return res.render("user/auth/verifyOtp", {
-        error: null,
-        otpExpired: false
+        errorMessage: null,
+        otpExpired: false,
+        expiresAt: req.session.signupOtpExpires
     });
 };
 
@@ -95,14 +114,31 @@ export const verifyOtp = async (req, res) => {
 
     try {
 
-        await verifySignupOtpService(req, res);
+       const result = await verifySignupOtpService(req, res);
 
-    } catch (err) {
-        console.error("VERIFY OTP ERROR:", err);
+       const errorMessage = req.session.errorMessage || null
+       delete req.session.errorMessage
 
+       await req.session.save()
+
+       if(!result.success){
         return res.render("user/auth/verifyOtp", {
-            error: "Something went wrong. Please try again.",
-            otpExpired: false
+            errorMessage,
+            otpExpired: result.otpExpired || false,
+            expiresAt: req.session.signupOtpExpires
+        })
+       }
+
+       return res.redirect("/user/login")
+
+    } catch (error) {
+        console.error("VERIFY OTP ERROR:", error);
+
+        const errorMessage = "Something went wrong. Please try again."
+        return res.render("user/auth/verifyOtp", {
+            errorMessage,
+            otpExpired: false,
+            expiresAt: req.session.signupOtpExpires
         });
 
     }
@@ -113,35 +149,57 @@ export const resendOtp = async (req, res) => {
 
     try {
 
-        await resendSignupOtpService(req, res);
+        const result = await resendSignupOtpService(req, res);
 
-    } catch (err) {
+        const errorMessage = req.session.errorMessage || null
 
-        console.log(err);
+        delete req.session.errorMessage
+
+        await req.session.save()
+
+        if(!result.success){
+            return res.render("user/auth/verifyOtp", {
+                errorMessage,
+                otpExpired: false,
+                expiresAt: req.session.signupOtpExpires
+            })
+        }
 
         return res.render("user/auth/verifyOtp", {
-            error: "Something went wrong. Please try again.",
-            otpExpired: true
+            errorMessage: null,
+            otpExpired:false,
+            expiresAt: req.session.signupOtpExpires
+        })
+    } catch (error) {
+
+        console.log("RESEND OTP ERROR:", error);
+
+        errorMessage = "Something went wrong. Please try again.";
+        return res.render("user/auth/verifyOtp", {
+            errorMessage,
+            otpExpired: false,
+            expiresAt: req.session.signupOtpExpires
         });
 
     }
 
 };
 
-export const loadLogin = (req, res) => {
+export const loadLogin = async(req, res) => {
     if (req.session.user) {
         return res.redirect("/user/home");
     }
 
-    const successMessage = req.session.successMessage;
+    const successMessage = req.session.successMessage || null;
     delete req.session.successMessage;
 
+    await req.session.save()
+
     res.render("user/auth/login", {
-        error: null,
-        success:{
-            general:successMessage
-        },
-        formData: {}
+        errorMessage: null,
+        successMessage,
+        formData: {},
+        errors: {}
     });
 };
 
@@ -149,16 +207,33 @@ export const login = async (req, res) => {
 
     try {
 
-        await loginService(req, res)
+        const result = await loginService(req, res)
 
-    } catch (err) {
+        if(!result.success){
+            const errorMessage = req.session.errorMessage || null
 
-        console.log(err);
+            delete req.session.errorMessage
+
+            await req.session.save()
+
+            return res.render("user/auth/login", {
+                errors:result.errors,
+                errorMessage,
+                successMessage: null,
+                formData: req.body
+            })
+        }
+
+        return res.redirect("/user/home")
+
+    } catch (error) {
+
+        console.log("LOGIN ERROR", error);
 
         return res.render("user/auth/login", {
-            error: {
-                general: "Something went wrong."
-            },
+            error: {},
+            errorMessage: "Something went wrong. Please try again.",
+            successMessage: null,
             formData: req.body
         });
     }
@@ -685,3 +760,29 @@ export const setDefaultAddress = async (req, res) => {
     }
 
 };
+
+
+////// shop ///////
+
+
+
+export const loadShop = async (req,res) => {
+    try {
+        
+        //console.log("FILTERS:", req.query);
+        const result = await loadShopService()
+
+        res.render("user/shop/shop", {
+            activePage:"shop",
+            products: result.products,
+            categories: result.categories,
+            colors: result.colors
+        })
+    } catch (error) {
+        console.log("LOAD SHOP ERROR", error);
+        
+        req.session.errorMessage = "Something went wrong";
+
+        return res.redirect("/user/home");
+    }
+}

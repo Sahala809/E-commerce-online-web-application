@@ -1,71 +1,77 @@
-import { error } from "console";
+
 
 export const validateSignup = (data) => {
 
-    const { name, email, phone, password, confirmPassword } = data;
+    
+    const name = data.name?.trim();
+    const email = data.email?.trim().toLowerCase();
+    const phone = data.phone?.trim();
+    const password = data.password;
+    const confirmPassword = data.confirmPassword;
 
-    const error = {};
+    const errors = {};
 
     const nameRegex = /^[A-Za-z ]+$/;
-
-    if (!name || name.trim() === "") {
-        error.name = "Name is required.";
-    } else if (name.trim().length < 3) {
-        error.name = "Name must be at least 3 characters.";
-    } else if (!nameRegex.test(name)) {
-        error.name = "Name can contain only letters and spaces.";
-    }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email || email.trim() === "") {
-        error.email = "Email is required.";
-    } else if (!emailRegex.test(email.trim())) {
-        error.email = "Invalid email address.";
-    }
-
     const phoneRegex = /^[6-9]\d{9}$/;
-
-    if (!phone || phone.trim() === "") {
-        error.phone = "Phone number is required.";
-    } else if (!phoneRegex.test(phone.trim())) {
-        error.phone = "Invalid phone number.";
-    }
-
     const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
+    if (!name) {
+        errors.name = "Name is required.";
+    } else if (name.length < 3) {
+        errors.name = "Name must be at least 3 characters.";
+    } else if (!nameRegex.test(name)) {
+        errors.name = "Name can contain only letters and spaces.";
+    }
+
+    
+    if (!email) {
+        errors.email = "Email is required.";
+    } else if (!emailRegex.test(email)) {
+        errors.email = "Invalid email address.";
+    }
+
+   
+
+    if (!phone) {
+        errors.phone = "Phone number is required.";
+    } else if (!phoneRegex.test(phone)) {
+        errors.phone = "Invalid phone number.";
+    }
+
+    
     if (!password) {
-        error.password = "Password is required.";
+        errors.password = "Password is required.";
     } else if (!passwordRegex.test(password)) {
-        error.password =
+        errors.password =
             "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.";
     }
 
     if (!confirmPassword) {
-        error.confirmPassword = "Confirm password is required.";
+        errors.confirmPassword = "Confirm password is required.";
     } else if (password !== confirmPassword) {
-        error.confirmPassword = "Passwords do not match.";
+        errors.confirmPassword = "Passwords do not match.";
     }
 
-    return error;
+    return errors;
 };
 
 export const validateLogin = (data) => {
 
     const { email, password } = data;
 
-    const error = {};
+    const errors = {};
 
     if (!email || email.trim() === "") {
-        error.email = "Email is required.";
+        errors.email = "Email is required.";
     }
 
     if (!password) {
-        error.password = "Password is required.";
+        errors.password = "Password is required.";
     }
 
-    return error;
+    return errors;
 };
 
 export const validateForgotPassword = (data) => {

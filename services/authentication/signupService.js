@@ -10,15 +10,15 @@ import sendOtp from "../../utils/sendOtp.js";
 
 export const signupService = async (req, res) => {
 
-    const error = validateSignup(req.body);
+    const errors = validateSignup(req.body);
 
-    if (Object.keys(error).length > 0) {
+    if (Object.keys(errors).length > 0) {
 
-        return res.render("user/auth/signup", {
-            error,
+        return {
+            success:false,
+            errors,
             formData: req.body
-        });
-
+        }
     }
 
     const {
@@ -34,12 +34,14 @@ export const signupService = async (req, res) => {
     });
 
     if (existingEmail) {
-        return res.render("user/auth/signup", {
-            error: {
-                email: "Email already exists."
-            },
+        
+        errors.email = "Email already exists."
+
+        return {
+            success: false,
+            errors,
             formData: req.body
-        });
+        }
     }
 
     const existingPhone = await User.findOne({
@@ -47,12 +49,13 @@ export const signupService = async (req, res) => {
     });
 
     if (existingPhone) {
-        return res.render("user/auth/signup", {
-            error: {
-                phone: "Phone number already exists."
-            },
-            formData: req.body
-        });
+
+        errors.phone = "Phone number already exists."
+        return {
+            success: false,
+            errors,
+            formData:req.body
+        }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -61,8 +64,8 @@ export const signupService = async (req, res) => {
 
     req.session.signupData = {
         name,
-        email,
-        phone,
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
         password: hashedPassword,
         referralCode
     };
@@ -82,7 +85,9 @@ export const signupService = async (req, res) => {
 
     console.log("==========================\n");
 
-    return res.redirect("/user/verify-otp");
+    return {
+        success: true
+    }
 };
 
 export const verifySignupOtpService = async (req,res) => {
@@ -93,43 +98,53 @@ export const verifySignupOtpService = async (req,res) => {
     const savedOtp = req.session.signupOtp;
     const expires = req.session.signupOtpExpires;
 
+
     console.log("Entered OTP :", otp);
     console.log("Saved OTP   :", savedOtp);
     console.log("Expires At  :", new Date(expires));
     console.log("Current Time:", new Date());
 
     if (!signupData) {
-        return res.redirect("/user/signup");
+
+        req.session.errorMessage = "Signup session expired. Please sign up again."
+
+        return {
+            success:false
+        }
+        
     }
 
+
     if (!savedOtp) {
-        return res.render("user/auth/verifyOtp", {
+        req.session.errorMessage =   "OTP not found."
 
-            error: "OTP not found.",
-            otpExpired: true
-
-        });
+        return {
+            success: false
+        } 
     }
 
     if (Date.now() > expires) {
 
-        
+        req.session.errorMessage =  "OTP has expired."
+
         delete req.session.signupOtp;
         delete req.session.signupOtpExpires;
-
+        
         await req.session.save();
 
-        return res.render("user/auth/verifyOtp", {
-            error: "OTP has expired.",
+        return {
+            success: false,
             otpExpired: true
-        });
+        }
     }
 
     if (otp !== savedOtp) {
-        return res.render("user/auth/verifyOtp", {
-            error: "Invalid OTP.",
+
+        req.session.errorMessage ="OTP does not match."
+        return {
+            success: false,
             otpExpired: false
-        });
+        }
 
     }
 
@@ -147,10 +162,13 @@ export const verifySignupOtpService = async (req,res) => {
     delete req.session.signupOtp;
     delete req.session.signupOtpExpires;
     
+    req.session.successMessage = "Account created successfully.";
+
     await req.session.save();
     
-
-    return res.redirect("/user/login");
+    return {
+        success:true
+    }
 };
 
 
@@ -159,7 +177,12 @@ export const resendSignupOtpService = async (req,res) => {
     const signupData = req.session.signupData;
 
     if (!signupData) {
-        return res.redirect("/user/signup");
+        
+        req.session.errorMessage = "Signup session expired. Please sign up again."
+
+        return {
+            success:false
+        }
     }
 
     const otp = generateOtp();
@@ -175,9 +198,7 @@ export const resendSignupOtpService = async (req,res) => {
     console.log("SIGNUP RESEND OTP :", otp);
     console.log("==========================\n");
 
-    return res.render("user/auth/verifyOtp",{
-        error: null,
-        otpExpired: false,
-        
-    })
-};
+    return {
+        success: true
+    }
+}
