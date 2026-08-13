@@ -1,95 +1,441 @@
-.address-container{
-    width:90%;
-    max-width:900px;
-    margin:80px auto;
+
+/* =================================
+   ADDRESS CONTAINER
+================================= */
+
+.address-container {
+    width: 90%;
+    max-width: 1400px;
+
+    margin: 40px auto;
+
+    display: flex;
+
+    gap: 30px;
+
+    align-items: flex-start;
+
+    box-sizing: border-box;
 }
 
-.address-card{
-    background:#f5f5f5;
+
+.edit-address{
+    flex: 1;
+}
+
+
+/* =================================
+   EDIT ADDRESS CONTENT / CARD
+================================= */
+
+.address-card {
+    flex: 1;
+
+    min-width: 0;
+
+    max-width: 850px;
+
+    background: #fff;
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+
+    box-sizing: border-box;
+}
+
+
+/* =================================
+   CARD HEADER
+================================= */
+
+.card-header {
+    margin-bottom: 30px;
+}
+
+.card-header h2 {
+    margin: 0 0 8px;
+
+    font-size: 32px;
+
+    font-weight: 600;
+
+    color: #111;
+}
+
+.card-header p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =================================
+   FORM ROW
+================================= */
+
+.profile-form-card{
+    background:#fff;
+    border-radius:20px;
     padding:40px;
-    border-radius:12px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
 }
 
-.card-header h2{
-    font-size:34px;
-    margin-bottom:8px;
-    font-family:"Times New Roman",serif;
+.row {
+    display: flex;
+
+    gap: 20px;
+
+    width: 100%;
 }
 
-.card-header p{
-    color:#666;
-    margin-bottom:30px;
+
+/* =================================
+   FORM GROUP
+================================= */
+
+.form-group {
+    flex: 1;
+
+    min-width: 0;
+
+    margin-bottom: 25px;
 }
 
-.row{
-    display:flex;
-    gap:20px;
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #333;
+
+    font-size: 14px;
+
+    font-weight: 500;
 }
 
-.form-group{
-    flex:1;
-    margin-bottom:22px;
-}
 
-.form-group label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:500;
-}
+/* =================================
+   INPUT + SELECT
+================================= */
 
 .form-group input,
-.form-group select{
-    width:100%;
-    padding:12px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    outline:none;
+.form-group select {
+    width: 100%;
+
+    height: 52px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #ddd;
+
+    border-radius: 10px;
+
+    background: #fff;
+
+    color: #333;
+
+    font-size: 14px;
+
+    transition: .2s ease;
 }
+
+
+/* =================================
+   FOCUS
+================================= */
 
 .form-group input:focus,
-.form-group select:focus{
-    border-color:#000;
+.form-group select:focus {
+    outline: none;
+
+    border-color: #111;
+
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .04);
 }
 
-.checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin:20px 0;
+
+/* =================================
+   SELECT
+================================= */
+
+.form-group select {
+    cursor: pointer;
+
+    appearance: auto;
 }
 
-.button-group{
-    display:flex;
-    gap:15px;
-    margin-top:30px;
+
+/* =================================
+   VALIDATION ERROR
+================================= */
+
+.text-danger {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #c62828;
+
+    font-size: 12px;
+
+    line-height: 1.4;
 }
 
-.save-btn{
-    background:#000;
-    color:#fff;
-    border:none;
-    padding:12px 35px;
-    border-radius:6px;
-    cursor:pointer;
+
+/* =================================
+   DEFAULT ADDRESS
+================================= */
+
+.checkbox {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 5px;
+
+    margin-bottom: 25px;
 }
 
-.save-btn:hover{
-    background:#222;
+.checkbox input {
+    width: 17px;
+
+    height: 17px;
+
+    margin: 0;
+
+    cursor: pointer;
+
+    accent-color: #111;
 }
 
-.cancel-btn{
-    text-decoration:none;
-    border:1px solid #ccc;
-    color:#444;
-    padding:12px 35px;
-    border-radius:6px;
+.checkbox label {
+    margin: 0;
+
+    color: #444;
+
+    font-size: 14px;
+
+    cursor: pointer;
 }
 
-.cancel-btn:hover{
-    background:#eee;
+
+/* =================================
+   BUTTON GROUP
+================================= */
+
+.button-group {
+    display: flex;
+
+    gap: 15px;
+
+    margin-top: 30px;
 }
 
-.text-danger{
-    color:red;
-    font-size:13px;
+
+/* =================================
+   SAVE BUTTON
+================================= */
+
+.save-btn {
+    height: 50px;
+
+    padding: 0 28px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #111;
+
+    color: #fff;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    transition: .2s ease;
+}
+
+.save-btn:hover {
+    background: #333;
+}
+
+
+/* =================================
+   CANCEL BUTTON
+================================= */
+
+.cancel-btn {
+    height: 50px;
+
+    padding: 0 28px;
+
+    border: 1px solid #111;
+
+    border-radius: 10px;
+
+    background: #fff;
+
+    color: #111;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    transition: .2s ease;
+
+    box-sizing: border-box;
+}
+
+.cancel-btn:hover {
+    background: #111;
+
+    color: #fff;
+}
+
+
+/* =================================
+   PROFILE BOTTOM
+================================= */
+
+.profile-bottom {
+    width: 90%;
+
+    margin: 25px auto;
+
+    text-align: right;
+
+    color: #999;
+
+    font-size: 13px;
+}
+
+
+/* =================================
+   TABLET
+================================= */
+
+@media (max-width: 992px) {
+
+    .address-container {
+        width: 92%;
+
+        gap: 20px;
+    }
+
+    .address-card {
+        max-width: 100%;
+
+        padding: 30px;
+    }
+
+}
+
+
+/* =================================
+   MOBILE
+================================= */
+
+@media (max-width: 768px) {
+
+    .address-container {
+        width: 100%;
+
+        margin: 20px auto;
+
+        padding: 0 15px;
+
+        flex-direction: column;
+
+        gap: 20px;
+    }
+
+    .address-card {
+        width: 100%;
+
+        max-width: 100%;
+
+        padding: 25px 20px;
+
+        border-radius: 15px;
+    }
+
+    .card-header h2 {
+        font-size: 27px;
+    }
+
+    .row {
+        flex-direction: column;
+
+        gap: 0;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .save-btn,
+    .cancel-btn {
+        width: 100%;
+    }
+
+}
+
+
+/* =================================
+   SMALL MOBILE
+================================= */
+
+@media (max-width: 480px) {
+
+    .address-container {
+        padding: 0 12px;
+    }
+
+    .address-card {
+        padding: 20px 15px;
+    }
+
+    .card-header h2 {
+        font-size: 24px;
+    }
+
+    .card-header p {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select {
+        height: 48px;
+
+        padding: 0 14px;
+    }
+
 }

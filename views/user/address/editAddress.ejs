@@ -2,10 +2,13 @@
 <%- include("../partials/navbar") %>
 
 <link rel="stylesheet" href="/css/address/editAddress.css">
+<link rel="stylesheet" href="/css/profile/sidebar.css">
 
 <div class="address-container">
 
-    <div class="address-card">
+     <%- include("../partials/profileSidebar") %>
+
+    <section class="edit-address">
 
         <div class="card-header">
 
@@ -16,6 +19,8 @@
             </p>
 
         </div>
+
+        <div class="profile-form-card">
 
         <form action="/user/address/edit/<%= address._id %>?_method=PATCH" method="POST" novalidate>
 
@@ -269,7 +274,9 @@
 
         </form>
 
-    </div>
+        </div>
+
+    </section>
 
 </div>
 

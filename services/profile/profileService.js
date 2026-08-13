@@ -22,14 +22,15 @@ export const editProfileService = async (req, res) => {
 
     const { name, phone } = req.body;
 
+    const user = await User.findById(req.session.user);
+
     const existingPhone = await User.findOne({ 
         phone,
-        _id: { $ne: req.session.user }
-    });
+        _id: { $ne: user._id }
+    }).lean();
 
+    
     if (existingPhone) {
-
-        const user = await User.findById(req.session.user);
 
         return res.render("user/profile/myProfile", {
             user,
@@ -42,8 +43,6 @@ export const editProfileService = async (req, res) => {
         });
 
     }
-    
-    const user = await User.findById(req.session.user);
     
     user.name = name.trim();
     user.phone = phone.trim();

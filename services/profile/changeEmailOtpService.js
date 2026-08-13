@@ -7,11 +7,20 @@ import { validateChangeEmail } from "./validationService.js";
 
 export const changeEmailService = async (req, res) => {
 
+    const user = await User.findById(req.session.user);
+
+    if (!user) {
+        return res.redirect("/user/login");
+    }
+
+    
+    if (user.googleId) {
+        return res.redirect("/user/profile");
+    }
+
     const error = validateChangeEmail(req);
 
     if (Object.keys(error).length > 0) {
-
-        const user = await User.findById(req.session.user);
 
         return res.render("user/profile/changeEmail", {
             user,
@@ -25,10 +34,10 @@ export const changeEmailService = async (req, res) => {
 
     const { email } = req.body;
 
-    const user = await User.findById(req.session.user);
+    const newEmail = email.trim().toLowerCase()
 
     // Check if the new email is the same as the current email
-    if (user.email === email.trim().toLowerCase()) {
+    if (user.email === newEmail) {
 
         return res.render("user/profile/changeEmail", {
             user,
@@ -45,7 +54,7 @@ export const changeEmailService = async (req, res) => {
     // Check if the email is already registered
     const existingUser = await User.findOne({
         email: email.trim().toLowerCase()
-    });
+    }).lean();
 
     if (existingUser) {
 

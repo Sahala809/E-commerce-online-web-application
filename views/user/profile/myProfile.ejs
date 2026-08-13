@@ -77,11 +77,14 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
                             type="email"
                             value="<%= user.email %>"
                             readonly>
+                        <% if (!user.googleId) { %>
 
-                        <a href="/user/profile/edit-email" class="edit-email">
-                            <i class="bi bi-pencil-square"></i>
-                            Edit
-                        </a>
+                            <a href="/user/profile/edit-email" class="edit-email">
+                                <i class="bi bi-pencil-square"></i>
+                                Edit
+                            </a>
+
+                        <% } %>
 
                     </div>
 
@@ -121,15 +124,19 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
 
                     </button>
 
-                    <a
-                        href="/user/profile/edit-password"
-                        class="password-btn">
+                    <% if (!user.googleId) { %>
 
-                        <i class="bi bi-shield-lock"></i>
+                        <a
+                            href="/user/profile/edit-password"
+                            class="password-btn">
 
-                        Change Password
+                            <i class="bi bi-shield-lock"></i>
 
-                    </a>
+                            Change Password
+
+                        </a>
+
+                    <% } %>
 
                 </div>
 

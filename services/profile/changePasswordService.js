@@ -5,8 +5,19 @@ import { validateChangePassword } from "./validationService.js";
 
 export const changePasswordService = async (req, res) => {
 
+    const user = await User.findById(req.session.user);
+
+    if (!user) {
+        return res.redirect("/user/login");
+    }
+
+    // Google users cannot change password
+    if (user.googleId) {
+        return res.redirect("/user/profile");
+    }
+
     const error = validateChangePassword(req, res);
-console.log(req.body);
+
     if (Object.keys(error).length > 0) {
 
         return res.render("user/profile/changePassword", {
@@ -18,8 +29,6 @@ console.log(req.body);
 
     }
     const { currentPassword, newPassword } = req.body;
-
-    const user = await User.findById(req.session.user);
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 

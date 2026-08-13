@@ -2,12 +2,14 @@
 <%- include("../partials/navbar") %>
 
 <link rel="stylesheet" href="/css/address/addAddress.css">
-
+<link rel="stylesheet" href="/css/profile/sidebar.css">
 <div class="address-container">
 
-    <div class="address-card">
+    <%- include("../partials/profileSidebar") %>
 
-        <div class="card-header">
+    
+<section class="addAddress">
+        <div class="content-header">
 
             <h2>Add Address</h2>
 
@@ -17,6 +19,7 @@
 
         </div>
 
+       <div class="profile-form-card">
         <form action="/user/address/add" method="POST" novalidate>
 
             <!-- Row 1 -->
@@ -30,10 +33,11 @@
                     <input
                         type="text"
                         name="fullName"
+                        id="fullName"
                         value="<%= formData ? formData.fullName : '' %>">
 
                     <% if (error && error.fullName) { %>
-                        <small class="text-danger">
+                        <small class="text-danger" id="fullNameError">
                             <%= error.fullName %>
                         </small>
                     <% } %>
@@ -47,10 +51,11 @@
                     <input
                         type="text"
                         name="phone"
+                        id="phone"
                         value="<%= formData ? formData.phone : '' %>">
 
                     <% if (error && error.phone) { %>
-                        <small class="text-danger">
+                        <small class="text-danger" id="phoneError">
                             <%= error.phone %>
                         </small>
                     <% } %>
@@ -68,10 +73,11 @@
                 <input
                     type="text"
                     name="houseName"
+                    id="houseName"
                     value="<%= formData ? formData.houseName : '' %>">
 
                 <% if (error && error.houseName) { %>
-                    <small class="text-danger">
+                    <small class="text-danger" id="houseNameError">
                         <%= error.houseName %>
                     </small>
                 <% } %>
@@ -87,10 +93,11 @@
                 <input
                     type="text"
                     name="street"
+                    id="street"
                     value="<%= formData ? formData.street : '' %>">
 
                 <% if (error && error.street) { %>
-                    <small class="text-danger">
+                    <small class="text-danger" id="streetError">
                         <%= error.street %>
                     </small>
                 <% } %>
@@ -106,10 +113,11 @@
                 <input
                     type="text"
                     name="district"
+                    id="district"
                     value="<%= formData ? formData.district : '' %>">
 
                 <% if (error && error.district) { %>
-                    <small class="text-danger">
+                    <small class="text-danger" id="districtError">
                         <%= error.district %>
                     </small>
                 <% } %>
@@ -127,10 +135,11 @@
                     <input
                         type="text"
                         name="city"
+                        id="city"
                         value="<%= formData ? formData.city : '' %>">
 
                     <% if (error && error.city) { %>
-                        <small class="text-danger">
+                        <small class="text-danger" id="cityError">
                             <%= error.city %>
                         </small>
                     <% } %>
@@ -144,10 +153,11 @@
                     <input
                         type="text"
                         name="state"
+                        id="state"
                         value="<%= formData ? formData.state : '' %>">
 
                     <% if (error && error.state) { %>
-                        <small class="text-danger">
+                        <small class="text-danger" id="stateError">
                             <%= error.state %>
                         </small>
                     <% } %>
@@ -161,10 +171,11 @@
                     <input
                         type="text"
                         name="pincode"
+                        id="pincode"
                         value="<%= formData ? formData.pincode : '' %>">
 
                     <% if (error && error.pincode) { %>
-                        <small class="text-danger">
+                        <small class="text-danger" id="pincodeError">
                             <%= error.pincode %>
                         </small>
                     <% } %>
@@ -179,7 +190,7 @@
 
                 <label>Country</label>
 
-                <select name="country">
+                <select name="country" id="country">
 
                     <option value="">Select Country</option>
 
@@ -201,7 +212,7 @@
                 </select>
 
                 <% if (error && error.country) { %>
-                    <small class="text-danger">
+                    <small class="text-danger" id="countryError">
                         <%= error.country %>
                     </small>
                 <% } %>
@@ -249,8 +260,9 @@
 
         </form>
 
-    </div>
+        </div>
 
+    </section>
 </div>
 
 <div class="profile-bottom">
@@ -258,6 +270,60 @@
     CHRONIX • Terms & Conditions • Privacy Policy
 
 </div>
+
+<script>
+
+    const fields = [
+        "fullName",
+        "phone",
+        "houseName",
+        "street",
+        "district",
+        "city",
+        "state",
+        "pincode"
+    ];
+
+    fields.forEach(fieldName => {
+
+        const field = document.getElementById(fieldName);
+
+        if (!field) return;
+
+        field.addEventListener("input", function () {
+
+            const error = document.getElementById(
+                fieldName + "Error"
+            );
+
+            if (error) {
+                error.remove();
+            }
+
+        });
+
+    });
+
+
+    // Country select
+
+    const country = document.getElementById("country");
+
+    if (country) {
+
+        country.addEventListener("change", function () {
+
+            const error = document.getElementById("countryError");
+
+            if (error) {
+                error.remove();
+            }
+
+        });
+
+    }
+
+</script>
 
 </body>
 
