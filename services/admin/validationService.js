@@ -29,12 +29,14 @@ export const validateAddCategory = (data) => {
 
     const { categoryName, description } = data;
 
+    const name = categoryName?.trim();
+
     const categoryNameRegex = /^[A-Za-z ]+$/;
 
-    if (!categoryName || categoryName.trim() === "") {
-        errors.categoryName = "Category name is required";
-    } else if (!categoryNameRegex.test(categoryName.trim())) {
-        errors.categoryName = "Category name should contain only letters";
+    if (!name) {
+        errors.categoryName = "Name is required";
+    } else if (!categoryNameRegex.test(name)) {
+        errors.categoryName = "Name should contain only letters";
     }
 
     if (!description || description.trim() === "") {
@@ -55,7 +57,9 @@ export const validateAddProduct = (data) => {
         categoryId
     } = data
 
-    if(!productName || !productName.trim()){
+    const name = productName?.trim()
+
+    if(!name){
         errors.productName = "Product name is required";
     }
 

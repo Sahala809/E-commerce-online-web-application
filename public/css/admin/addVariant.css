@@ -1,252 +1,1081 @@
-/* ================= Content ================= */
+/* =========================================================
+   ADD VARIANT PAGE
+========================================================= */
 
-.content{
-    padding:30px;
-    background:#f5f6fa;
-    min-height:100vh;
+/* ---------- Main Content ---------- */
+
+.content {
+    flex: 1;
+    padding: 35px 45px 50px;
+    background: #f5f6fa;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
 }
 
-/* ================= Page Title ================= */
 
-.page-title{
-    margin-bottom:30px;
+/* =========================================================
+   PAGE TITLE
+========================================================= */
+
+.page-title {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto 28px;
 }
 
-.page-title h1{
-    font-size:34px;
-    color:#111827;
-    margin-bottom:5px;
+.page-title h1 {
+    margin: 0 0 7px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #111827;
 }
 
-.page-title p{
-    color:#6b7280;
-    font-size:15px;
+.page-title p {
+    margin: 0;
+    font-size: 15px;
+    color: #6b7280;
 }
 
-/* ================= Alert ================= */
-
-.alert{
-    border:none;
-    border-radius:8px;
-    margin-bottom:20px;
+.page-title strong {
+    color: #111827;
 }
 
-/* ================= Form Card ================= */
 
-.form-card{
-    background:#fff;
-    padding:35px;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
+/* =========================================================
+   ALERTS
+========================================================= */
+
+.alert {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto 20px;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
 }
 
-.form-card h3{
-    font-size:20px;
-    color:#111827;
-    margin-bottom:20px;
+
+/* =========================================================
+   FORM CARD
+========================================================= */
+
+.form-card {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+
+    background: #ffffff;
+    padding: 35px 40px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        0 8px 25px rgba(0, 0, 0, 0.04);
+
+    box-sizing: border-box;
 }
 
-/* ================= Labels ================= */
 
-.form-label{
-    font-weight:600;
-    color:#374151;
+/* =========================================================
+   FORM HEADINGS
+========================================================= */
+
+.form-card h3 {
+    margin: 0 0 22px;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    color: #111827;
 }
 
-/* ================= Inputs ================= */
 
-.form-control{
-    border-radius:8px;
-    border:1px solid #d1d5db;
-    padding:12px 15px;
-    transition:.3s;
+/* =========================================================
+   FORM LABEL
+========================================================= */
+
+.form-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #374151;
 }
 
-.form-control:focus{
-    border-color:#111827;
-    box-shadow:none;
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-control {
+    width: 100%;
+    height: 48px;
+
+    padding: 10px 14px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    font-size: 14px;
+    color: #111827;
+
+    box-sizing: border-box;
+
+    transition: border-color .2s ease,
+                box-shadow .2s ease;
 }
 
-/* ================= Textarea ================= */
+.form-control:focus {
+    border-color: #111827;
 
-textarea.form-control{
-    resize:none;
+    box-shadow:
+        0 0 0 3px rgba(17, 24, 39, 0.08);
+
+    outline: none;
 }
 
-/* ================= Bootstrap Switch ================= */
-
-.form-check-input{
-    width:45px;
-    height:24px;
-    cursor:pointer;
+.form-control::placeholder {
+    color: #9ca3af;
 }
 
-.form-check-input:focus{
-    box-shadow:none;
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+textarea.form-control {
+    height: 125px;
+
+    resize: vertical;
+
+    line-height: 1.5;
 }
 
-.form-check-label{
-    margin-left:8px;
-    font-weight:500;
+
+/* =========================================================
+   FORM SPACING
+========================================================= */
+
+.mb-3 {
+    margin-bottom: 22px !important;
 }
 
-/* ================= Image Upload ================= */
 
-.main-upload{
-    width:100%;
-    height:260px;
-    border:2px dashed #d1d5db;
-    border-radius:12px;
-    background:#fafafa;
+/* =========================================================
+   STATUS SWITCH
+========================================================= */
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+.form-check {
+    display: flex;
+    align-items: center;
 
-    transition:.3s;
+    gap: 10px;
+
+    margin-top: 5px;
 }
 
-.main-upload:hover{
-    border-color:#111827;
-    background:#f3f4f6;
+.form-check-input {
+    width: 42px;
+    height: 22px;
+
+    margin: 0;
+
+    cursor: pointer;
 }
 
-.main-upload input{
-    border:none;
-    background:transparent;
+.form-check-input:focus {
+    box-shadow: none;
 }
 
-/* Small Upload Boxes */
+.form-check-label {
+    margin: 0;
 
-.small-upload{
-    height:90px;
-    border:2px dashed #d1d5db;
-    border-radius:10px;
+    font-size: 14px;
+    font-weight: 500;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    background:#fafafa;
-
-    transition:.3s;
+    color: #374151;
 }
 
-.small-upload:hover{
-    border-color:#111827;
-    background:#f3f4f6;
+
+/* =========================================================
+   VALIDATION ERROR
+========================================================= */
+
+.text-danger {
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 13px;
+    line-height: 1.4;
+
+    color: #dc2626;
 }
 
-.small-upload input{
-    border:none;
-    background:transparent;
-    font-size:12px;
+
+/* =========================================================
+   IMAGE UPLOAD AREA
+========================================================= */
+
+.image-upload-area {
+    width: 100%;
+    height: 280px;
+
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+
+    background: #fafafa;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
 }
 
-/* ================= Buttons ================= */
-
-.btn-primary{
-    background:#111827;
-    border:none;
-    padding:10px 30px;
+.image-upload-area:hover {
+    border-color: #111827;
+    background: #f7f7f7;
 }
 
-.btn-primary:hover{
-    background:#1f2937;
+
+/* Cloud Icon */
+
+.upload-icon {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 50%;
+
+    background: #f0f1f3;
 }
 
-.btn-success{
-    padding:10px 30px;
+.upload-icon i {
+    font-size: 30px;
+    color: #111827;
 }
 
-.btn-outline-primary{
-    padding:10px 30px;
+
+/* Upload Heading */
+
+.image-upload-area h4 {
+    margin: 0 0 7px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #111827;
 }
 
-/* ================= Table ================= */
 
-.table-card{
-    margin-top:40px;
-    background:#fff;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
+/* Upload Description */
+
+.image-upload-area p {
+    margin: 0 0 18px;
+
+    font-size: 13px;
+
+    color: #6b7280;
 }
 
-.table-card h3{
-    color:#111827;
-    margin-bottom:20px;
+
+/* =========================================================
+   BROWSE BUTTON
+========================================================= */
+
+.browse-btn {
+    padding: 10px 22px;
+
+    border: 1px solid #111827;
+    border-radius: 7px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: .2s ease;
 }
 
-.table{
-    margin-bottom:0;
+.browse-btn:hover {
+    background: #323232;
+    border-color: #323232;
 }
 
-.table thead th{
-    background:#f9fafb;
-    color:#374151;
-    font-weight:600;
-    border-bottom:1px solid #e5e7eb;
+
+/* =========================================================
+   THREE IMAGE PREVIEW BOXES
+========================================================= */
+
+.image-preview-container {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 12px;
+
+    margin-top: 15px;
 }
 
-.table tbody td{
-    vertical-align:middle;
+
+/* Individual box */
+
+.small-upload {
+    position: relative;
+
+    width: 100%;
+    height: 105px;
+
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+
+    background: #fafafa;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease;
 }
 
-.table tbody tr:hover{
-    background:#f9fafb;
+.small-upload:hover {
+    border-color: #111827;
+    background: #f5f5f5;
 }
 
-/* ================= Status ================= */
 
-.badge{
-    font-size:13px;
-    padding:7px 12px;
+/* Plus */
+
+.small-upload .plus {
+    font-size: 30px;
+    font-weight: 300;
+
+    color: #9ca3af;
+
+    line-height: 1;
 }
 
-/* ================= Validation ================= */
 
-.text-danger{
-    display:block;
-    margin-top:6px;
-    font-size:13px;
+/* Preview Image */
+
+.small-upload img {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: none;
 }
 
-/* ================= Responsive ================= */
 
-@media(max-width:992px){
+/* Hide file input */
 
-    .form-card{
-        padding:25px;
+.small-upload input[type="file"] {
+    display: none;
+}
+
+
+/* =========================================================
+   FORM BUTTONS
+========================================================= */
+
+.text-end {
+    text-align: right;
+}
+
+.mt-4 {
+    margin-top: 25px !important;
+}
+
+.btn {
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    padding: 10px 25px;
+
+    transition: .2s ease;
+}
+
+
+/* Save Variant */
+
+.btn-primary {
+    background: #111827;
+    border: 1px solid #111827;
+
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #323232;
+    border-color: #323232;
+}
+
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.table-card {
+    width: 100%;
+    max-width: 1150px;
+
+    margin: 35px auto 0;
+
+    background: #ffffff;
+
+    padding: 28px 30px;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        0 8px 25px rgba(0, 0, 0, 0.04);
+
+    box-sizing: border-box;
+}
+
+.table-card h3 {
+    margin: 0 0 20px;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table {
+    width: 100%;
+
+    margin-bottom: 0;
+
+    border-collapse: collapse;
+}
+
+.table thead th {
+    padding: 14px 12px;
+
+    background: #f8f9fa;
+
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 14px 12px;
+
+    vertical-align: middle;
+
+    color: #4b5563;
+
+    font-size: 14px;
+
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background: #fafafa;
+}
+
+
+/* =========================================================
+   VARIANT IMAGE IN TABLE
+========================================================= */
+
+.variant-image {
+    width: 60px;
+    height: 60px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    border: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+.badge {
+    padding: 6px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   BOTTOM BUTTONS
+========================================================= */
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-end {
+    justify-content: flex-end;
+}
+
+.gap-3 {
+    gap: 12px;
+}
+
+.mt-5 {
+    margin-top: 30px !important;
+}
+
+.btn-outline-primary {
+    background: #ffffff;
+
+    border: 1px solid #111827;
+
+    color: #111827;
+}
+
+.btn-outline-primary:hover {
+    background: #111827;
+
+    color: #ffffff;
+}
+
+.btn-success {
+    background: #198754;
+
+    border: 1px solid #198754;
+
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background: #157347;
+
+    border-color: #157347;
+}
+
+
+/* =========================================================
+   BOOTSTRAP ROW FIX
+========================================================= */
+
+.form-card .row {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.form-card .col-lg-7,
+.form-card .col-lg-5 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+/* =====================================================
+   EDIT VARIANT - IMAGE SECTION
+===================================================== */
+
+.image-help {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   THREE IMAGE SLOTS
+===================================================== */
+
+.variant-image-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   EACH IMAGE SLOT
+===================================================== */
+
+.variant-image-slot {
+    position: relative;
+
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    background: #f9fafb;
+}
+
+
+/* =====================================================
+   IMAGE
+===================================================== */
+
+.variant-preview {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+
+/* =====================================================
+   EMPTY IMAGE SLOT
+===================================================== */
+
+.empty-image-slot {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    background: #fafafa;
+
+    transition: .2s;
+}
+
+
+.empty-image-slot:hover {
+    background: #f3f4f6;
+    border-color: #111827;
+}
+
+
+/* =====================================================
+   PLUS BUTTON
+===================================================== */
+
+.empty-image-slot .plus {
+    font-size: 32px;
+    font-weight: 300;
+    color: #6b7280;
+
+    line-height: 1;
+}
+
+
+/* =====================================================
+   REMOVE IMAGE BUTTON
+===================================================== */
+
+.remove-image {
+    position: absolute;
+
+    top: 7px;
+    right: 7px;
+
+    width: 29px;
+    height: 29px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #dc2626;
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    z-index: 10;
+
+    font-size: 15px;
+
+    transition: .2s;
+}
+
+
+.remove-image:hover {
+    background: #b91c1c;
+    transform: scale(1.05);
+}
+
+
+/* =====================================================
+   UPLOAD AREA
+===================================================== */
+
+.edit-upload-area {
+
+    width: 100%;
+
+    min-height: 180px;
+
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+
+    background: #fafafa;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    padding: 25px;
+
+    cursor: pointer;
+
+    transition: .3s;
+}
+
+
+.edit-upload-area:hover {
+    border-color: #111827;
+    background: #f5f5f5;
+}
+
+
+/* =====================================================
+   UPLOAD ICON
+===================================================== */
+
+.edit-upload-area .upload-icon {
+
+    font-size: 38px;
+
+    color: #6b7280;
+
+    margin-bottom: 10px;
+}
+
+
+/* =====================================================
+   UPLOAD HEADING
+===================================================== */
+
+.edit-upload-area h5 {
+
+    margin: 0 0 5px;
+
+    color: #111827;
+
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   UPLOAD DESCRIPTION
+===================================================== */
+
+.edit-upload-area p {
+
+    margin: 0 0 15px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   BROWSE BUTTON
+===================================================== */
+
+.browse-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 9px 20px;
+
+    border: none;
+
+    background: #111827;
+
+    color: #fff;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    transition: .3s;
+}
+
+
+.browse-btn:hover {
+
+    background: #374151;
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   TEXT ERROR
+===================================================== */
+
+.text-danger {
+
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   FORM CARD / RIGHT SIDE
+===================================================== */
+
+.form-card .col-lg-5 {
+
+    min-width: 0;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 992px) {
+
+    .variant-image-slots {
+
+        grid-template-columns: repeat(3, 1fr);
+
     }
 
-    .main-upload{
-        height:220px;
-        margin-top:30px;
+}
+
+
+@media (max-width: 576px) {
+
+    .variant-image-slots {
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 7px;
+
+    }
+
+    .remove-image {
+
+        width: 24px;
+        height: 24px;
+
+        top: 5px;
+        right: 5px;
+
+        font-size: 12px;
+    }
+
+    .empty-image-slot .plus {
+
+        font-size: 25px;
+
+    }
+
+    .edit-upload-area {
+
+        min-height: 160px;
+
+        padding: 20px;
+
     }
 
 }
 
-@media(max-width:768px){
 
-    .content{
-        padding:20px;
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .content {
+        padding: 30px;
     }
 
-    .page-title h1{
-        font-size:28px;
+    .form-card,
+    .page-title,
+    .table-card,
+    .alert {
+        max-width: 100%;
     }
 
-    .main-upload{
-        height:200px;
+}
+
+
+@media (max-width: 992px) {
+
+    .content {
+        padding: 25px;
     }
 
-    .d-flex.justify-content-end{
-        flex-direction:column;
+    .image-upload-area {
+        margin-top: 10px;
+
+        height: 240px;
     }
 
-    .btn{
-        width:100%;
+    .form-card {
+        padding: 30px;
+    }
+
+}
+
+
+@media (max-width: 768px) {
+
+    .content {
+        padding: 20px 15px;
+    }
+
+    .page-title h1 {
+        font-size: 27px;
+    }
+
+    .form-card {
+        padding: 22px;
+    }
+
+    .image-upload-area {
+        height: 220px;
+    }
+
+    .image-preview-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .small-upload {
+        height: 85px;
+    }
+
+    .table-card {
+        padding: 20px 15px;
+
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+
+    .text-end {
+        text-align: left;
+    }
+
+    .text-end .btn {
+        width: 100%;
+    }
+
+    .d-flex.justify-content-end {
+        flex-direction: column;
+    }
+
+    .d-flex.justify-content-end .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .content {
+        padding: 15px 10px;
+    }
+
+    .form-card {
+        padding: 18px;
+    }
+
+    .page-title h1 {
+        font-size: 24px;
+    }
+
+    .image-preview-container {
+        gap: 8px;
+    }
+
+    .small-upload {
+        height: 75px;
+    }
+
+    .small-upload .plus {
+        font-size: 24px;
     }
 
 }

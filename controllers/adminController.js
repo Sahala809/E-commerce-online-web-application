@@ -246,6 +246,8 @@ export const loadCategory = async (req,res) =>{
             currentPage:result.currentPage,
             totalPages: result.totalPages,
             search:result.search,
+            limit:result.limit,
+            skip:result.skip,
             successMessage,
             errorMessage
 
@@ -295,13 +297,21 @@ export const addCategory = async(req,res) => {
     try {
         const result = await addCategoryService(req, res)
 
+        const successMessage = req.session.successMessage || "";
+        const errorMessage = req.session.errorMessage || "";
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+        
         if(!result.success){
             return res.render("admin/category/addCategory", {
                 activePage: "category",
                 pageTitle : "Category",
                 message: result.message,
                 errors: result.errors,
-                formData: req.body
+                formData: req.body,
+                successMessage,
+                errorMessage
             })
         }
 
@@ -429,7 +439,9 @@ export const loadProduct = async (req,res) => {
             totalPages:result.totalPages,
             search,
             successMessage,
-            errorMessage
+            errorMessage,
+            limit,
+            skip: result.skip
           })
         
     } catch (error) {
@@ -525,6 +537,11 @@ export const loadAddVariant = async (req,res) => {
 
         const { productId } = req.params
 
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+
+        const skip = (page - 1) * limit;
+
         const product = await Product.findById(productId)
             .populate("categoryId")
             
@@ -550,7 +567,10 @@ export const loadAddVariant = async (req,res) => {
             errors: {},
             formData: {},
             successMessage,
-            errorMessage
+            errorMessage,
+            skip,
+            page,
+            limit
         })
     } catch (error) {
 
@@ -568,6 +588,12 @@ export const addVariant = async (req, res) => {
 
         const { productId } =req.params
 
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+
+        const skip = (page - 1) * limit;
+
         if(!result.success){
             const product = await Product.findById(productId)
             const variants = await Variant.find({ productId })
@@ -580,7 +606,10 @@ export const addVariant = async (req, res) => {
                 errors: result.errors,
                 formData: req.body,
                 successMessage: "",
-                errorMessage: ""
+                errorMessage: "",
+                skip,
+                page,
+                limit
             });
         }
 
@@ -601,9 +630,9 @@ export const loadEditProduct = async (req,res) => {
     try {
         
         const  productId  = req.params.id
-console.log("Product ID:", req.params.id);
+
         const product = await Product.findById(productId)
-console.log(product);
+
         if(!product){
             req.session.errorMessage = "Product not found.";
             return res.redirect("/admin/products");
@@ -646,7 +675,7 @@ export const editProduct = async (req,res) => {
                 pageTitle: "Product",
                 product: result.product,
                 categories: result.categories,
-                brands: result.brands,
+                brands: [],
                 errors: result.errors,
                 formData: req.body,
                 successMessage: "",

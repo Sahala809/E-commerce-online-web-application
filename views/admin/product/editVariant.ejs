@@ -148,51 +148,83 @@
 
                         </div>
 
-                        <!-- Right Side -->
-
+                                                <!-- Right Side -->
                         <div class="col-lg-5">
 
-                            <h3 class="mb-4">Current Images</h3>
+                            <h3 class="mb-4">Variant Images</h3>
 
-                            <div class="row mb-4">
+                            <p class="image-help">
+                                You can add up to 3 images for this variant.
+                            </p>
 
-                                <% variant.images.forEach(image => { %>
+                            <!-- Three image slots -->
+                            <div class="variant-image-slots">
 
-                                    <div class="col-6 mb-3">
+                                <% for(let i = 0; i < 3; i++) { %>
 
-                                        <img
-                                            src="/uploads/variants/<%= image %>"
-                                            class="img-fluid rounded border">
+                                    <div class="variant-image-slot"
+                                        id="slot<%= i %>">
+
+                                        <% if(variant.images && variant.images[i]) { %>
+
+                                            <!-- Existing image -->
+
+                                            <img
+                                                src="/uploads/variants/<%= variant.images[i] %>"
+                                                class="variant-preview"
+                                                id="preview<%= i %>">
+
+                                            <!-- Remove button -->
+
+                                            <button
+                                                type="button"
+                                                class="remove-image"
+                                                onclick="removeExistingImage('<%= variant.images[i] %>', <%= i %>)">
+
+                                                <i class="bi bi-x"></i>
+
+                                            </button>
+
+                                        <% } else { %>
+
+                                            <!-- Empty slot -->
+
+                                            <label class="empty-image-slot">
+
+                                                <span class="plus">+</span>
+
+                                                <input
+                                                    type="file"
+                                                    class="slot-input"
+                                                    data-slot="<%= i %>"
+                                                    accept="image/png,image/jpeg,image/jpg"
+                                                    hidden>
+
+                                            </label>
+
+                                        <% } %>
 
                                     </div>
 
-                                <% }) %>
+                                <% } %>
 
                             </div>
 
-                            <label class="form-label">
 
-                                Replace Images (Optional)
+                            <!-- Hidden input for removed images -->
 
-                            </label>
+                            <div id="removedImagesContainer"></div>
 
-                            <div class="main-upload mb-3">
 
-                                <input
-                                    type="file"
-                                    name="images"
-                                    class="form-control"
-                                    accept="image/*"
-                                    multiple>
+                            <!-- Hidden files that will finally be submitted -->
 
-                            </div>
+                            <div id="newFilesContainer"></div>
+
 
                             <% if(errors?.images){ %>
 
                                 <small class="text-danger">
-
                                     <%= errors.images %>
-
                                 </small>
 
                             <% } %>
@@ -232,7 +264,233 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* =====================================================
+       REMOVE EXISTING IMAGE
+    ===================================================== */
+
+    window.removeExistingImage = function (imageName, index) {
+
+        const slot =
+            document.getElementById(`slot${index}`);
+
+        if (!slot) return;
+
+
+        /* Tell backend to remove old image */
+
+        const removedInput =
+            document.createElement("input");
+
+        removedInput.type = "hidden";
+        removedInput.name = "removedImages[]";
+        removedInput.value = imageName;
+
+        document
+            .getElementById("removedImagesContainer")
+            .appendChild(removedInput);
+
+
+        /* Turn the same slot into + */
+
+        slot.innerHTML = `
+
+            <label class="empty-image-slot">
+
+                <span class="plus">+</span>
+
+                <input
+                    type="file"
+                    class="slot-input"
+                    data-slot="${index}"
+                    accept="image/png,image/jpeg,image/jpg"
+                    hidden>
+
+            </label>
+
+        `;
+
+
+        /* Add change event to new input */
+
+        const input =
+            slot.querySelector(".slot-input");
+
+        input.addEventListener(
+            "change",
+            handleImageSelect
+        );
+
+    };
+
+
+    /* =====================================================
+       SELECT NEW IMAGE
+    ===================================================== */
+
+    window.handleImageSelect = function () {
+
+        const input = this;
+
+        const file = input.files[0];
+
+        if (!file) return;
+
+
+        const slotNumber =
+            input.dataset.slot;
+
+        const slot =
+            document.getElementById(
+                `slot${slotNumber}`
+            );
+
+
+        /* Preview image */
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = function (e) {
+
+            slot.innerHTML = `
+
+                <img
+                    src="${e.target.result}"
+                    class="variant-preview">
+
+                <button
+                    type="button"
+                    class="remove-image"
+                    onclick="removeNewImage(${slotNumber})">
+
+                    <i class="bi bi-x"></i>
+
+                </button>
+
+            `;
+
+        };
+
+
+        reader.readAsDataURL(file);
+
+
+        /*
+         * IMPORTANT:
+         * Put selected file into a hidden file input
+         * so it is submitted with the form.
+         */
+
+        const dataTransfer =
+            new DataTransfer();
+
+        dataTransfer.items.add(file);
+
+
+        const fileInput =
+            document.createElement("input");
+
+        fileInput.type = "file";
+
+        fileInput.name = "images";
+
+        fileInput.hidden = true;
+
+        fileInput.id =
+            `newFile${slotNumber}`;
+
+        fileInput.files =
+            dataTransfer.files;
+
+
+        document
+            .getElementById("newFilesContainer")
+            .appendChild(fileInput);
+
+    };
+
+
+    /* =====================================================
+       REMOVE NEWLY SELECTED IMAGE
+    ===================================================== */
+
+    window.removeNewImage = function (index) {
+
+        const slot =
+            document.getElementById(
+                `slot${index}`
+            );
+
+
+        /* Remove selected file */
+
+        const fileInput =
+            document.getElementById(
+                `newFile${index}`
+            );
+
+        if (fileInput) {
+
+            fileInput.remove();
+
+        }
+
+
+        /* Make slot + again */
+
+        slot.innerHTML = `
+
+            <label class="empty-image-slot">
+
+                <span class="plus">+</span>
+
+                <input
+                    type="file"
+                    class="slot-input"
+                    data-slot="${index}"
+                    accept="image/png,image/jpeg,image/jpg"
+                    hidden>
+
+            </label>
+
+        `;
+
+
+        const input =
+            slot.querySelector(".slot-input");
+
+
+        input.addEventListener(
+            "change",
+            handleImageSelect
+        );
+
+    };
+
+
+    /* =====================================================
+       INITIALIZE EMPTY SLOTS
+    ===================================================== */
+
+    document
+        .querySelectorAll(".slot-input")
+        .forEach(input => {
+
+            input.addEventListener(
+                "change",
+                handleImageSelect
+            );
+
+        });
+
+});
+
+</script>
 </body>
 
 </html>

@@ -51,7 +51,9 @@ export const loadProductService = async (page, limit, search) => {
         totalProducts,
         activeProducts,
         inactiveProducts,
-        totalPages
+        totalPages,
+        skip,
+        limit
     }
 }
 
@@ -67,8 +69,13 @@ export const addProductService = async (req,res) => {
 
     const errors = validateAddProduct(req.body)
 
+    const name = productName.trim();
+
     const existingProduct = await Product.findOne({
-        productName: productName.trim()
+        productName: {
+            $regex: `^${name}$`,
+            $options: "i"
+        }
     })
 
     if (existingProduct) {
@@ -85,7 +92,7 @@ export const addProductService = async (req,res) => {
     
 
     const product = await Product.create({
-        productName: productName.trim(),
+        productName: name,
         description: description.trim(),
         brandId: brandId || null,
         categoryId,
@@ -157,9 +164,16 @@ export const editProductService = async(req, res) => {
 
     const errors = validateAddProduct(req.body)
 
+    const name = productName?.trim();
+
     const existingProduct = await Product.findOne({
-        productName: productName.trim(),
-        _id: {$ne: productId}
+        productName:  {
+                $regex: `^${name}$`,
+                $options: "i"
+            },
+        _id: {
+            $ne: productId
+        }
     })
 
     if (existingProduct) {
@@ -180,16 +194,21 @@ export const editProductService = async(req, res) => {
         };
     }
 
-    await Product.findByIdAndUpdate(productId, {
-        productName: productName.trim(),
+    const product = await Product.findByIdAndUpdate(productId, {
+        productName: name,
         categoryId,
         brandId: brandId || null,
         description: description.trim(),
-        isActive: !!isActive
+        isActive
+    },
+    {
+        new: true
+        
     });
 
     return {
-        success: true
+        success: true,
+        product
     };
 
 }

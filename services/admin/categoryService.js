@@ -33,7 +33,9 @@ export const loadCategoryService = async (req) => {
         categories,
         currentPage:page,
         totalPages,
-        search
+        search,
+        limit,
+        skip
     };
 
 };
@@ -54,8 +56,14 @@ export const addCategoryService = async(req, res) => {
 
     const { categoryName, description, isActive } = req.body;
     
+    const name = categoryName.trim();
+
     const existingCategory = await Category.findOne({
-        categoryName: categoryName.trim()
+        categoryName:{
+            $regex:`^${name}$`,
+            $options:"i"
+        }
+        
     })
 
     if(existingCategory){
@@ -64,12 +72,12 @@ export const addCategoryService = async(req, res) => {
             errors:{
                 categoryName: "Category already exists"
             },
-            message: ""
+            message: "Category already exists"
         }
     }
 
     await Category.create({
-        categoryName: categoryName.trim(),
+        categoryName: name,
         description: description.trim(),
         isActive: isActive == "on"
     })
