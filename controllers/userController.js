@@ -772,6 +772,8 @@ export const loadShop = async (req,res) => {
         //console.log("FILTERS:", req.query);
         const result = await loadShopService()
 
+        
+
         res.render("user/shop/shop", {
             activePage:"shop",
             products: result.products,

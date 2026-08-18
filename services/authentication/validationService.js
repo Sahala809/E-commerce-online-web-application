@@ -3,11 +3,13 @@
 export const validateSignup = (data) => {
 
     
-    const name = data.name?.trim();
-    const email = data.email?.trim().toLowerCase();
-    const phone = data.phone?.trim();
-    const password = data.password;
-    const confirmPassword = data.confirmPassword;
+    const {
+        name ,
+        email,
+        phone ,
+        password ,
+        confirmPassword 
+    } = data
 
     const errors = {};
 
@@ -17,11 +19,11 @@ export const validateSignup = (data) => {
     const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
-    if (!name) {
+    if (!name || name.trim() === "") {
         errors.name = "Name is required.";
     } else if (name.length < 3) {
         errors.name = "Name must be at least 3 characters.";
-    } else if (!nameRegex.test(name)) {
+    } else if (!nameRegex.test(name.trim())) {
         errors.name = "Name can contain only letters and spaces.";
     }
 

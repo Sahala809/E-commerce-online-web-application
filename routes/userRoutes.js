@@ -24,7 +24,7 @@ import {
 
 import { isLogin } from "../middleware/userAuth.js";
 import { noCache } from "../middleware/noCache.js";
-
+import { checkBlockedUser } from "../middleware/checkBlochedUser.js";
 import {
     loadProfile,
     editProfile,
@@ -54,8 +54,6 @@ import {
 const router = express.Router();
 
 
-router.get("/home",isLogin, noCache, loadHome)
-router.get("/", loadHome);
 
 router.get(
     "/auth/google",
@@ -79,6 +77,12 @@ router.post("/signup", signup);
 
 router.get("/login" , noCache, loadLogin)
 router.post("/login", noCache, login);
+
+
+router.get("/home",isLogin, noCache, loadHome)
+router.get("/", loadHome);
+
+
 
 router.get("/logout" , logout)
 

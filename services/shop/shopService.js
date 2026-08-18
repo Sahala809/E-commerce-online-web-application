@@ -35,8 +35,9 @@ export const loadShopService = async (filters) => {
     }).lean()
 
     const variants = await Variant.find({
-        isActive: true
-    }).lean()
+        isActive: true,
+        stock: { $gt: 0}
+    })
 
 
     const shopProducts = products.map(product => {
@@ -64,3 +65,4 @@ export const loadShopService = async (filters) => {
         colors: normalizedColors
     }
 }
+

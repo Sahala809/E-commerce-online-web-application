@@ -605,6 +605,7 @@ export const addVariant = async (req, res) => {
                 variants,
                 errors: result.errors,
                 formData: req.body,
+                uploadedImages: result.uploadedImages || [],
                 successMessage: "",
                 errorMessage: "",
                 skip,
@@ -678,6 +679,7 @@ export const editProduct = async (req,res) => {
                 brands: [],
                 errors: result.errors,
                 formData: req.body,
+                uploadedImages: result.uploadedImages || [],
                 successMessage: "",
                 errorMessage: ""
 

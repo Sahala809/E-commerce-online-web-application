@@ -125,7 +125,8 @@ export const addVariantService = async (req,res) => {
     if (Object.keys(errors).length > 0) {
         return {
             success: false,
-            errors
+            errors,
+            uploadedImages: req.files || []
         };
     }
 
