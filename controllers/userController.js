@@ -41,8 +41,13 @@ import {
 } from "../services/address/addressService.js";
 
 import {
-    loadShopService
+    loadShopService,
 } from "../services/shop/shopService.js"
+
+import {
+    loadProductDetailService
+} from "../services/shop/productDetailService.js"
+import Variant from "../models/variantModel.js";
 
 
 export const loadHome = (req, res) => {
@@ -770,15 +775,20 @@ export const loadShop = async (req,res) => {
     try {
         
         //console.log("FILTERS:", req.query);
-        const result = await loadShopService()
+        const result = await loadShopService(req.query)
 
         
 
-        res.render("user/shop/shop", {
+        res.render("user/product/shop", {
             activePage:"shop",
             products: result.products,
             categories: result.categories,
-            colors: result.colors
+            colors: result.colors,
+
+            totalPages: result.totalPages,
+            currentPage:result.currentPage,
+            totalProducts: result.totalProducts
+            
         })
     } catch (error) {
         console.log("LOAD SHOP ERROR", error);
@@ -787,4 +797,35 @@ export const loadShop = async (req,res) => {
 
         return res.redirect("/user/home");
     }
+
 }
+
+
+
+export const loadProductDetail = async (req, res) => {
+    try {
+
+        const productId = req.params.id
+
+        const result = await loadProductDetailService(productId)
+
+        if(!result || !result.product){
+            req.session.errorMessage = "Product not found";
+            return res.redirect("/user/shop")
+        }
+
+        res.render("user/product/productDetail", {
+            activePage:"shop",
+            product: result.product,
+            variants: result.variants || []
+        })
+    } catch (error) {
+
+        console.log("LOAD PRODUCT DETAIL ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong";
+
+        return res.redirect("/user/shop");
+        
+    }
+};

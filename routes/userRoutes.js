@@ -48,7 +48,8 @@ import {
 } from "../controllers/userController.js"
 
 import {
-    loadShop
+    loadShop,
+    loadProductDetail
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -125,4 +126,6 @@ router.delete("/address/delete/:id", isLogin, deleteAddress)
 router.patch("/address/default/:id", isLogin, setDefaultAddress)
 
 router.get("/shop", loadShop)
+router.get("/product/:id", loadProductDetail);
+
 export default router;

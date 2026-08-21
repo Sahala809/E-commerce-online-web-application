@@ -93,7 +93,7 @@
                                     name="price"
                                     id="price"
                                     class="form-control"
-                                    value="<%= formData?.price || variant.price %>">
+                                    value="₹<%= formData?.price || variant.price %>">
 
                                 <% if(errors?.price){ %>
                                     <small class="text-danger" 
@@ -113,7 +113,7 @@
                                     name="offerPrice"
                                     id="offerPrice"
                                     class="form-control"
-                                    value="<%= formData?.offerPrice || variant.offerPrice %>">
+                                    value="₹<%= formData?.offerPrice || variant.offerPrice %>">
 
 
                                     <% if(errors?.offerPrice){ %>

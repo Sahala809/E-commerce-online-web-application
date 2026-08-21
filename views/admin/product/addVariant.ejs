@@ -38,6 +38,19 @@
                     method="POST"
                     enctype="multipart/form-data">
 
+                    <% if (typeof uploadedImages !== "undefined" && uploadedImages.length > 0) { %>
+
+                        <% uploadedImages.forEach(image => { %>
+
+                            <input
+                                type="hidden"
+                                name="existingImages"
+                                value="<%= image %>">
+
+                        <% }) %>
+
+                    <% } %>
+
                     <div class="row">
 
                         <!-- Left Side -->
@@ -183,11 +196,29 @@
     <!-- IMAGE 1 -->
     <div class="small-upload" id="box1">
 
-        <span class="plus" id="plus1">+</span>
+        <span
+            class="plus"
+            id="plus1"
+            <% if (uploadedImages && uploadedImages[0]) { %>
+                style="display:none;"
+            <% } %>
+        >
+            +
+        </span>
 
         <img id="preview1" alt="Image 1">
+        <% if (uploadedImages && uploadedImages[0]) { %>
+            src="/uploads/variants/<%= uploadedImages[0] %>"
+            style="display:block;"
+        <% } %>
 
-        <div class="image-actions" id="actions1" style="display:none;">
+        <div 
+            class="image-actions" 
+            id="actions1" 
+            <% if (!(uploadedImages && uploadedImages[0])) { %>
+                style="display:none;"
+            <% } %>
+        >
 
             <button type="button" class="edit-image" data-box="box1">
                 ✎
@@ -205,11 +236,32 @@
     <!-- IMAGE 2 -->
     <div class="small-upload" id="box2">
 
-        <span class="plus" id="plus2">+</span>
+        <span
+            class="plus"
+            id="plus2"
+            <% if (uploadedImages && uploadedImages[1]) { %>
+                style="display:none;"
+            <% } %>
+        >
+            +
+        </span>
 
-        <img id="preview2" alt="Image 2">
+        <img 
+            id="preview2" 
+            alt="Image 2"
+            <% if (uploadedImages && uploadedImages[1]) { %>
+                src="/uploads/variants/<%= uploadedImages[1] %>"
+                style="display:block;"
+            <% } %>
+        >
 
-        <div class="image-actions" id="actions2" style="display:none;">
+        <div 
+            class="image-actions" 
+            id="actions2" 
+            <% if (!(uploadedImages && uploadedImages[1])) { %>
+                style="display:none;"
+            <% } %>
+        >
 
             <button type="button" class="edit-image" data-box="box2">
                 ✎
@@ -227,11 +279,33 @@
     <!-- IMAGE 3 -->
     <div class="small-upload" id="box3">
 
-        <span class="plus" id="plus3">+</span>
+        <span
+            class="plus"
+            id="plus3"
+            <% if (uploadedImages && uploadedImages[2]) { %>
+                style="display:none;"
+            <% } %>
+        >
+            +
+        </span>
 
-        <img id="preview3" alt="Image 3">
 
-        <div class="image-actions" id="actions3" style="display:none;">
+        <img
+            id="preview3"
+            alt="Image 3"
+            <% if (uploadedImages && uploadedImages[2]) { %>
+                src="/uploads/variants/<%= uploadedImages[2] %>"
+                style="display:block;"
+            <% } %>
+        >
+
+        <div
+            class="image-actions"
+            id="actions3"
+            <% if (!(uploadedImages && uploadedImages[2])) { %>
+                style="display:none;"
+            <% } %>
+        >
 
             <button type="button" class="edit-image" data-box="box3">
                 ✎
@@ -376,9 +450,9 @@
 
                             <td><%= variant.stock %></td>
 
-                            <td>£<%= variant.price %></td>
+                            <td>₹<%= variant.price %></td>
 
-                            <td>£<%= variant.offerPrice %></td>
+                            <td>₹<%= variant.offerPrice %></td>
 
                             <td>
 
@@ -460,6 +534,34 @@
                     </tbody>
 
                 </table>
+
+                <!-- Variant Pagination -->
+
+<div class="pagination">
+
+    <% if (page > 1) { %>
+
+        <a href="/admin/products/<%= product._id %>/variants?page=<%= page - 1 %>">
+            Previous
+        </a>
+
+    <% } %>
+
+
+    <span>
+        Page <%= page %> of <%= totalPages %>
+    </span>
+
+
+    <% if (page < totalPages) { %>
+
+        <a href="/admin/products/<%= product._id %>/variants?page=<%= page + 1 %>">
+            Next
+        </a>
+
+    <% } %>
+
+</div>
 
             </div>
 

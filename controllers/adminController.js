@@ -552,7 +552,13 @@ export const loadAddVariant = async (req,res) => {
         }
 
         const variants = await Variant.find({productId})
-        
+                                .sort({createdAt:-1})
+                                .skip(skip)
+                                .limit(limit)
+         
+        const totalVariants = await Variant.countDocuments({ productId });
+        const totalPages = Math.ceil(totalVariants / limit);
+
         const successMessage = req.session.successMessage || ""
         const errorMessage = req.session.errorMessage || ""
 
@@ -566,11 +572,13 @@ export const loadAddVariant = async (req,res) => {
             variants,
             errors: {},
             formData: {},
+            uploadedImages: [],
             successMessage,
             errorMessage,
-            skip,
             page,
-            limit
+            limit,
+            skip,
+            totalPages
         })
     } catch (error) {
 
@@ -597,6 +605,31 @@ export const addVariant = async (req, res) => {
         if(!result.success){
             const product = await Product.findById(productId)
             const variants = await Variant.find({ productId })
+                                    .sort({ createAt: -1})
+                                    .skip(skip)
+                                    .limit(limit)
+                                    .lean()
+            const totalVariants = await Variant.countDocuments({
+                productId
+            });  
+
+            const totalPages = Math.ceil(
+                totalVariants / limit
+            );
+
+            const newUploadedImages =
+                (result.uploadedImages || []).map(
+                    file => file.filename
+                );
+
+            const oldUploadedImages =
+                result.existingImages || [];
+
+
+            const uploadedImages = [
+                ...oldUploadedImages,
+                ...newUploadedImages
+            ].slice(0, 4);
 
             return res.render("admin/product/addVariant", {
                 activePage: "product",
@@ -605,12 +638,13 @@ export const addVariant = async (req, res) => {
                 variants,
                 errors: result.errors,
                 formData: req.body,
-                uploadedImages: result.uploadedImages || [],
+                uploadedImages: uploadedImages,
                 successMessage: "",
                 errorMessage: "",
                 skip,
                 page,
-                limit
+                limit,
+                totalPages
             });
         }
 

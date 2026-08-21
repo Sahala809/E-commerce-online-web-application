@@ -1,0 +1,449 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/product/shop.css">
+
+<main class="shop-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/user/home">Home</a>
+        <span>›</span>
+        <span>Shop</span>
+    </div>
+
+
+    <!-- Shop Heading -->
+    <div class="shop-title-section">
+        <h1 class="shop-title">SHOP</h1>
+
+        <p class="shop-subtitle">
+            Find the perfect watch for every moment
+        </p>
+    </div>
+
+
+    <div class="shop-layout">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <aside class="shop-sidebar">
+
+            <div class="filter-heading">
+                <i class="bi bi-sliders"></i>
+                <span>Filters</span>
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="filter-section">
+
+                <div class="filter-title">
+                    <span>Category</span>
+                    <i class="bi bi-chevron-up"></i>
+                </div>
+
+                <% if (categories && categories.length > 0) { %>
+
+                    <% categories.forEach(category => { %>
+
+                        <label class="filter-option">
+
+                            <input
+                                type="checkbox"
+                                name="category"
+                                value="<%= category._id %>"
+                            >
+
+                            <span>
+                                <%= category.name %>
+                            </span>
+
+                        </label>
+
+                    <% }) %>
+
+                <% } else { %>
+
+                    <small class="text-muted">
+                        No categories available
+                    </small>
+
+                <% } %>
+
+            </div>
+
+
+            <!-- BRAND -->
+
+            <div class="filter-section">
+
+                <div class="filter-title">
+                    <span>Brand</span>
+                    <i class="bi bi-chevron-up"></i>
+                </div>
+
+                <small class="text-muted">
+                    No brands available
+                </small>
+
+            </div>
+
+
+            <!-- PRICE -->
+
+            <div class="filter-section">
+
+                <div class="filter-title">
+                    <span>Price</span>
+                    <i class="bi bi-chevron-up"></i>
+                </div>
+
+                <div class="price-values">
+
+                    <span>₹0</span>
+                    <span>₹50,000</span>
+
+                </div>
+
+                <input
+                    type="range"
+                    class="price-slider"
+                    min="0"
+                    max="50000"
+                    value="50000"
+                >
+
+            </div>
+
+
+            <!-- COLOR -->
+
+            <div class="filter-section">
+
+                <div class="filter-title">
+                    <span>Color</span>
+                    <i class="bi bi-chevron-up"></i>
+                </div>
+
+
+                <% if (colors && colors.length > 0) { %>
+
+                    <% colors.forEach(color => { %>
+
+                        <label class="filter-option">
+
+                            <input
+                                type="checkbox"
+                                name="color"
+                                value="<%= color.toLowerCase() %>"
+                            >
+
+                            <span>
+                                <%= color %>
+                            </span>
+
+                        </label>
+
+                    <% }) %>
+
+                <% } else { %>
+
+                    <small class="text-muted">
+                        No colors available
+                    </small>
+
+                <% } %>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- ================= SHOP CONTENT ================= -->
+
+        <section class="shop-content">
+
+
+            <!-- TOP TOOLBAR -->
+
+            <div class="shop-toolbar">
+
+                <div class="product-count">
+
+                    <% if (products && products.length > 0) { %>
+
+                        <span>
+                            <%= products.length %> Products
+                        </span>
+
+                    <% } else { %>
+
+                        <span>
+                            No Products
+                        </span>
+
+                    <% } %>
+                </div>
+
+
+                <!-- SORT -->
+
+                <div class="sort-container">
+
+                    <label for="sort">
+                        Sort By
+                    </label>
+
+                    <select id="sort" name="sort">
+
+                        <option value="">
+                            Default
+                        </option>
+
+                        <option value="priceLow">
+                            Price: Low to High
+                        </option>
+
+                        <option value="priceHigh">
+                            Price: High to Low
+                        </option>
+
+                        <option value="newest">
+                            Newest
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= PRODUCTS ================= -->
+
+            <div class="product-grid">
+
+    <% if (products && products.length > 0) { %>
+
+        <% products.forEach(product => { %>
+
+            <% if (product.variant) { %>
+
+                <a
+                    href="/user/product/<%= product._id %>"
+                    class="product-card-link"
+                >
+
+                <div class="product-card">
+
+                    <!-- INNER IMAGE BOX -->
+                    <div class="product-image">
+
+                        <% if (
+                            product.variant.images &&
+                            product.variant.images.length > 0
+                        ) { %>
+
+                            <img
+                                src="/uploads/variants/<%= product.variant.images[0] %>"
+                                alt="<%= product.productName %>"
+                            >
+
+                        <% } else { %>
+
+                            <img
+                                src="/images/no-image.png"
+                                alt="No image"
+                            >
+
+                        <% } %>
+
+
+                        <!-- Wishlist -->
+                        <button
+                            type="button"
+                            class="wishlist-btn"
+                            title="Add to Wishlist"
+                        >
+                            <i class="bi bi-heart"></i>
+                        </button>
+
+                    </div>
+
+
+                    <!-- PRODUCT INFORMATION -->
+                    <div class="product-info">
+
+                        <!-- Product Name -->
+                        <h3 class="product-name">
+                            <%= product.productName %>
+                        </h3>
+
+
+                        <!-- Color -->
+                        <p class="product-color">
+                            <%= product.variant.color %>
+                        </p>
+
+
+                        <!-- Price -->
+                        <div class="product-price">
+
+                            <% if (
+                                product.variant.offerPrice &&
+                                product.variant.offerPrice > 0 &&
+                                product.variant.offerPrice < product.variant.price
+                            ) { %>
+
+                                <span class="offer-price">
+                                    ₹<%= product.variant.offerPrice %>
+                                </span>
+
+                                <del class="original-price">
+                                    ₹<%= product.variant.price %>
+                                </del>
+
+                            <% } else { %>
+
+                                <span class="offer-price">
+                                    ₹<%= product.variant.price %>
+                                </span>
+
+                            <% } %>
+
+                        </div>
+
+
+                        <!-- Add To Cart -->
+                        <button
+                            type="button"
+                            class="add-cart-btn"
+                        >
+                            <span>Add to Cart</span>
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            <% } %>
+
+        <% }) %>
+
+    <% } else { %>
+
+        <div class="no-products">
+            <h3>No products found</h3>
+            <p>Try changing your filters.</p>
+        </div>
+
+    <% } %>
+
+</div>
+
+            <!-- ================= PAGINATION ================= -->
+
+            <div class="pagination-container">
+
+                <% if (totalPages && totalPages > 1) { %>
+
+                    <div class="pagination">
+
+                        <% if (currentPage > 1) { %>
+
+                            <a
+                                href="/user/shop?page=<%= currentPage - 1 %>"
+                                class="pagination-btn"
+                            >
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+
+                        <% } %>
+
+
+                        <% for (
+                            let page = 1;
+                            page <= totalPages;
+                            page++
+                        ) { %>
+
+                            <a
+                                href="/user/shop?page=<%= page %>"
+                                class="pagination-number
+                                <%= page === currentPage ? 'active' : '' %>"
+                            >
+                                <%= page %>
+                            </a>
+
+                        <% } %>
+
+
+                        <% if (currentPage < totalPages) { %>
+
+                            <a
+                                href="/user/shop?page=<%= currentPage + 1 %>"
+                                class="pagination-btn"
+                            >
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+
+                        <% } %>
+
+                    </div>
+
+                <% } %>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    // ================= COLOR FILTER =================
+
+    const colorCheckboxes =
+        document.querySelectorAll('input[name="color"]');
+
+
+    colorCheckboxes.forEach(checkbox => {
+
+        checkbox.addEventListener("change", () => {
+
+            const selectedColors = [
+                ...document.querySelectorAll(
+                    'input[name="color"]:checked'
+                )
+            ].map(checkbox => checkbox.value);
+
+
+            const params = new URLSearchParams();
+
+
+            selectedColors.forEach(color => {
+
+                params.append("color", color);
+
+            });
+
+
+            window.location.href =
+                `/user/shop?${params.toString()}`;
+
+        });
+
+    });
+
+</script>
+
+
+<%- include("../partials/footer") %>

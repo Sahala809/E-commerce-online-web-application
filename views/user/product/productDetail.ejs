@@ -1,0 +1,297 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/product/productDetail.css">
+
+<main class="product-detail-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/user/home">Home</a>
+        <span>›</span>
+        <a href="/user/shop">Shop</a>
+        <span>›</span>
+        <span><%= product.productName %></span>
+    </div>
+
+
+    <div class="product-detail-layout">
+
+
+        <!-- =================================================
+     LEFT : PRODUCT IMAGE GALLERY
+================================================== -->
+<section class="product-gallery">
+
+    <!-- THREE SMALL IMAGE BOXES -->
+    <div class="thumbnail-list" id="thumbnailList">
+
+        <% if (
+            variants &&
+            variants.length > 0 &&
+            variants[0].images &&
+            variants[0].images.length > 0
+        ) { %>
+
+            <% variants[0].images.slice(0, 3).forEach((image, index) => { %>
+
+                <div
+                    class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                    data-image="/uploads/variants/<%= image %>"
+                >
+                    <img
+                        src="/uploads/variants/<%= image %>"
+                        alt="<%= product.productName %>"
+                    >
+                </div>
+
+            <% }) %>
+
+        <% } %>
+
+    </div>
+
+
+    <!-- MAIN IMAGE BOX -->
+    <div class="main-image-box">
+
+        <% if (
+            variants &&
+            variants.length > 0 &&
+            variants[0].images &&
+            variants[0].images.length > 0
+        ) { %>
+
+            <img
+                id="mainProductImage"
+                src="/uploads/variants/<%= variants[0].images[0] %>"
+                alt="<%= product.productName %>"
+            >
+
+        <% } else { %>
+
+            <div class="no-main-image">
+                No Image Available
+            </div>
+
+        <% } %>
+
+
+        <!-- WISHLIST -->
+        <button
+            type="button"
+            class="detail-wishlist-btn"
+            title="Add to Wishlist"
+        >
+            <i class="bi bi-heart"></i>
+        </button>
+
+    </div>
+
+</section>
+
+
+        <!-- =================================================
+             RIGHT : PRODUCT DETAILS
+        ================================================== -->
+
+        <section class="product-details">
+
+
+            <!-- Product Name -->
+
+            <h1 class="detail-product-name">
+                <%= product.productName %>
+            </h1>
+
+
+            <!-- Category -->
+
+            <% if (product.categoryId) { %>
+
+                <p class="detail-category">
+                    <%= product.categoryId.name %>
+                </p>
+
+            <% } %>
+
+
+            <!-- Rating -->
+
+            <div class="product-rating">
+
+                <span class="stars">
+                    ★★★★★
+                </span>
+
+                <span class="review-count">
+                    (0 Reviews)
+                </span>
+
+            </div>
+
+
+            <!-- Price -->
+
+            <% if (variants && variants.length > 0) { %>
+
+                <% const variant = variants[0]; %>
+
+                <div class="detail-price">
+
+                    <% if (
+                        variant.offerPrice &&
+                        variant.offerPrice > 0 &&
+                        variant.offerPrice < variant.price
+                    ) { %>
+
+                        <span class="detail-offer-price">
+                            ₹<%= variant.offerPrice %>
+                        </span>
+
+                        <del class="detail-original-price">
+                            ₹<%= variant.price %>
+                        </del>
+
+                    <% } else { %>
+
+                        <span class="detail-offer-price">
+                            ₹<%= variant.price %>
+                        </span>
+
+                    <% } %>
+
+                </div>
+
+
+                <!-- Color -->
+
+                <div class="detail-section">
+
+                    <h3>Color</h3>
+
+                    <div class="color-options">
+
+                        <% variants.forEach((item, index) => { %>
+
+                            <button
+                                type="button"
+                                class="color-option <%= index === 0 ? 'selected' : '' %>"
+                                data-variant-id="<%= item._id %>"
+                            >
+                                <%= item.color %>
+                            </button>
+
+                        <% }) %>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Stock -->
+
+                <div class="stock-info">
+
+                    <% if (variant.stock > 0) { %>
+
+                        <span class="in-stock">
+                            <i class="bi bi-check-circle"></i>
+                            In Stock
+                        </span>
+
+                    <% } else { %>
+
+                        <span class="out-stock">
+                            Out of Stock
+                        </span>
+
+                    <% } %>
+
+                </div>
+
+            <% } %>
+
+
+            <!-- Description -->
+
+            <div class="detail-description">
+
+                <h3>Description</h3>
+
+                <p>
+                    <%= product.description %>
+                </p>
+
+            </div>
+
+
+            <!-- Quantity -->
+
+            <div class="quantity-section">
+
+                <h3>Quantity</h3>
+
+                <div class="quantity-control">
+
+                    <button
+                        type="button"
+                        id="decreaseQuantity"
+                    >
+                        −
+                    </button>
+
+                    <span id="quantity">
+                        1
+                    </span>
+
+                    <button
+                        type="button"
+                        id="increaseQuantity"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Buttons -->
+
+            <div class="detail-actions">
+
+                <button
+                    type="button"
+                    class="detail-add-cart"
+                >
+                    <i class="bi bi-cart-plus"></i>
+                    Add to Cart
+                </button>
+
+            </div>
+
+
+            <div class="detail-wishlist-link">
+
+                <button type="button">
+                    <i class="bi bi-heart"></i>
+                    Add to Wishlist
+                </button>
+
+            </div>
+
+
+        </section>
+
+    </div>
+
+</main>
+
+<script>
+    const variants = <%- JSON.stringify(variants) %>;
+</script>
+
+<script src="/js/product/productDetail.js"></script>
+
+<%- include("../partials/footer") %>

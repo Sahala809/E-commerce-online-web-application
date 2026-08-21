@@ -117,8 +117,29 @@ export const addVariantService = async (req,res) => {
         price,
         offerPrice,
         description,
-        isActive
+        isActive,
+        existingImages
     } = req.body
+
+    const normalizedColor = color?.trim().toLowerCase();
+
+    const existingVariant = await Variant.findOne({
+        productId,
+        color: {
+            $regex: `^${normalizedColor}$`,
+            $options: "i"
+        }
+    });
+
+    if (existingVariant) {
+        return {
+            success: false,
+            errors: {
+                color: "This color already exists for this product."
+            },
+            uploadedImages: req.files || []
+        };
+    }
 
     const errors = await validateAddVariant(req.body, req.files)
 
@@ -126,11 +147,29 @@ export const addVariantService = async (req,res) => {
         return {
             success: false,
             errors,
-            uploadedImages: req.files || []
+            uploadedImages: req.files || [],
+            existingImages: existingImages
+                ? Array.isArray(existingImages)
+                    ? existingImages
+                    : [existingImages]
+                : []
         };
     }
 
-    const images = req.files.map(file => file.filename)
+    // Newly uploaded images
+    if (req.files && req.files.length > 0) {
+
+        const newImages = req.files.map(
+            file => file.filename
+        );
+
+        images.push(...newImages);
+
+    }
+
+
+    // Maximum 4 images
+    images = images.slice(0, 4);
 
     const variant = await Variant.create({
         productId,

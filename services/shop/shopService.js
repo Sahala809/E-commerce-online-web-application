@@ -1,68 +1,77 @@
 import Product from "../../models/productModel.js"
 import Category from "../../models/categoryModel.js"
 import Variant from "../../models/variantModel.js"
-export const loadShopService = async (filters) => {
-    let products = await Product.find({
+export const loadShopService = async (filters = {}) => {
+    
+    const page = Number(filters.page) || 1
+    const limit = 12
+    const skip = (page - 1) * limit
+
+    const totalProducts =await Product.countDocuments({
         isActive: true
     }).lean()
 
-    // if(filters.color){
-    //     const selectedColors = Array.isArray(filters.colors)
-    //         ? filters.color 
-    //         : [filters.color]
-
-    //     const normalizedSelectedColors = selectedColors.map(colors =>
-    //         color.trim().toLowerCase()
-    //     )
-
-    //     const variants = await Variant.find({
-    //         color: { $in: normalizedSelectedColors}
-    //     }).select("productId")
-
-    //     const productId = variants.map(variant => variant.productId)
-
-    //     products = await Product.find({
-    //         _id: { $in: productId }
-    //     })
-
-    // }else {
-    //     products = await Product.find()
-    // }
+    let products = await Product.find({
+        isActive: true
+    })
+    .sort({createdAt: -1})
+    .populate("categoryId")
+    .skip(skip)
+    .limit(limit)
+    .lean()
 
 
     const categories = await Category.find({
         isActive: true
     }).lean()
 
+    const colors = await Variant.distinct("color",{
+        isActive: true
+    })
+
     const variants = await Variant.find({
         isActive: true,
         stock: { $gt: 0}
     })
-
+    .populate("productId")
+    .lean()
 
     const shopProducts = products.map(product => {
 
-        const productVariants = variants.filter(
-            variant =>
-                variant.productId.toString() === product._id.toString()
-        );
+        const productVariants = variants.filter(variant => {
+
+            return (
+                variant.productId &&
+                variant.productId._id.toString() === product._id.toString()
+            );
+
+        });
 
         return {
-            ...Product,
-            variants:productVariants
-        }
-    })
+            ...product,
+            variant: productVariants[0] || null
+        };
+    });
 
-    const colors = await Variant.distinct("color")
+    const totalPages = Math.ceil(totalProducts / limit)
 
     const normalizedColors = [
-        ...new Set(colors.map(color => color.trim().toLowerCase()))
+        ...new Set(
+            colors.map(color =>
+                color.trim().toLowerCase()
+            )
+        )
     ];
+
 
     return {
         products: shopProducts,
         categories,
-        colors: normalizedColors
-    }
+        colors: normalizedColors,
+        
+        currentPage : page,
+        totalPages,
+        totalProducts
+    };
 }
 
