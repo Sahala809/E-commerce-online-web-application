@@ -47,7 +47,15 @@ import {
 import {
     loadProductDetailService
 } from "../services/shop/productDetailService.js"
+
 import Variant from "../models/variantModel.js";
+
+import {
+    addToCartService,
+    loadCartService,
+    updateCartService,
+    removeFromCartService
+} from "../services/cart/cartServices.js"
 
 
 export const loadHome = (req, res) => {
@@ -339,7 +347,8 @@ export const loadForgotPasswordVerifyOtp = (req, res) => {
 
     return res.render("user/auth/verifyOtpForgotPassword", {
         error: null,
-        otpExpired: false
+        otpExpired: false,
+        expiresAt:req.session.resetOtpExpires 
     });
 
 };
@@ -357,7 +366,9 @@ export const verifyForgotPasswordOtp = async (req, res) => {
 
         res.render("user/auth/verifyOtpForgotPassword", {
             error: "Something went wrong. Please try again",
-            otpExpired: false
+            otpExpired: false,
+            expiresAt:
+                    req.session.resetOtpExpires || 0
         });
 
     }
@@ -376,7 +387,9 @@ export const resendForgotPasswordOtp = async (req, res) => {
 
         return res.render("user/auth/verifyOtpForgotPassword", {
             error: "Something went wrong. Please try again",
-            otpExpired: true
+            otpExpired: false,
+            expiresAt:
+                    req.session.resetOtpExpires || 0
         });
 
     }
@@ -827,5 +840,131 @@ export const loadProductDetail = async (req, res) => {
 
         return res.redirect("/user/shop");
         
+    }
+};
+
+export const addToCart = async (req, res) => {
+    try {
+console.log("SESSION:", req.session);
+        const { productId, variantId, quantity } = req.body;
+
+        const userId = req.session.user;
+
+        // User not logged in
+        if (!userId) {
+            req.session.errorMessage = "Please login to add products to cart";
+
+            return res.redirect("/user/login");
+        }
+
+
+        const result = await addToCartService(
+            userId,
+            productId,
+            variantId,
+            quantity
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect(`/user/product/${productId}`);
+        }
+
+        req.session.successMessage = result.message;
+console.log("REDIRECTING TO CART");
+        return res.redirect(`/user/cart`);
+
+    } catch (error) {
+
+        console.log("ADD TO CART ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong";
+
+        return res.redirect(`/user/product/${req.body.productId}`);
+    }
+};
+
+
+export const loadCart = async (req, res) => {
+    try {
+ console.log("LOAD CART CONTROLLER");
+        const userId = req.session.user;
+
+        const result = await loadCartService(userId);
+
+        res.render("user/cart/cart", {
+            activePage: "cart",
+            cart: result.cart,
+            subtotal: result.subtotal,
+            discount: result.discount,
+
+            shippingCharge: result.shippingCharge,
+
+            tax: result.tax,
+
+            total: result.total
+        });
+
+    } catch (error) {
+
+        console.log("LOAD CART ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong";
+
+        return res.redirect("/user/shop");
+    }
+};
+
+
+export const updateCart = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        const { variantId, quantity } = req.body;
+
+        const result = await updateCartService(
+            userId,
+            variantId,
+            quantity
+        );
+
+        return res.json(result);
+
+    } catch (error) {
+
+        console.log("UPDATE CART ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        });
+    }
+};
+
+
+
+export const removeFromCart = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        const { variantId } = req.body;
+
+        const result = await removeFromCartService(
+            userId,
+            variantId
+        );
+
+        return res.json(result);
+
+    } catch (error) {
+
+        console.log("REMOVE CART ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        });
     }
 };

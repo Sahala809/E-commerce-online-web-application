@@ -49,7 +49,11 @@ import {
 
 import {
     loadShop,
-    loadProductDetail
+    loadProductDetail,
+    addToCart,
+    loadCart,
+    updateCart,
+    removeFromCart
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -127,5 +131,10 @@ router.patch("/address/default/:id", isLogin, setDefaultAddress)
 
 router.get("/shop", loadShop)
 router.get("/product/:id", loadProductDetail);
+
+router.post("/cart", addToCart);
+router.get("/cart", loadCart);
+router.patch("/cart", updateCart);
+router.delete("/cart", removeFromCart);
 
 export default router;

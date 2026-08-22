@@ -167,24 +167,24 @@ else {
 
     resend.style.display = "none";
 
-    const count = setInterval(() => {
 
-        // Calculate remaining time using
-        // the original server-side expiry time
+    // ========================================
+    // UPDATE TIMER FUNCTION
+    // ========================================
+
+    function updateTimer() {
+
         const remaining = Math.max(
             0,
             Math.floor((expiresAt - Date.now()) / 1000)
         );
 
 
-        // Minutes
         const min = Math.floor(remaining / 60);
 
-        // Seconds
         const sec = remaining % 60;
 
 
-        // Display timer
         timer.innerHTML =
             `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 
@@ -198,14 +198,28 @@ else {
             clearInterval(count);
 
             timer.style.display = "none";
+
             resend.style.display = "block";
 
         }
 
-    }, 1000);
+    }
+
+
+    // ========================================
+    // SHOW CORRECT TIME IMMEDIATELY
+    // ========================================
+
+    updateTimer();
+
+
+    // ========================================
+    // THEN UPDATE EVERY SECOND
+    // ========================================
+
+    const count = setInterval(updateTimer, 1000);
 
 }
-
 </script>
 
 </body>

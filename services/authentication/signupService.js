@@ -31,7 +31,7 @@ export const signupService = async (req, res) => {
 
     const existingEmail = await User.findOne({
         email: email.trim().toLowerCase()
-    });
+    }).lean();
 
     if (existingEmail) {
         
@@ -46,7 +46,7 @@ export const signupService = async (req, res) => {
 
     const existingPhone = await User.findOne({
         phone: phone.trim()
-    });
+    }).lean();
 
     if (existingPhone) {
 
@@ -165,7 +165,7 @@ export const verifySignupOtpService = async (req,res) => {
     req.session.successMessage = "Account created successfully.";
 
     await req.session.save();
-    
+
     return {
         success:true
     }

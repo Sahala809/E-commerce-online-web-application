@@ -77,7 +77,8 @@ export const verifyForgotPasswordOtpService = async (req, res) => {
 
         return res.render("user/auth/verifyOtpForgotPassword", {
             error: "OTP not found.",
-            otpExpired: true
+            otpExpired: true,
+            expiresAt:0
         });
 
     }
@@ -91,7 +92,8 @@ export const verifyForgotPasswordOtpService = async (req, res) => {
         
         return res.render("user/auth/verifyOtpForgotPassword", {
             error: "OTP has expired.",
-            otpExpired: true
+            otpExpired: true,
+            expiresAt:0
         });
 
     }
@@ -100,7 +102,8 @@ export const verifyForgotPasswordOtpService = async (req, res) => {
 
         return res.render("user/auth/verifyOtpForgotPassword", {
             error: "Invalid OTP.",
-            otpExpired: false
+            otpExpired: false,
+            expiresAt: req.session.resetOtpExpires
         });
 
     }
@@ -152,7 +155,8 @@ export const resendForgotPasswordOtpService = async (req, res) => {
 
     return res.render("user/auth/verifyOtpForgotPassword", {
         error: null,
-        otpExpired: false
+        otpExpired: false,
+         expiresAt: req.session.resetOtpExpires
     });
 };
 
@@ -178,7 +182,7 @@ export const resetPasswordService = async (req, res) => {
 
     const user = await User.findOne({
         email: email.trim().toLowerCase()
-    });
+    }).lean();
 
     if (!user) {
 

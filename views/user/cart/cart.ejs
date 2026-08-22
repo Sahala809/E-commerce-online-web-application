@@ -1,0 +1,300 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/cart/cart.css">
+
+<main class="cart-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/user/home">Home</a>
+        <span>›</span>
+        <a href="/user/shop">Shop</a>
+        <span>›</span>
+        <span>Cart</span>
+    </div>
+
+
+    <!-- Cart Header -->
+    <div class="cart-header">
+        <h1>Your Cart</h1>
+        <p>Review your selected products before checkout.</p>
+    </div>
+
+
+    <% if (!cart || !cart.items || cart.items.length === 0) { %>
+
+        <!-- Empty Cart -->
+        <section class="empty-cart">
+
+            <div class="empty-cart-icon">
+                <i class="bi bi-cart-x"></i>
+            </div>
+
+            <h2>Your Cart is Empty</h2>
+
+            <p>
+                You haven't added any products to your cart yet.
+            </p>
+
+            <a href="/user/shop" class="continue-shopping-btn">
+                <i class="bi bi-bag"></i>
+                Continue Shopping
+            </a>
+
+        </section>
+
+    <% } else { %>
+
+
+        <!-- Cart Layout -->
+        <div class="cart-layout">
+
+
+            <!-- LEFT : CART ITEMS -->
+            <section class="cart-items-section">
+
+                <div class="cart-items-header">
+                    <h2>Cart Items</h2>
+
+                    <span>
+                        <%= cart.items.length %>
+                        <%= cart.items.length === 1 ? "Item" : "Items" %>
+                    </span>
+                </div>
+
+
+                <% cart.items.forEach((item) => { %>
+
+                    <div class="cart-item">
+
+                        <!-- Product Image -->
+                        <div class="cart-item-image">
+
+                            <% if (
+                                item.variantId &&
+                                item.variantId.images &&
+                                item.variantId.images.length > 0
+                            ) { %>
+
+                                <img
+                                    src="/uploads/variants/<%= item.variantId.images[0] %>"
+                                    alt="<%= item.productId.productName %>"
+                                >
+
+                            <% } else { %>
+
+                                <div class="no-cart-image">
+                                    <i class="bi bi-image"></i>
+                                </div>
+
+                            <% } %>
+
+                        </div>
+
+
+                        <!-- Product Details -->
+                        <div class="cart-item-details">
+
+                            <h3>
+                                <%= item.productId.productName %>
+                            </h3>
+
+                            <% if (item.variantId) { %>
+
+                                <p class="cart-item-color">
+                                    Color:
+                                    <strong>
+                                        <%= item.variantId.color %>
+                                    </strong>
+                                </p>
+
+                            <% } %>
+
+
+                            <!-- Price -->
+                            <div class="cart-item-price">
+
+                                <% if (
+                                    item.variantId.offerPrice &&
+                                    item.variantId.offerPrice > 0 &&
+                                    item.variantId.offerPrice < item.variantId.price
+                                ) { %>
+
+                                    <span class="offer-price">
+                                        ₹<%= item.variantId.offerPrice %>
+                                    </span>
+
+                                    <del>
+                                        ₹<%= item.variantId.price %>
+                                    </del>
+
+                                <% } else { %>
+
+                                    <span class="offer-price">
+                                        ₹<%= item.variantId.price %>
+                                    </span>
+
+                                <% } %>
+
+                            </div>
+
+
+                            <!-- Quantity -->
+                            <div class="cart-quantity">
+
+    <button
+        type="button"
+        class="quantity-btn"
+        data-action="decrease"
+        data-variant-id="<%= item.variantId._id %>"
+        data-stock="<%= item.variantId.stock %>"
+    >
+        −
+    </button>
+
+    <span class="quantity-value">
+        <%= item.quantity %>
+    </span>
+
+    <button
+        type="button"
+        class="quantity-btn"
+        data-action="increase"
+        data-variant-id="<%= item.variantId._id %>"
+        data-stock="<%= item.variantId.stock %>"
+    >
+        +
+    </button>
+
+</div>
+
+                        </div>
+
+
+                        <!-- Remove -->
+                        <div class="cart-item-remove">
+
+    <button
+        type="button"
+        class="remove-cart-btn"
+        data-variant-id="<%= item.variantId._id %>"
+        title="Remove item"
+    >
+        <i class="bi bi-trash3"></i>
+    </button>
+
+</div>
+
+                    </div>
+
+                <% }) %>
+
+            </section>
+
+
+
+            <!-- RIGHT : CART SUMMARY -->
+<aside class="cart-summary">
+
+    <h2>Order Summary</h2>
+
+
+    <!-- Subtotal -->
+    <div class="summary-row">
+
+        <span>Subtotal</span>
+
+        <span>
+            ₹<%= subtotal %>
+        </span>
+
+    </div>
+
+
+    <!-- Discount -->
+    <div class="summary-row">
+
+        <span>Discount</span>
+
+        <span class="discount-amount">
+           - ₹<%= discount %>
+        </span>
+
+    </div>
+
+
+    <!-- Shipping -->
+    <div class="summary-row">
+
+        <span>Shipping Charge</span>
+
+        <span class="free-delivery">
+            <% if (shippingCharge === 0) { %>
+
+                Free
+
+            <% } else { %>
+
+                ₹<%= shippingCharge %>
+
+            <% } %>
+        </span>
+
+    </div>
+
+
+    <!-- Tax -->
+    <div class="summary-row">
+
+        <span>Tax</span>
+
+        <span>
+           ₹<%= tax %>
+        </span>
+
+    </div>
+
+
+    <div class="summary-line"></div>
+
+
+    <!-- Total -->
+    <div class="summary-total">
+
+        <span>Total</span>
+
+        <strong>
+            ₹<%= subtotal %>
+        </strong>
+
+    </div>
+
+                <button
+                    type="button"
+                    class="checkout-btn"
+                >
+                    Proceed to Checkout
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <a
+                    href="/user/shop"
+                    class="continue-shopping"
+                >
+                    <i class="bi bi-arrow-left"></i>
+                    Continue Shopping
+                </a>
+
+            </aside>
+
+        </div>
+
+    <% } %>
+
+</main>
+
+<script src="/js/cart/cart.js"></script>
+
+<%- include("../partials/footer") %>

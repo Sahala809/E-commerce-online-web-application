@@ -261,15 +261,39 @@
 
             <div class="detail-actions">
 
-                <button
-                    type="button"
-                    class="detail-add-cart"
-                >
-                    <i class="bi bi-cart-plus"></i>
-                    Add to Cart
-                </button>
+    <form action="/user/cart" method="POST">
 
-            </div>
+        <input
+            type="hidden"
+            name="productId"
+            value="<%= product._id %>"
+        >
+
+        <input
+            type="hidden"
+            name="variantId"
+            id="selectedVariantId"
+            value="<%= variants[0]._id %>"
+        >
+
+        <input
+            type="hidden"
+            name="quantity"
+            id="cartQuantity"
+            value="1"
+        >
+
+        <button
+            type="submit"
+            class="detail-add-cart"
+        >
+            <i class="bi bi-cart-plus"></i>
+            Add to Cart
+        </button>
+
+    </form>
+
+</div>
 
 
             <div class="detail-wishlist-link">
