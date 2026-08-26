@@ -67,11 +67,12 @@ router.delete('/category/:id', deleteCategory)
 router.get("/products", loadProduct)
 router.get("/products/add", loadAddProduct)
 router.post("/products/add", addProduct)
+
 router.get("/products/:productId/variants", loadAddVariant)
 
 router.post(
-    "/products/:productId/variants",
-    upload.array("images", 4),
+    "/products/:productId/variants/add",
+    upload.array("images", 3),
     addVariant
 );
 
@@ -87,8 +88,8 @@ router.patch(
   editVariant
 );
 
-router.delete(
-    "/products/:productId/variants/delete/:variantId",
+router.post(
+    "/products/:productId/variants/:variantId/delete",
     deleteVariant
 );
 

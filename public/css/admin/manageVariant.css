@@ -1,0 +1,1774 @@
+/* =========================================================
+   GLOBAL / ADMIN CONTENT
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    min-height: 100vh;
+    height: auto;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+    height: auto;
+    padding: 40px 50px;
+    background: #f5f6fa;
+    overflow: visible;
+}
+
+
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.page-title {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 25px;
+}
+
+.page-title h1 {
+    margin: 0 0 6px;
+    font-size: 32px;
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.4px;
+}
+
+.page-title p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   ALERT
+   ========================================================= */
+
+.alert {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   MAIN VARIANTS CARD
+   ========================================================= */
+
+.form-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+}
+
+
+/* =========================================================
+   VARIANT CARD HEADER
+   ========================================================= */
+
+.variant-card-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding-bottom: 22px;
+    margin-bottom: 20px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.variant-card-header h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.variant-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.variant-card-header .add-btn {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+
+/* =========================================================
+   ADD VARIANT BUTTON
+   ========================================================= */
+
+#addVariantButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    min-height: 42px;
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #030812;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#addVariantButton:hover {
+    background: #323232;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+#addVariantButton i {
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   ADD ANOTHER VARIANT
+   ========================================================= */
+
+.btn-add-another {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    min-height: 42px;
+    padding: 10px 18px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-another:hover {
+    background: #f5f6fa;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+
+/* =========================================================
+   ADD VARIANT BUTTON
+   ========================================================= */
+
+.add-variant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    height: 42px;
+    padding: 0 18px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #030812;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition: all 0.2s ease;
+}
+
+.add-variant-btn:hover {
+    background: #323232;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+   ========================================================= */
+
+.table-responsive {
+    width: 100%;
+    margin-top: 5px;
+
+    overflow-x: auto;
+    overflow-y: visible;
+
+    scrollbar-width: thin;
+}
+
+
+/* =========================================================
+   VARIANT TABLE
+   ========================================================= */
+
+.table {
+    width: 100%;
+    margin: 0;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    color: #374151;
+    font-size: 14px;
+}
+
+.table thead th {
+    padding: 16px 15px;
+
+    background: #f8f9fb;
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.table tbody td {
+    padding: 18px 15px;
+
+    color: #374151;
+    font-size: 14px;
+
+    border-bottom: 1px solid #eeeeee;
+
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background: #fafafa;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   TABLE IMAGE
+   ========================================================= */
+
+.variant-table-image {
+    width: 70px;
+    height: 70px;
+
+    display: block;
+
+    object-fit: cover;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+.empty-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f3f4f6;
+    color: #9ca3af;
+
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   TABLE TEXT
+   ========================================================= */
+
+.table tbody td strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.table tbody td:nth-child(3),
+.table tbody td:nth-child(4) {
+    color: #111827;
+    font-weight: 500;
+}
+
+.table tbody td:nth-child(5) {
+    color: #374151;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+   ========================================================= */
+
+.table .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.table .bg-success {
+    background: #e9f8ef !important;
+    color: #15803d !important;
+}
+
+.table .bg-danger {
+    background: #fef0f0 !important;
+    color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+   ========================================================= */
+
+.table .dropdown {
+    position: relative;
+}
+
+.table .btn-light {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #374151;
+}
+
+.table .btn-light:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+
+/* =========================================================
+   ACTION DROPDOWN
+   ========================================================= */
+
+.table .dropdown-menu {
+    min-width: 150px;
+
+    padding: 6px;
+
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.10);
+}
+
+.table .dropdown-item {
+    display: flex;
+    align-items: center;
+
+    padding: 9px 10px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    color: #374151;
+}
+
+.table .dropdown-item:hover {
+    background: #f5f6fa;
+    color: #111827;
+}
+
+.table .dropdown-item.text-danger {
+    color: #dc2626 !important;
+}
+
+.table .dropdown-item.text-danger:hover {
+    background: #fff1f2;
+    color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   BOTTOM ACTION AREA
+   ========================================================= */
+
+.variant-bottom-actions {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 0;
+    padding: 20px 0;
+
+    border-top: 1px solid #eeeeee;
+}
+
+
+/* =========================================================
+   FINISH BUTTON
+   ========================================================= */
+
+.btn-finish {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 10px 22px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #030812;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.btn-finish:hover {
+    background: #323232;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.variants-pagination {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #eeeeee;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.pagination-info strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-btn {
+    min-width: 38px;
+    height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+    padding: 0 12px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover {
+    background: #f5f6fa;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.page-btn.active {
+    background: #030812;
+    color: #ffffff;
+    border-color: #030812;
+}
+
+
+/* =========================================================
+   =========================================================
+   VARIANT MODAL
+   =========================================================
+   IMPORTANT:
+   THE ENTIRE MODAL SCROLLS.
+   NOT ONLY MODAL BODY.
+   =========================================================
+   ========================================================= */
+/* =========================================================
+   VARIANT MODAL
+   ========================================================= */
+
+.variant-modal {
+    z-index: 1055;
+}
+
+
+/* =========================================================
+   MODAL DIALOG
+   ========================================================= */
+
+.variant-modal .modal-dialog {
+    width: 90%;
+    max-width: 1100px;
+
+    margin: 20px auto;
+
+    max-height: calc(100vh - 40px);
+}
+
+
+/* =========================================================
+   MODAL CONTENT
+   =========================================================
+   IMPORTANT:
+   The MODAL CONTENT itself scrolls.
+
+   Header is sticky/fixed.
+   Everything below header scrolls.
+   ========================================================= */
+
+.variant-modal .modal-content {
+    width: 100%;
+
+    max-height: calc(100vh - 40px);
+
+    position: relative;
+
+    border: none;
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.20);
+
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af #f1f5f9;
+}
+
+
+/* =========================================================
+   MODAL SCROLLBAR
+   ========================================================= */
+
+.variant-modal .modal-content::-webkit-scrollbar {
+    width: 9px;
+}
+
+.variant-modal .modal-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.variant-modal .modal-content::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+
+    border-radius: 10px;
+
+    border: 2px solid #f1f5f9;
+}
+
+.variant-modal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+
+/* =========================================================
+   MODAL HEADER
+   =========================================================
+   HEADER STAYS FIXED WHILE MODAL SCROLLS
+   ========================================================= */
+
+.variant-modal .modal-header {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    width: 100%;
+
+    padding: 22px 34px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   MODAL TITLE
+   ========================================================= */
+
+.variant-modal .modal-title {
+    margin: 0;
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   MODAL HEADER SMALL TEXT
+   ========================================================= */
+
+.variant-modal .modal-header small {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.variant-modal .btn-close {
+    margin: 0;
+
+    opacity: 0.65;
+
+    flex-shrink: 0;
+
+    transition: opacity 0.2s ease;
+}
+
+.variant-modal .btn-close:hover {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   MODAL BODY
+   =========================================================
+   IMPORTANT:
+
+   DO NOT CREATE ANOTHER SCROLLBAR HERE.
+
+   The modal-content is the scrollbar.
+   ========================================================= */
+
+.variant-modal .modal-body {
+    display: block;
+
+    width: 100%;
+
+    padding: 35px;
+
+    background: #f8fafc;
+
+    overflow: visible;
+}
+
+
+/* =========================================================
+   MODAL BODY ROW
+   ========================================================= */
+
+.variant-modal .modal-body .row {
+    margin-left: -15px;
+
+    margin-right: -15px;
+}
+
+
+/* =========================================================
+   MODAL SECTION
+   ========================================================= */
+
+.variant-modal .modal-section {
+    width: 100%;
+
+    padding: 24px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+
+/* =========================================================
+   MODAL SECTION TITLE
+   ========================================================= */
+
+.variant-modal .modal-section h5 {
+    margin: 0 0 22px;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   FORM GROUP
+   ========================================================= */
+
+.variant-modal .form-group {
+    margin-bottom: 20px;
+}
+
+.variant-modal .form-group:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.variant-modal label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+/* ================= SWITCH ================= */
+
+.form-check {
+    display: flex;
+
+    align-items: center;
+
+    margin-top: 15px;
+}
+
+.form-check-input {
+    width: 45px;
+    height: 24px;
+
+    cursor: pointer;
+}
+
+.form-check-input:focus {
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   INPUT / SELECT / TEXTAREA
+   ========================================================= */
+
+.variant-modal .form-control,
+.variant-modal input,
+.variant-modal select,
+.variant-modal textarea {
+    width: 100%;
+
+    min-height: 52px;
+
+    padding: 12px 15px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.variant-modal .form-control:focus,
+.variant-modal input:focus,
+.variant-modal select:focus,
+.variant-modal textarea:focus {
+    border-color: #111827;
+
+    box-shadow:
+        0 0 0 3px rgba(17, 24, 39, 0.08);
+
+    outline: none;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.variant-modal textarea.form-control {
+    min-height: 150px;
+
+    resize: vertical;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   IMAGE UPLOAD AREA
+   ========================================================= */
+
+.variant-modal .image-upload-area {
+    width: 100%;
+
+    min-height: 180px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px 15px;
+
+    text-align: center;
+
+    border: 2px dashed #d1d5db;
+
+    border-radius: 12px;
+
+    background: #f9fafb;
+
+    transition: all 0.2s ease;
+}
+
+.variant-modal .image-upload-area:hover {
+    border-color: #9ca3af;
+
+    background: #f3f4f6;
+}
+
+
+/* =========================================================
+   UPLOAD ICON
+   ========================================================= */
+
+.variant-modal .upload-icon {
+    width: 46px;
+
+    height: 46px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    background: #f1f3f5;
+
+    color: #374151;
+
+    font-size: 22px;
+}
+
+
+.variant-modal .image-upload-area h4 {
+    margin: 5px 0;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+.variant-modal .image-upload-area p {
+    margin: 0 0 15px;
+
+    color: #9ca3af;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   BROWSE BUTTON
+   ========================================================= */
+
+.variant-modal .browse-btn {
+    padding: 8px 16px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.variant-modal .browse-btn:hover {
+    background: #f3f4f6;
+
+    border-color: #9ca3af;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   IMAGE PREVIEW
+   ========================================================= */
+
+.variant-modal .image-preview-container,
+.variant-modal .edit-image-preview-container {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 18px;
+}
+
+
+/* =========================================================
+   IMAGE BOX
+   ========================================================= */
+
+.variant-modal .small-upload {
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
+
+    min-height: 100px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    border: 2px dashed #d1d5db;
+
+    border-radius: 12px;
+
+    background: #f9fafb;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.variant-modal .small-upload:hover {
+    border-color: #9ca3af;
+
+    background: #f3f4f6;
+}
+
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.variant-modal .small-upload img {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+
+/* =========================================================
+   PLUS ICON
+   ========================================================= */
+
+.variant-modal .small-upload .plus {
+    position: relative;
+
+    z-index: 2;
+
+    color: #9ca3af;
+
+    font-size: 28px;
+
+    font-weight: 300;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   IMAGE ACTIONS
+   ========================================================= */
+
+.variant-modal .image-actions {
+    position: absolute;
+
+    left: 7px;
+
+    right: 7px;
+
+    bottom: 7px;
+
+    z-index: 10;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+}
+
+
+.variant-modal .image-actions button {
+    width: 36px;
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: rgba(17, 24, 39, 0.88);
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.variant-modal .image-actions button:hover {
+    background: #111827;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MODAL FOOTER
+   =========================================================
+   FOOTER SCROLLS WITH THE CONTENT
+   ========================================================= */
+
+.variant-modal .modal-footer {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    width: 100%;
+
+    padding: 18px 35px;
+
+    background: #ffffff;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.variant-modal .btn-primary {
+    min-height: 42px;
+
+    padding: 10px 22px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #030812;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.variant-modal .btn-primary:hover {
+    background: #323232;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+   ========================================================= */
+
+.variant-modal .btn-secondary {
+    min-height: 42px;
+
+    padding: 10px 22px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #e5e7eb;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+
+.variant-modal .btn-secondary:hover {
+    background: #d1d5db;
+}
+
+
+/* =========================================================
+   OUTLINE BUTTON
+   ========================================================= */
+
+.variant-modal .btn-outline-secondary {
+    min-height: 42px;
+
+    padding: 10px 20px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   REMOVED IMAGES
+   ========================================================= */
+
+#removedImagesContainer {
+    display: none;
+}
+
+
+/* =========================================================
+   CROP CONTAINER
+   ========================================================= */
+
+.crop-container {
+    width: 100%;
+
+    max-height: 500px;
+
+    overflow: hidden;
+
+    background: #f5f5f5;
+
+    border-radius: 8px;
+}
+
+
+#editCropImage {
+    display: block;
+
+    max-width: 100%;
+
+    height: auto;
+}
+
+
+/* =========================================================
+   VALIDATION POPUP
+   ========================================================= */
+
+.validation-modal {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);
+}
+
+.validation-modal .modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.validation-modal .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #dc3545;
+}
+
+.validation-modal .modal-body {
+    padding: 22px;
+}
+
+.validation-modal .modal-body p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.validation-modal .modal-footer {
+    padding: 12px 22px 18px;
+    border-top: none;
+}
+
+.validation-modal .btn-primary {
+    min-width: 80px;
+    border-radius: 7px;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 992px) {
+
+    .variant-modal .modal-dialog {
+        width: 95%;
+
+        max-width: 900px;
+
+        margin: 15px auto;
+
+        max-height: calc(100vh - 30px);
+    }
+
+    .variant-modal .modal-content {
+        max-height: calc(100vh - 30px);
+    }
+
+    .variant-modal .modal-header {
+        padding: 20px 25px;
+    }
+
+    .variant-modal .modal-body {
+        padding: 25px;
+    }
+
+    .variant-modal .modal-footer {
+        padding: 16px 25px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .variant-modal .modal-dialog {
+        width: calc(100% - 20px);
+
+        max-width: none;
+
+        margin: 10px auto;
+
+        max-height: calc(100vh - 20px);
+    }
+
+    .variant-modal .modal-content {
+        max-height: calc(100vh - 20px);
+
+        border-radius: 12px;
+    }
+
+    .variant-modal .modal-header {
+        padding: 18px;
+    }
+
+    .variant-modal .modal-title {
+        font-size: 18px;
+    }
+
+    .variant-modal .modal-body {
+        padding: 18px;
+    }
+
+    .variant-modal .modal-footer {
+        padding: 15px 18px;
+    }
+
+    .variant-modal .modal-section {
+        padding: 18px;
+    }
+
+    .variant-modal .image-preview-container,
+    .variant-modal .edit-image-preview-container {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 8px;
+    }
+
+    .variant-modal .small-upload {
+        min-height: 90px;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 992px) {
+
+    .content {
+        padding: 30px;
+    }
+
+    .form-card {
+        padding: 25px;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 12px 10px;
+    }
+
+    /* Modal */
+
+    .variant-modal .modal-dialog {
+        width: 95%;
+        max-width: 900px;
+
+        margin: 15px auto;
+    }
+
+    .variant-modal .modal-content {
+        max-height: calc(100vh - 30px);
+    }
+
+    .variant-modal .modal-header {
+        padding: 20px 25px;
+    }
+
+    .variant-modal .modal-body {
+        padding: 25px;
+    }
+
+    .variant-modal .modal-footer {
+        padding: 16px 25px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .content {
+        padding: 20px 15px;
+    }
+
+    .page-title h1 {
+        font-size: 27px;
+    }
+
+    .form-card {
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .variant-card-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .variant-card-header .add-btn {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    #addVariantButton {
+        width: 100%;
+    }
+
+
+    /* Table */
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 850px;
+    }
+
+
+    /* Buttons */
+
+    .btn-add-another,
+    .add-variant-btn {
+        width: 100%;
+    }
+
+    .variant-bottom-actions {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+
+        padding: 18px 0;
+    }
+
+    .btn-finish {
+        width: 100%;
+    }
+
+
+    /* Pagination */
+
+    .variants-pagination {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 14px;
+    }
+
+    .pagination-buttons {
+        width: 100%;
+    }
+
+    .page-btn {
+        flex: 1;
+    }
+
+
+    /* =====================================================
+       MOBILE MODAL
+       ===================================================== */
+
+    .variant-modal .modal-dialog {
+        width: calc(100% - 20px);
+
+        max-width: none;
+
+        margin: 10px auto;
+    }
+
+    /*
+       IMPORTANT:
+       Entire modal remains scrollable.
+    */
+
+    .variant-modal .modal-content {
+        max-height: calc(100vh - 20px);
+
+        border-radius: 12px;
+    }
+
+    .variant-modal .modal-header {
+        padding: 18px;
+    }
+
+    .variant-modal .modal-title {
+        font-size: 18px;
+    }
+
+    .variant-modal .modal-body {
+        padding: 18px;
+    }
+
+    .variant-modal .modal-footer {
+        padding: 15px 18px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .variant-modal .modal-footer .btn {
+        width: 100%;
+    }
+
+    .variant-modal .modal-section {
+        padding: 18px;
+    }
+
+    .variant-modal .image-preview-container,
+    .variant-modal .edit-image-preview-container {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 8px;
+    }
+
+    .variant-modal .small-upload {
+        min-height: 90px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .content {
+        padding: 15px 10px;
+    }
+
+    .form-card {
+        padding: 18px 12px;
+    }
+
+    .page-title {
+        margin-bottom: 20px;
+    }
+
+    .page-title h1 {
+        font-size: 24px;
+    }
+
+    .page-title p {
+        font-size: 14px;
+    }
+
+    .variant-table-image {
+        width: 55px;
+        height: 55px;
+    }
+
+    .variant-bottom-actions {
+        padding: 16px 0;
+    }
+
+    .pagination-buttons {
+        gap: 4px;
+    }
+
+    .page-btn {
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       SMALL MOBILE MODAL
+       ===================================================== */
+
+    .variant-modal .modal-dialog {
+        width: calc(100% - 12px);
+
+        margin: 6px auto;
+    }
+
+    .variant-modal .modal-content {
+        max-height: calc(100vh - 12px);
+
+        border-radius: 10px;
+    }
+
+    .variant-modal .modal-header {
+        padding: 15px;
+    }
+
+    .variant-modal .modal-body {
+        padding: 15px;
+    }
+
+    .variant-modal .modal-footer {
+        padding: 12px 15px;
+    }
+
+    .variant-modal .modal-section {
+        padding: 15px;
+    }
+
+    .variant-modal .image-preview-container,
+    .variant-modal .edit-image-preview-container {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 7px;
+    }
+
+    .variant-modal .small-upload {
+        min-height: 80px;
+    }
+
+    .variant-modal .image-actions button {
+        width: 28px;
+        height: 28px;
+
+        font-size: 12px;
+    }
+}

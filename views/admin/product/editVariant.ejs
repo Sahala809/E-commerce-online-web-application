@@ -1,6 +1,6 @@
 <%- include("../partials/header") %>
 
-<link rel="stylesheet" href="/css/admin/addVariant.css">
+<link rel="stylesheet" href="/css/admin/editVariant.css">
 
 <body>
 
@@ -14,125 +14,550 @@
 
         <div class="content">
 
-            <% if(successMessage){ %>
+            <!-- ================================================= -->
+            <!-- SUCCESS / ERROR MESSAGE -->
+            <!-- ================================================= -->
+
+            <% if (typeof successMessage !== "undefined" && successMessage) { %>
+
                 <div class="alert alert-success">
                     <%= successMessage %>
                 </div>
+
             <% } %>
 
-            <% if(errorMessage){ %>
+            <% if (typeof errorMessage !== "undefined" && errorMessage) { %>
+
                 <div class="alert alert-danger">
                     <%= errorMessage %>
                 </div>
+
             <% } %>
 
+
+            <!-- ================================================= -->
+            <!-- PAGE TITLE -->
+            <!-- ================================================= -->
+
             <div class="page-title">
-                <h1>Edit Product Variant</h1>
-                <p>Edit variant for <strong><%= product.productName %></strong></p>
+
+                <h1>Product Variants</h1>
+
+                <p>
+                    Manage variants for
+                    <strong>
+                        <%= product.productName %>
+                    </strong>
+                </p>
+
             </div>
+
+
+            <!-- ================================================= -->
+            <!-- VARIANTS CARD -->
+            <!-- ================================================= -->
 
             <div class="form-card">
 
-                <form
-                    action="/admin/products/<%= product._id %>/variants/edit/<%= variant._id %>?_method=PATCH"
-                    method="POST"
-                    enctype="multipart/form-data">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+
+                        <h3 class="mb-1">
+                            Variants
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Edit or manage product variants
+                        </p>
+
+                    </div>
+
+
+                    <!-- ADD VARIANT -->
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="addVariantButton">
+
+                        <i class="bi bi-plus-lg"></i>
+                        Add Variant
+
+                    </button>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- VARIANT TABLE -->
+                <!-- ================================================= -->
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Image</th>
+
+                                <th>Color</th>
+
+                                <th>Price</th>
+
+                                <th>Offer Price</th>
+
+                                <th>Stock</th>
+
+                                <th>Status</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        <% if (variants && variants.length > 0) { %>
+
+                            <% variants.forEach(variant => { %>
+
+                                <tr>
+
+                                    <!-- IMAGE -->
+
+                                    <td>
+
+                                        <% if (variant.images && variant.images.length > 0) { %>
+
+                                            <img
+                                                src="/uploads/variants/<%= variant.images[0] %>"
+                                                alt="<%= variant.color %>"
+                                                style="
+                                                    width:60px;
+                                                    height:60px;
+                                                    object-fit:cover;
+                                                    border-radius:8px;
+                                                "
+                                            >
+
+                                        <% } else { %>
+
+                                            <div
+                                                style="
+                                                    width:60px;
+                                                    height:60px;
+                                                    display:flex;
+                                                    align-items:center;
+                                                    justify-content:center;
+                                                    background:#f1f1f1;
+                                                    border-radius:8px;
+                                                "
+                                            >
+
+                                                <i class="bi bi-image"></i>
+
+                                            </div>
+
+                                        <% } %>
+
+                                    </td>
+
+
+                                    <!-- COLOR -->
+
+                                    <td>
+
+                                        <strong>
+                                            <%= variant.color %>
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- PRICE -->
+
+                                    <td>
+                                        ₹ <%= variant.price %>
+                                    </td>
+
+
+                                    <!-- OFFER PRICE -->
+
+                                    <td>
+
+                                        <% if (
+                                            variant.offerPrice !== undefined &&
+                                            variant.offerPrice !== null &&
+                                            variant.offerPrice !== ""
+                                        ) { %>
+
+                                            ₹ <%= variant.offerPrice %>
+
+                                        <% } else { %>
+
+                                            -
+
+                                        <% } %>
+
+                                    </td>
+
+
+                                    <!-- STOCK -->
+
+                                    <td>
+                                        <%= variant.stock %>
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        <% if (variant.isActive) { %>
+
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+
+                                        <% } else { %>
+
+                                            <span class="badge bg-danger">
+                                                Inactive
+                                            </span>
+
+                                        <% } %>
+
+                                    </td>
+
+
+                                    <!-- ACTION -->
+
+                                    <td>
+
+    <div class="dropdown">
+
+        <!-- Three dots button -->
+        <button
+            type="button"
+            class="btn btn-sm btn-light"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="More options"
+        >
+            <i class="bi bi-three-dots-vertical"></i>
+        </button>
+
+
+        <!-- Dropdown -->
+        <ul class="dropdown-menu dropdown-menu-end">
+
+            <!-- EDIT -->
+            <li>
+
+                <button
+                    type="button"
+                    class="dropdown-item edit-variant-btn"
+
+                    data-variant-id="<%= variant._id %>"
+
+                    data-color="<%= variant.color || '' %>"
+
+                    data-stock="<%= variant.stock ?? '' %>"
+
+                    data-price="<%= variant.price ?? '' %>"
+
+                    data-offer-price="<%= variant.offerPrice ?? '' %>"
+
+                    data-description="<%= variant.description || '' %>"
+
+                    data-is-active="<%= variant.isActive ? 'true' : 'false' %>"
+
+                    data-image1="<%= variant.images?.[0] || '' %>"
+
+                    data-image2="<%= variant.images?.[1] || '' %>"
+
+                    data-image3="<%= variant.images?.[2] || '' %>"
+                >
+
+                    <i class="bi bi-pencil me-2"></i>
+                    Edit
+
+                </button>
+
+            </li>
+
+
+            <!-- DELETE -->
+            <li>
+
+                <button
+                    type="button"
+                    class="dropdown-item text-danger delete-variant-btn"
+                    data-variant-id="<%= variant._id %>"
+                    data-product-id="<%= product._id %>"
+                >
+
+                    <i class="bi bi-trash me-2"></i>
+                    Delete
+
+                </button>
+
+            </li>
+
+        </ul>
+
+    </div>
+
+</td>
+
+                                </tr>
+
+                            <% }) %>
+
+                        <% } else { %>
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="text-center py-5"
+                                >
+
+                                    <p class="text-muted mb-0">
+                                        No variants found.
+                                    </p>
+
+                                </td>
+
+                            </tr>
+
+                        <% } %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- EDIT VARIANT MODAL -->
+<!-- ========================================================= -->
+
+<div
+    class="modal fade"
+    id="editVariantModal"
+    tabindex="-1"
+    aria-labelledby="editVariantModalLabel"
+    aria-hidden="true"
+>
+
+    <div
+        class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+    >
+
+        <div class="modal-content">
+
+
+            <!-- ================================================= -->
+            <!-- MODAL HEADER -->
+            <!-- ================================================= -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5
+                        class="modal-title"
+                        id="editVariantModalLabel"
+                    >
+                        Edit Variant
+                    </h5>
+
+                    <small class="text-muted">
+
+                        <%= product.productName %>
+
+                    </small>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- EDIT FORM -->
+            <!-- ================================================= -->
+
+            <form
+                id="editVariantForm"
+                method="POST"
+                enctype="multipart/form-data"
+                novalidate
+            >
+
+                <div class="modal-body">
+
+
+                    <!-- SERVER ERROR -->
+
+                    <div
+                        id="modalErrorMessage"
+                        class="alert alert-danger d-none"
+                    ></div>
+
 
                     <div class="row">
 
-                        <!-- Left Side -->
+
+                        <!-- ================================================= -->
+                        <!-- LEFT SIDE -->
+                        <!-- ================================================= -->
 
                         <div class="col-lg-7">
 
-                            <h3 class="mb-4">Variant Information</h3>
+                            <h5 class="mb-4">
+                                Variant Information
+                            </h5>
+
+
+                            <!-- COLOR -->
 
                             <div class="mb-3">
 
-                                <label class="form-label">Color</label>
+                                <label
+                                    for="editColor"
+                                    class="form-label"
+                                >
+                                    Color
+                                </label>
 
                                 <input
                                     type="text"
                                     name="color"
-                                    id="color"
+                                    id="editColor"
                                     class="form-control"
-                                    value="<%= formData?.color || variant.color %>">
+                                >
 
-                                <% if(errors?.color){ %>
-                                    <small class="text-danger" id="colorError">
-                                        <%= errors.color %>
-                                    </small>
-                                <% } %>
+                                <small
+                                    class="text-danger client-error"
+                                    id="editColorError"
+                                ></small>
 
                             </div>
 
+
+                            <!-- STOCK -->
+
                             <div class="mb-3">
 
-                                <label class="form-label">Stock</label>
+                                <label
+                                    for="editStock"
+                                    class="form-label"
+                                >
+                                    Stock
+                                </label>
 
                                 <input
                                     type="number"
                                     name="stock"
-                                    id="stock"
+                                    id="editStock"
                                     class="form-control"
-                                    value="<%= formData?.stock || variant.stock %>">
+                                    min="0"
+                                >
 
-                                <% if(errors?.stock){ %>
-                                    <small class="text-danger" id="stockError">
-                                        <%= errors.stock %>
-                                    </small>
-                                <% } %>
+                                <small
+                                    class="text-danger client-error"
+                                    id="editStockError"
+                                ></small>
 
                             </div>
 
+
+                            <!-- PRICE -->
+
                             <div class="mb-3">
 
-                                <label class="form-label">Price (₹)</label>
+                                <label
+                                    for="editPrice"
+                                    class="form-label"
+                                >
+                                    Price (₹)
+                                </label>
 
                                 <input
                                     type="number"
                                     name="price"
-                                    id="price"
+                                    id="editPrice"
                                     class="form-control"
-                                    value="₹<%= formData?.price || variant.price %>">
+                                    min="1"
+                                >
 
-                                <% if(errors?.price){ %>
-                                    <small class="text-danger" 
-                                            id="priceError">
-                                        <%= errors.price %>
-                                    </small>
-                                <% } %>
+                                <small
+                                    class="text-danger client-error"
+                                    id="editPriceError"
+                                ></small>
 
                             </div>
 
+
+                            <!-- OFFER PRICE -->
+
                             <div class="mb-3">
 
-                                <label class="form-label">Offer Price (₹)</label>
+                                <label
+                                    for="editOfferPrice"
+                                    class="form-label"
+                                >
+                                    Offer Price (₹)
+                                </label>
 
                                 <input
                                     type="number"
                                     name="offerPrice"
-                                    id="offerPrice"
+                                    id="editOfferPrice"
                                     class="form-control"
-                                    value="₹<%= formData?.offerPrice || variant.offerPrice %>">
+                                    min="0"
+                                >
 
-
-                                    <% if(errors?.offerPrice){ %>
-
-                                        <small
-                                            class="text-danger"
-                                            id="offerPriceError">
-
-                                            <%= errors.offerPrice %>
-
-                                        </small>
-
-                                    <% } %>
+                                <small
+                                    class="text-danger client-error"
+                                    id="editOfferPriceError"
+                                ></small>
 
                             </div>
 
+
+                            <!-- STATUS -->
+
                             <div class="mb-3">
 
-                                <label class="form-label">Status</label>
+                                <label class="form-label">
+                                    Status
+                                </label>
 
                                 <div class="form-check form-switch">
 
@@ -141,1347 +566,1611 @@
                                         type="checkbox"
                                         name="isActive"
                                         value="true"
-                                        <%= (formData?.isActive !== undefined ? formData.isActive === "true" : variant.isActive) ? "checked" : "" %>>
+                                        id="editIsActive"
+                                    >
 
-                                    <label class="form-check-label">
-
+                                    <label
+                                        class="form-check-label"
+                                        for="editIsActive"
+                                    >
                                         Active
-
                                     </label>
 
                                 </div>
 
                             </div>
- 
+
+
+                            <!-- DESCRIPTION -->
+
                             <div class="mb-3">
 
-                                <label class="form-label">Description</label>
+                                <label
+                                    for="editDescription"
+                                    class="form-label"
+                                >
+                                    Description
+                                </label>
 
                                 <textarea
                                     rows="5"
                                     class="form-control"
-                                    name="description"><%= formData?.description || variant.description %></textarea>
+                                    name="description"
+                                    id="editDescription"
+                                ></textarea>
 
                             </div>
 
                         </div>
-                        <!-- Right Side -->
+
+
+
+                        <!-- ================================================= -->
+                        <!-- RIGHT SIDE - IMAGES -->
+                        <!-- ================================================= -->
 
                         <div class="col-lg-5">
 
-                            <h3 class="mb-4">Variant Images</h3>
+                            <h5 class="mb-4">
+                                Variant Images
+                            </h5>
 
-                            <!-- Main Upload Area -->
-                            <div class="image-upload-area" id="imageUploadArea">
+
+                            <!-- IMAGE UPLOAD AREA -->
+
+                            <div
+                                class="image-upload-area"
+                                id="editImageUploadArea"
+                            >
 
                                 <div class="upload-icon">
+
                                     <i class="bi bi-cloud-arrow-up"></i>
+
                                 </div>
 
-                                <h4>Drop files here to upload</h4>
+                                <h4>
+                                    Add or replace image
+                                </h4>
 
-                                <p>PNG, JPG up to 10MB each</p>
+                                <p>
+                                    PNG, JPG up to 10MB
+                                </p>
 
                                 <button
                                     type="button"
                                     class="browse-btn"
-                                    id="browseBtn">
+                                    id="editBrowseBtn"
+                                >
                                     Browse Files
                                 </button>
 
                                 <input
                                     type="file"
-                                    id="imageInput"
+                                    id="editImageInput"
                                     name="images"
                                     accept="image/png,image/jpeg,image/jpg"
-                                    multiple
-                                    hidden>
+                                    hidden
+                                >
 
                             </div>
 
-                            <% if(errors && errors.images){ %>
-                                <small class="text-danger" id="imageError">
-                                    <%= errors.images %>
-                                </small>
-                            <% } %>
+
+                            <!-- IMAGE ERROR -->
+
+                            <small
+                                class="text-danger"
+                                id="editImageError"
+                            ></small>
 
 
-                            <!-- Three Image Preview Boxes -->
+                            <!-- ================================================= -->
+                            <!-- IMAGE BOXES -->
+                            <!-- ================================================= -->
 
-                        <div class="image-preview-container">
+                            <div class="image-preview-container">
 
-    <!-- IMAGE 1 -->
-   <div class="small-upload" id="box1">
 
-    <% if (variant.images?.[0]) { %>
+                                <!-- IMAGE 1 -->
 
-        <img
-            id="preview1"
-            src="/uploads/variants/<%= variant.images[0] %>"
-            alt="Image 1"
-            style="display:block;">
+                                <div
+                                    class="small-upload"
+                                    id="editBox1"
+                                >
 
-        <span
-            class="plus"
-            id="plus1"
-            style="display:none;">
-            +
-        </span>
+                                    <span
+                                        class="plus"
+                                        id="editPlus1"
+                                    >
+                                        +
+                                    </span>
 
-        <div
-            class="image-actions"
-            id="actions1"
-            style="display:flex;">
+                                    <img
+                                        id="editPreview1"
+                                        alt="Image 1"
+                                        style="display:none;"
+                                    >
 
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box1"
-                data-existing="<%= variant.images[0] %>">
-                ✎
-            </button>
+                                    <div
+                                        class="image-actions"
+                                        id="editActions1"
+                                        style="display:none;"
+                                    >
 
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box1"
-                data-existing="<%= variant.images?.[0] || '' %>">
-                ×
-            </button>
+                                        <button
+                                            type="button"
+                                            class="edit-image edit-existing-image"
+                                            data-box="editBox1"
+                                        >
+                                            ✎
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="remove-image remove-existing-image"
+                                            data-box="editBox1"
+                                        >
+                                            ×
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- IMAGE 2 -->
+
+                                <div
+                                    class="small-upload"
+                                    id="editBox2"
+                                >
+
+                                    <span
+                                        class="plus"
+                                        id="editPlus2"
+                                    >
+                                        +
+                                    </span>
+
+                                    <img
+                                        id="editPreview2"
+                                        alt="Image 2"
+                                        style="display:none;"
+                                    >
+
+                                    <div
+                                        class="image-actions"
+                                        id="editActions2"
+                                        style="display:none;"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="edit-image edit-existing-image"
+                                            data-box="editBox2"
+                                        >
+                                            ✎
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="remove-image remove-existing-image"
+                                            data-box="editBox2"
+                                        >
+                                            ×
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- IMAGE 3 -->
+
+                                <div
+                                    class="small-upload"
+                                    id="editBox3"
+                                >
+
+                                    <span
+                                        class="plus"
+                                        id="editPlus3"
+                                    >
+                                        +
+                                    </span>
+
+                                    <img
+                                        id="editPreview3"
+                                        alt="Image 3"
+                                        style="display:none;"
+                                    >
+
+                                    <div
+                                        class="image-actions"
+                                        id="editActions3"
+                                        style="display:none;"
+                                    >
+
+                                        <button
+                                            type="button"
+                                            class="edit-image edit-existing-image"
+                                            data-box="editBox3"
+                                        >
+                                            ✎
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="remove-image remove-existing-image"
+                                            data-box="editBox3"
+                                        >
+                                            ×
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- REMOVED IMAGES -->
+
+                            <div id="removedImagesContainer"></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- MODAL FOOTER -->
+                <!-- ================================================= -->
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="updateVariantButton"
+                    >
+                        Update Variant
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
 
-    <% } else { %>
-
-        <span class="plus" id="plus1">+</span>
-
-        <img
-            id="preview1"
-            alt="Image 1"
-            style="display:none;">
-
-        <div
-            class="image-actions"
-            id="actions1"
-            style="display:none;">
-
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box1">
-                ✎
-            </button>
-
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box1">
-                ×
-            </button>
-
-        </div>
-
-    <% } %>
+    </div>
 
 </div>
 
 
-  <!-- IMAGE 2 -->
-<div class="small-upload" id="box2">
 
-    <% if (variant.images?.[1]) { %>
+<!-- ========================================================= -->
+<!-- CROPPER MODAL -->
+<!-- ========================================================= -->
 
-        <img
-            id="preview2"
-            src="/uploads/variants/<%= variant.images[1] %>"
-            alt="Image 2"
-            style="display:block;">
+<div
+    class="modal fade"
+    id="editCropModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
 
-        <span
-            class="plus"
-            id="plus2"
-            style="display:none;">
-            +
-        </span>
+    <div
+        class="modal-dialog modal-lg modal-dialog-centered"
+    >
 
-        <div
-            class="image-actions"
-            id="actions2"
-            style="display:flex;">
-
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box2"
-                data-existing="<%= variant.images[1] %>">
-                ✎
-            </button>
-
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box2"
-                data-existing="<%= variant.images?.[1] || '' %>">
-                ×
-            </button>
-
-        </div>
-
-    <% } else { %>
-
-        <span
-            class="plus"
-            id="plus2">
-            +
-        </span>
-
-        <img
-            id="preview2"
-            alt="Image 2"
-            style="display:none;">
-
-        <div
-            class="image-actions"
-            id="actions2"
-            style="display:none;">
-
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box2">
-                ✎
-            </button>
-
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box2">
-                ×
-            </button>
-
-        </div>
-
-    <% } %>
-
-</div>
-
-
-    <!-- IMAGE 3 -->
-<div class="small-upload" id="box3">
-
-    <% if (variant.images?.[2]) { %>
-
-        <img
-            id="preview3"
-            src="/uploads/variants/<%= variant.images[2] %>"
-            alt="Image 3"
-            style="display:block;">
-
-        <span
-            class="plus"
-            id="plus3"
-            style="display:none;">
-            +
-        </span>
-
-        <div
-            class="image-actions"
-            id="actions3"
-            style="display:flex;">
-
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box3"
-                data-existing="<%= variant.images[2] %>">
-                ✎
-            </button>
-
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box3"
-                data-existing="<%= variant.images?.[2] || '' %>">
-                ×
-            </button>
-
-        </div>
-
-    <% } else { %>
-
-        <span
-            class="plus"
-            id="plus3">
-            +
-        </span>
-
-        <img
-            id="preview3"
-            alt="Image 3"
-            style="display:none;">
-
-        <div
-            class="image-actions"
-            id="actions3"
-            style="display:none;">
-
-            <button
-                type="button"
-                class="edit-image"
-                data-box="box3">
-                ✎
-            </button>
-
-            <button
-                type="button"
-                class="remove-image"
-                data-box="box3">
-                ×
-            </button>
-
-        </div>
-
-    <% } %>
-
-</div>
-
-</div>
-
-<div id="removedImagesContainer"></div>
-
-
-<div class="modal fade" id="cropModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
+
             <div class="modal-header">
-                <h5 class="modal-title">Adjust Image</h5>
+
+                <h5 class="modal-title">
+                    Adjust Image
+                </h5>
 
                 <button
                     type="button"
                     class="btn-close"
-                    data-bs-dismiss="modal">
-                </button>
+                    data-bs-dismiss="modal"
+                ></button>
+
             </div>
+
 
             <div class="modal-body text-center">
 
                 <div class="crop-container">
-                    <img id="cropImage">
+
+                    <img
+                        id="editCropImage"
+                        style="
+                            max-width:100%;
+                            display:block;
+                        "
+                    >
+
                 </div>
 
             </div>
+
 
             <div class="modal-footer">
 
                 <button
                     type="button"
                     class="btn btn-secondary"
-                    data-bs-dismiss="modal">
+                    data-bs-dismiss="modal"
+                >
                     Cancel
                 </button>
 
                 <button
                     type="button"
                     class="btn btn-primary"
-                    id="cropButton">
+                    id="editCropButton"
+                >
                     Crop & Fix
                 </button>
 
             </div>
 
         </div>
-    </div>
-</div>
-
-                        
-
-                    </div>
-
-                
-
-
-                    <div class="text-end mt-4">
-
-                        <a
-                            href="/admin/products/<%= product._id %>/variants"
-                            class="btn btn-outline-secondary me-2">
-
-                            Cancel
-
-                        </a>
-
-                        <button
-                            type="submit"
-                            class="btn btn-primary">
-
-                            Update Variant
-
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
 
     </div>
 
 </div>
+
+
+
+<!-- ========================================================= -->
+<!-- LIBRARIES -->
+<!-- ========================================================= -->
 
 <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
 
 <script>
 
-// ======================================================
-// EDIT VARIANT - IMAGE + CROPPER
-// ======================================================
+document.addEventListener("DOMContentLoaded", function () {
 
-const imageInput =
-    document.getElementById("imageInput");
+    // =====================================================
+    // MODALS
+    // =====================================================
 
-const cropModalElement =
-    document.getElementById("cropModal");
+    const editVariantModalElement =
+        document.getElementById("editVariantModal");
 
-const cropModal =
-    new bootstrap.Modal(cropModalElement);
+    const editVariantModal =
+        new bootstrap.Modal(editVariantModalElement);
 
-const cropImage =
-    document.getElementById("cropImage");
 
-const cropButton =
-    document.getElementById("cropButton");
+    const cropModalElement =
+        document.getElementById("editCropModal");
 
-const form =
-    document.querySelector("form");
+    const cropModal =
+        new bootstrap.Modal(cropModalElement);
 
 
-let cropper = null;
+    // =====================================================
+    // FORM
+    // =====================================================
 
-let currentBox = null;
+    const form =
+        document.getElementById("editVariantForm");
 
-// Newly selected / cropped files
-let croppedFiles = {};
 
+    // =====================================================
+    // IMAGE ELEMENTS
+    // =====================================================
 
-// ======================================================
-// 1. CLICK IMAGE BOX
-// ======================================================
+    const imageInput =
+        document.getElementById("editImageInput");
 
-document.querySelectorAll(".small-upload").forEach(box => {
+    const browseButton =
+        document.getElementById("editBrowseBtn");
 
-    box.addEventListener("click", function(e) {
+    const cropImage =
+        document.getElementById("editCropImage");
 
-        // Don't open file picker when clicking
-        // Edit or Remove buttons
+    const cropButton =
+        document.getElementById("editCropButton");
 
-        if (
-            e.target.closest(".edit-image") ||
-            e.target.closest(".remove-image")
-        ) {
-            return;
-        }
 
-        // Store selected box
+    // =====================================================
+    // FORM FIELDS
+    // =====================================================
 
-        currentBox = this.id;
+    const colorInput =
+        document.getElementById("editColor");
 
-        // Open file picker
+    const stockInput =
+        document.getElementById("editStock");
 
-        imageInput.click();
+    const priceInput =
+        document.getElementById("editPrice");
 
-    });
+    const offerPriceInput =
+        document.getElementById("editOfferPrice");
 
-});
+    const descriptionInput =
+        document.getElementById("editDescription");
 
+    const activeInput =
+        document.getElementById("editIsActive");
 
-// ======================================================
-// 2. SELECT NEW IMAGE
-// ======================================================
 
-imageInput.addEventListener("change", function() {
+    // =====================================================
+    // VARIABLES
+    // =====================================================
 
-    const file = this.files[0];
+    let currentVariantId = null;
 
-    if (!file) {
-        return;
-    }
+    let currentBox = null;
 
+    let cropper = null;
 
-    // Check image type
+    let croppedFiles = {};
 
-    if (!file.type.startsWith("image/")) {
+    let existingImages = {};
 
-        alert("Please select an image.");
 
-        imageInput.value = "";
+    // =====================================================
+    // EDIT VARIANT BUTTON
+    // =====================================================
 
-        return;
+    document
+        .querySelectorAll(".edit-variant-btn")
+        .forEach(button => {
 
-    }
+            button.addEventListener("click", function () {
 
+                // -----------------------------------------
+                // GET VARIANT DATA
+                // -----------------------------------------
 
-    // Open crop modal
+                currentVariantId =
+                    this.dataset.variantId;
 
-    openCropModal(file);
 
-});
+                const color =
+                    this.dataset.color || "";
 
 
-// ======================================================
-// 3. OPEN CROP MODAL
-// ======================================================
+                const stock =
+                    this.dataset.stock || "";
 
-function openCropModal(file) {
 
-    const reader =
-        new FileReader();
+                const price =
+                    this.dataset.price || "";
 
 
-    reader.onload = function(e) {
+                const offerPrice =
+                    this.dataset.offerPrice || "";
 
-        cropImage.src =
-            e.target.result;
 
-        cropModal.show();
+                const description =
+                    this.dataset.description || "";
 
-    };
 
+                const isActive =
+                    this.dataset.isActive === "true";
 
-    reader.readAsDataURL(file);
 
-}
+                const image1 =
+                    this.dataset.image1 || "";
 
 
-// ======================================================
-// 4. INITIALIZE CROPPER
-// ======================================================
+                const image2 =
+                    this.dataset.image2 || "";
 
-cropModalElement.addEventListener(
-    "shown.bs.modal",
-    function() {
 
-        // Destroy old cropper
+                const image3 =
+                    this.dataset.image3 || "";
 
-        if (cropper) {
 
-            cropper.destroy();
+                // -----------------------------------------
+                // FORM ACTION
+                // -----------------------------------------
 
-            cropper = null;
+                form.action =
+                    `/admin/products/<%= product._id %>/variants/edit/${currentVariantId}?_method=PATCH`;
 
-        }
 
+                // -----------------------------------------
+                // PUT EXISTING VALUES INTO FORM
+                // -----------------------------------------
 
-        // Create cropper
+                colorInput.value =
+                    color;
 
-        cropper =
-            new Cropper(
-                cropImage,
-                {
-                    aspectRatio: 1,
 
-                    viewMode: 1,
+                stockInput.value =
+                    stock;
 
-                    dragMode: "move",
 
-                    autoCropArea: 1,
+                priceInput.value =
+                    price;
 
-                    responsive: true,
 
-                    background: false
-                }
-            );
+                offerPriceInput.value =
+                    offerPrice;
 
-    }
-);
 
+                descriptionInput.value =
+                    description;
 
-// ======================================================
-// 5. CROP & FIX
-// ======================================================
 
-cropButton.addEventListener(
-    "click",
-    function() {
+                activeInput.checked =
+                    isActive;
 
-        if (!cropper || !currentBox) {
 
-            return;
+                // -----------------------------------------
+                // RESET DATA
+                // -----------------------------------------
 
-        }
+                croppedFiles = {};
 
 
-        const canvas =
-            cropper.getCroppedCanvas({
+                existingImages = {
 
-                width: 800,
+                    editBox1: image1,
 
-                height: 800
+                    editBox2: image2,
+
+                    editBox3: image3
+
+                };
+
+
+                // -----------------------------------------
+                // CLEAR ERRORS
+                // -----------------------------------------
+
+                document
+                    .querySelectorAll(".client-error")
+                    .forEach(error => {
+
+                        error.textContent = "";
+
+                    });
+
+
+                document
+                    .getElementById("editImageError")
+                    .textContent = "";
+
+
+                document
+                    .getElementById("modalErrorMessage")
+                    .classList.add("d-none");
+
+
+                // -----------------------------------------
+                // RESET IMAGE BOXES
+                // -----------------------------------------
+
+                resetImageBoxes();
+
+
+                // -----------------------------------------
+                // LOAD EXISTING IMAGES
+                // -----------------------------------------
+
+                loadExistingImage(
+                    "editBox1",
+                    image1
+                );
+
+
+                loadExistingImage(
+                    "editBox2",
+                    image2
+                );
+
+
+                loadExistingImage(
+                    "editBox3",
+                    image3
+                );
+
+
+                // -----------------------------------------
+                // SHOW MODAL
+                // -----------------------------------------
+
+                editVariantModal.show();
 
             });
 
+        });
 
-        canvas.toBlob(
-            function(blob) {
 
-                if (!blob) {
+    // =====================================================
+    // RESET IMAGE BOXES
+    // =====================================================
 
-                    alert(
-                        "Unable to crop image."
-                    );
+    function resetImageBoxes() {
 
-                    return;
+        [
+            "editBox1",
+            "editBox2",
+            "editBox3"
+        ]
+        .forEach(boxId => {
+
+            const box =
+                document.getElementById(boxId);
+
+            const preview =
+                box.querySelector("img");
+
+            const plus =
+                box.querySelector(".plus");
+
+            const actions =
+                box.querySelector(".image-actions");
+
+
+            preview.src = "";
+
+            preview.style.display = "none";
+
+            plus.style.display = "block";
+
+            actions.style.display = "none";
+
+        });
+
+
+        document
+            .getElementById("removedImagesContainer")
+            .innerHTML = "";
+
+    }
+
+
+    // =====================================================
+    // LOAD EXISTING IMAGE
+    // =====================================================
+
+    function loadExistingImage(boxId, imageName) {
+
+        if (!imageName) {
+            return;
+        }
+
+
+        const box =
+            document.getElementById(boxId);
+
+        const preview =
+            box.querySelector("img");
+
+        const plus =
+            box.querySelector(".plus");
+
+        const actions =
+            box.querySelector(".image-actions");
+
+
+        preview.src =
+            `/uploads/variants/${imageName}`;
+
+        preview.style.display =
+            "block";
+
+        plus.style.display =
+            "none";
+
+        actions.style.display =
+            "flex";
+
+    }
+
+
+    // =====================================================
+    // BROWSE BUTTON
+    // =====================================================
+
+    browseButton.addEventListener(
+        "click",
+        function () {
+
+            currentBox =
+                findFirstAvailableBox();
+
+            imageInput.click();
+
+        }
+    );
+
+
+    // =====================================================
+    // CLICK IMAGE BOX
+    // =====================================================
+
+    document
+        .querySelectorAll(".small-upload")
+        .forEach(box => {
+
+            box.addEventListener(
+                "click",
+                function (event) {
+
+                    if (
+                        event.target.closest(".edit-image") ||
+                        event.target.closest(".remove-image")
+                    ) {
+                        return;
+                    }
+
+
+                    currentBox =
+                        this.id;
+
+
+                    imageInput.click();
 
                 }
+            );
+
+        });
 
 
-                // Create new cropped file
+    // =====================================================
+    // FIND EMPTY BOX
+    // =====================================================
 
-                const file =
-                    new File(
-                        [blob],
+    function findFirstAvailableBox() {
 
-                        `variant-image-${Date.now()}.jpg`,
+        for (
+            const boxId of
+            [
+                "editBox1",
+                "editBox2",
+                "editBox3"
+            ]
+        ) {
 
-                        {
-                            type: "image/jpeg"
-                        }
-                    );
+            if (
+                !existingImages[boxId] &&
+                !croppedFiles[boxId]
+            ) {
 
+                return boxId;
 
-                // Store new file
+            }
 
-                croppedFiles[currentBox] =
-                    file;
-
-
-                // --------------------------------------
-                // Remove image validation errors
-                // --------------------------------------
-
-                const imageError =
-                    document.getElementById(
-                        "imageError"
-                    );
-
-                if (imageError) {
-
-                    imageError.remove();
-
-                }
+        }
 
 
-                const clientImageError =
-                    document.getElementById("clientImageError");
+        return "editBox1";
 
-                if (clientImageError) {
-                    clientImageError.remove();
-                }
+    }
 
 
-                // --------------------------------------
-                // Get current box
-                // --------------------------------------
+    // =====================================================
+    // IMAGE SELECT
+    // =====================================================
 
-                const box =
-                    document.getElementById(
-                        currentBox
-                    );
+    imageInput.addEventListener(
+        "change",
+        function () {
 
-
-                const preview =
-                    box.querySelector("img");
+            const file =
+                this.files[0];
 
 
-                const plus =
-                    box.querySelector(".plus");
+            if (!file) {
+                return;
+            }
 
 
-                const actions =
-                    box.querySelector(
-                        ".image-actions"
-                    );
+            if (!file.type.startsWith("image/")) {
 
-
-                // --------------------------------------
-                // Show image
-                // --------------------------------------
-
-                preview.src =
-                    URL.createObjectURL(file);
-
-                preview.style.display =
-                    "block";
-
-
-                // Hide +
-
-                plus.style.display =
-                    "none";
-
-
-                // Show buttons
-
-                actions.style.display =
-                    "flex";
-
-
-                // Close modal
-
-                cropModal.hide();
-
-
-                // Destroy cropper
-
-                if (cropper) {
-
-                    cropper.destroy();
-
-                    cropper = null;
-
-                }
-
-
-                // Clear file input
+                showImageError(
+                    "Please select a valid image."
+                );
 
                 imageInput.value = "";
 
-            },
+                return;
 
-            "image/jpeg",
+            }
 
-            0.9
-        );
+
+            openCropModal(file);
+
+        }
+    );
+
+
+    // =====================================================
+    // OPEN CROP MODAL
+    // =====================================================
+
+    function openCropModal(file) {
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function (event) {
+
+                cropImage.src =
+                    event.target.result;
+
+                cropModal.show();
+
+            };
+
+
+        reader.readAsDataURL(file);
 
     }
-);
 
 
-// ======================================================
-// 6. EDIT / CROP EXISTING IMAGE
-// ======================================================
+    // =====================================================
+    // INITIALIZE CROPPER
+    // =====================================================
 
-document.querySelectorAll(".edit-image")
-    .forEach(button => {
+    cropModalElement.addEventListener(
+        "shown.bs.modal",
+        function () {
 
-        button.addEventListener(
-            "click",
-            async function(e) {
+            if (cropper) {
 
-                e.stopPropagation();
+                cropper.destroy();
 
+                cropper = null;
 
-                // Current box
-
-                currentBox =
-                    this.dataset.box;
+            }
 
 
-                // Existing database image
+            cropper =
+                new Cropper(
+                    cropImage,
+                    {
 
-                const existingImage =
-                    this.dataset.existing;
+                        aspectRatio: 1,
 
+                        viewMode: 1,
 
-                // --------------------------------------
-                // If this is a newly cropped image
-                // --------------------------------------
+                        dragMode: "move",
 
-                if (!existingImage) {
+                        autoCropArea: 1,
 
-                    const existingFile =
-                        croppedFiles[currentBox];
+                        responsive: true,
 
-
-                    if (existingFile) {
-
-                        openCropModal(
-                            existingFile
-                        );
+                        background: false
 
                     }
+                );
 
-                    return;
+        }
+    );
 
-                }
+
+    // =====================================================
+    // CROP & FIX
+    // =====================================================
+
+    cropButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                !cropper ||
+                !currentBox
+            ) {
+                return;
+            }
 
 
-                // --------------------------------------
-                // Existing database image
-                // --------------------------------------
+            const canvas =
+                cropper.getCroppedCanvas({
 
-                try {
+                    width: 800,
 
-                    const response =
-                        await fetch(
-                            `/uploads/variants/${existingImage}`
+                    height: 800
+
+                });
+
+
+            canvas.toBlob(
+                function (blob) {
+
+                    if (!blob) {
+
+                        showImageError(
+                            "Unable to crop image."
                         );
 
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            "Image could not be loaded"
-                        );
+                        return;
 
                     }
-
-
-                    const blob =
-                        await response.blob();
 
 
                     const file =
                         new File(
                             [blob],
-
-                            existingImage,
-
+                            `variant-image-${Date.now()}.jpg`,
                             {
-                                type: blob.type
+                                type: "image/jpeg"
                             }
                         );
 
 
-                    // Open cropper
+                    // -------------------------------------
+                    // IF OLD DATABASE IMAGE EXISTS
+                    // -------------------------------------
 
-                    openCropModal(file);
-
-                }
-                catch(error) {
-
-                    console.error(error);
-
-                    alert(
-                        "Unable to edit image."
-                    );
-
-                }
-
-            }
-        );
-
-    });
+                    const oldImage =
+                        existingImages[currentBox];
 
 
-// ======================================================
-// 7. REMOVE IMAGE
-// ======================================================
+                    if (oldImage) {
 
-document.querySelectorAll(".remove-image")
-    .forEach(button => {
+                        addRemovedImage(oldImage);
 
-        button.addEventListener(
-            "click",
-            function(e) {
+                        existingImages[currentBox] = "";
 
-                e.stopPropagation();
+                    }
 
 
-                // Current box
+                    // -------------------------------------
+                    // SAVE NEW FILE
+                    // -------------------------------------
 
-                const boxId =
-                    this.dataset.box;
-
-
-                // Existing database image
-
-                const existingImage =
-                    this.dataset.existing;
+                    croppedFiles[currentBox] =
+                        file;
 
 
-                // --------------------------------------
-                // Existing image
-                // --------------------------------------
+                    // -------------------------------------
+                    // SHOW PREVIEW
+                    // -------------------------------------
 
-                if (existingImage) {
-
-                    const removedInput =
-                        document.createElement(
-                            "input"
-                        );
-
-
-                    removedInput.type =
-                        "hidden";
-
-
-                    removedInput.name =
-                        "removedImages[]";
-
-
-                    removedInput.value =
-                        existingImage;
-
-
-                    document
-                        .getElementById(
-                            "removedImagesContainer"
-                        )
-                        .appendChild(
-                            removedInput
-                        );
-
-                }
-
-
-                // --------------------------------------
-                // Remove newly cropped file
-                // --------------------------------------
-
-                delete croppedFiles[boxId];
-
-
-                // Get box
-
-                const box =
-                    document.getElementById(
-                        boxId
+                    showCroppedImage(
+                        currentBox,
+                        file
                     );
 
 
-                const preview =
-                    box.querySelector("img");
+                    // -------------------------------------
+                    // CLOSE MODAL
+                    // -------------------------------------
+
+                    cropModal.hide();
 
 
-                const plus =
-                    box.querySelector(".plus");
+                    if (cropper) {
+
+                        cropper.destroy();
+
+                        cropper = null;
+
+                    }
 
 
-                const actions =
-                    box.querySelector(
-                        ".image-actions"
-                    );
+                    imageInput.value = "";
 
+                },
 
-                // Remove preview
+                "image/jpeg",
 
-                preview.src = "";
+                0.9
 
-                preview.style.display =
-                    "none";
-
-
-                // Show +
-
-                plus.style.display =
-                    "block";
-
-
-                // Hide buttons
-
-                actions.style.display =
-                    "none";
-
-
-                // Clear existing image reference
-
-                box.dataset.existingImage =
-                    "";
-
-                button.dataset.existing =
-                    "";
-
-            }
-        );
-
-    });
-
-
-// ======================================================
-// 8. WHEN CROP MODAL CLOSES
-// ======================================================
-
-cropModalElement.addEventListener(
-    "hidden.bs.modal",
-    function() {
-
-        if (cropper) {
-
-            cropper.destroy();
-
-            cropper = null;
+            );
 
         }
+    );
 
 
-        imageInput.value = "";
+    // =====================================================
+    // SHOW CROPPED IMAGE
+    // =====================================================
 
-    }
-);
+    function showCroppedImage(boxId, file) {
 
-
-// ======================================================
-// 9. CHECK WHETHER ANY IMAGE EXISTS
-// ======================================================
-
-function hasAnyImage() {
-
-    const boxes =
-        document.querySelectorAll(
-            ".small-upload"
-        );
-
-
-    return [...boxes].some(box => {
+        const box =
+            document.getElementById(boxId);
 
         const preview =
             box.querySelector("img");
 
+        const plus =
+            box.querySelector(".plus");
 
-        if (!preview) {
-
-            return false;
-
-        }
-
-
-        return (
-            preview.style.display !== "none" &&
-            preview.src !== ""
-        );
-
-    });
-
-}
+        const actions =
+            box.querySelector(".image-actions");
 
 
-// ======================================================
-// 10. FORM VALIDATION
-// ======================================================
+        preview.src =
+            URL.createObjectURL(file);
 
-form.addEventListener(
-    "submit",
-    function(e) {
+        preview.style.display =
+            "block";
 
-        let isValid = true;
+        plus.style.display =
+            "none";
 
+        actions.style.display =
+            "flex";
 
-        // ----------------------------------------------
-        // Get fields
-        // ----------------------------------------------
-
-        const color =
-            document.getElementById("color");
+    }
 
 
-        const stock =
-            document.getElementById("stock");
+    // =====================================================
+    // EDIT EXISTING IMAGE
+    // =====================================================
+
+    document
+        .querySelectorAll(".edit-existing-image")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async function (event) {
+
+                    event.stopPropagation();
 
 
-        const price =
-            document.getElementById("price");
+                    currentBox =
+                        this.dataset.box;
 
 
-        // ----------------------------------------------
-        // Remove previous CLIENT errors
-        // ----------------------------------------------
+                    // -------------------------------------
+                    // IF NEW CROPPED FILE EXISTS
+                    // -------------------------------------
 
-        document
-            .querySelectorAll(
-                ".client-error"
-            )
-            .forEach(error => {
-
-                error.remove();
-
-            });
+                    const newFile =
+                        croppedFiles[currentBox];
 
 
-        // =================================================
-        // COLOR
-        // =================================================
+                    if (newFile) {
 
-        if (
-            !color.value.trim()
-        ) {
+                        openCropModal(newFile);
 
-            showError(
-                color,
-                "Color is required"
+                        return;
+
+                    }
+
+
+                    // -------------------------------------
+                    // GET EXISTING IMAGE
+                    // -------------------------------------
+
+                    const existingImage =
+                        existingImages[currentBox];
+
+
+                    if (!existingImage) {
+
+                        imageInput.click();
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                `/uploads/variants/${existingImage}`
+                            );
+
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                "Image could not be loaded"
+                            );
+
+                        }
+
+
+                        const blob =
+                            await response.blob();
+
+
+                        const file =
+                            new File(
+                                [blob],
+                                existingImage,
+                                {
+                                    type: blob.type
+                                }
+                            );
+
+
+                        openCropModal(file);
+
+                    }
+                    catch (error) {
+
+                        console.error(error);
+
+                        showImageError(
+                            "Unable to edit image."
+                        );
+
+                    }
+
+                }
             );
-
-            isValid = false;
-
-        }
-
-
-        // =================================================
-        // STOCK
-        // =================================================
-
-        if (
-            stock.value.trim() === "" ||
-            Number(stock.value) < 0
-        ) {
-
-            showError(
-                stock,
-                "Please enter a valid stock"
-            );
-
-            isValid = false;
-
-        }
-
-
-        // =================================================
-        // PRICE
-        // =================================================
-
-        if (
-            price.value.trim() === "" ||
-            Number(price.value) <= 0
-        ) {
-
-            showError(
-                price,
-                "Please enter a valid price"
-            );
-
-            isValid = false;
-
-        }
-
-
-        // =================================================
-        // IMAGE
-        // =================================================
-
-        if (!hasAnyImage()) {
-
-            const error =
-                document.createElement(
-                    "small"
-                );
-
-
-            error.className =
-                "text-danger client-error";
-
-
-            error.id =
-                "clientImageError";
-
-
-            error.textContent =
-                "At least one image is required";
-
-
-            document
-                .getElementById(
-                    "imageUploadArea"
-                )
-                .insertAdjacentElement(
-                    "afterend",
-                    error
-                );
-
-
-            isValid = false;
-
-        }
-
-
-        // =================================================
-        // STOP SUBMISSION
-        // =================================================
-
-        if (!isValid) {
-
-            e.preventDefault();
-
-            return;
-
-        }
-
-
-        // =================================================
-        // PREPARE NEW CROPPED IMAGES
-        // =================================================
-
-        const dataTransfer =
-            new DataTransfer();
-
-
-        [
-            "box1",
-            "box2",
-            "box3"
-        ].forEach(boxId => {
-
-            const file =
-                croppedFiles[boxId];
-
-
-            if (file) {
-
-                dataTransfer.items.add(
-                    file
-                );
-
-            }
 
         });
 
 
-        // Put new files into input
+    // =====================================================
+    // REMOVE IMAGE
+    // =====================================================
 
-        imageInput.files =
-            dataTransfer.files;
+    document
+        .querySelectorAll(".remove-existing-image")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function (event) {
+
+                    event.stopPropagation();
+
+
+                    const boxId =
+                        this.dataset.box;
+
+
+                    const oldImage =
+                        existingImages[boxId];
+
+
+                    if (oldImage) {
+
+                        addRemovedImage(oldImage);
+
+                    }
+
+
+                    delete croppedFiles[boxId];
+
+
+                    existingImages[boxId] = "";
+
+
+                    const box =
+                        document.getElementById(boxId);
+
+
+                    const preview =
+                        box.querySelector("img");
+
+                    const plus =
+                        box.querySelector(".plus");
+
+                    const actions =
+                        box.querySelector(".image-actions");
+
+
+                    preview.src = "";
+
+                    preview.style.display =
+                        "none";
+
+                    plus.style.display =
+                        "block";
+
+                    actions.style.display =
+                        "none";
+
+                }
+            );
+
+        });
+
+
+    // =====================================================
+    // ADD REMOVED IMAGE
+    // =====================================================
+
+    function addRemovedImage(imageName) {
+
+        if (!imageName) {
+            return;
+        }
+
+
+        const container =
+            document.getElementById(
+                "removedImagesContainer"
+            );
+
+
+        const alreadyExists =
+            [
+                ...container.querySelectorAll(
+                    'input[name="removedImages[]"]'
+                )
+            ]
+            .some(input =>
+                input.value === imageName
+            );
+
+
+        if (alreadyExists) {
+            return;
+        }
+
+
+        const input =
+            document.createElement("input");
+
+
+        input.type =
+            "hidden";
+
+        input.name =
+            "removedImages[]";
+
+        input.value =
+            imageName;
+
+
+        container.appendChild(input);
 
     }
-);
 
 
-// ======================================================
-// 11. SHOW CLIENT ERROR
-// ======================================================
+    // =====================================================
+    // FORM SUBMIT
+    // =====================================================
 
-function showError(
-    input,
-    message
-) {
+    form.addEventListener(
+        "submit",
+        function (event) {
 
-    const error =
-        document.createElement(
-            "small"
-        );
+            let isValid = true;
 
 
-    error.className =
-        "text-danger client-error";
+            // ---------------------------------------------
+            // CLEAR ERRORS
+            // ---------------------------------------------
+
+            document
+                .querySelectorAll(".client-error")
+                .forEach(error => {
+
+                    error.textContent = "";
+
+                });
 
 
-    error.textContent =
-        message;
+            document
+                .getElementById("editImageError")
+                .textContent = "";
 
 
-    input.parentElement.appendChild(
-        error
+            // ---------------------------------------------
+            // COLOR
+            // ---------------------------------------------
+
+            if (
+                !colorInput.value.trim()
+            ) {
+
+                showFieldError(
+                    "editColorError",
+                    "Color is required"
+                );
+
+                isValid = false;
+
+            }
+
+
+            // ---------------------------------------------
+            // STOCK
+            // ---------------------------------------------
+
+            if (
+                stockInput.value.trim() === "" ||
+                Number(stockInput.value) < 0
+            ) {
+
+                showFieldError(
+                    "editStockError",
+                    "Please enter a valid stock"
+                );
+
+                isValid = false;
+
+            }
+
+
+            // ---------------------------------------------
+            // PRICE
+            // ---------------------------------------------
+
+            if (
+                priceInput.value.trim() === "" ||
+                Number(priceInput.value) <= 0
+            ) {
+
+                showFieldError(
+                    "editPriceError",
+                    "Please enter a valid price"
+                );
+
+                isValid = false;
+
+            }
+
+
+            // ---------------------------------------------
+            // OFFER PRICE
+            // ---------------------------------------------
+
+            if (
+                offerPriceInput.value.trim() !== "" &&
+                Number(offerPriceInput.value) < 0
+            ) {
+
+                showFieldError(
+                    "editOfferPriceError",
+                    "Offer price cannot be negative"
+                );
+
+                isValid = false;
+
+            }
+
+
+            // ---------------------------------------------
+            // IMAGE
+            // ---------------------------------------------
+
+            if (!hasAnyImage()) {
+
+                showImageError(
+                    "At least one image is required"
+                );
+
+                isValid = false;
+
+            }
+
+
+            // ---------------------------------------------
+            // STOP
+            // ---------------------------------------------
+
+            if (!isValid) {
+
+                event.preventDefault();
+
+                return;
+
+            }
+
+
+            // ---------------------------------------------
+            // PREPARE CROPPED FILES
+            // ---------------------------------------------
+
+            const dataTransfer =
+                new DataTransfer();
+
+
+            [
+                "editBox1",
+                "editBox2",
+                "editBox3"
+            ]
+            .forEach(boxId => {
+
+                const file =
+                    croppedFiles[boxId];
+
+
+                if (file) {
+
+                    dataTransfer.items.add(file);
+
+                }
+
+            });
+
+
+            imageInput.files =
+                dataTransfer.files;
+
+        }
     );
 
-}
 
+    // =====================================================
+    // CHECK IMAGE
+    // =====================================================
 
-// ======================================================
-// 12. REMOVE ERROR WHEN USER TYPES
-// ======================================================
+    function hasAnyImage() {
 
-const fields = [
+        return [
+            "editBox1",
+            "editBox2",
+            "editBox3"
+        ]
+        .some(boxId => {
 
-    {
-        input: "color",
-        error: "colorError"
-    },
+            return !!(
+                existingImages[boxId] ||
+                croppedFiles[boxId]
+            );
 
-    {
-        input: "stock",
-        error: "stockError"
-    },
-
-    {
-        input: "price",
-        error: "priceError"
-    },
-
-    {
-        input: "offerPrice",
-        error: "offerPriceError"
-    }
-
-];
-
-
-fields.forEach(field => {
-
-    const input =
-        document.getElementById(
-            field.input
-        );
-
-
-    if (!input) {
-
-        return;
+        });
 
     }
 
 
-    input.addEventListener(
-        "input",
-        function() {
+    // =====================================================
+    // FIELD ERROR
+    // =====================================================
 
-            // Remove client error
+    function showFieldError(
+        elementId,
+        message
+    ) {
 
-            const clientError =
-                input.parentElement
-                    .querySelector(
-                        ".client-error"
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+
+        if (element) {
+
+            element.textContent =
+                message;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // IMAGE ERROR
+    // =====================================================
+
+    function showImageError(message) {
+
+        const error =
+            document.getElementById(
+                "editImageError"
+            );
+
+
+        error.textContent =
+            message;
+
+    }
+
+
+    // =====================================================
+    // REMOVE ERROR WHILE TYPING
+    // =====================================================
+
+    [
+        "editColor",
+        "editStock",
+        "editPrice",
+        "editOfferPrice"
+    ]
+    .forEach(inputId => {
+
+        const input =
+            document.getElementById(inputId);
+
+
+        if (!input) {
+            return;
+        }
+
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                const errorId =
+                    inputId + "Error";
+
+
+                const error =
+                    document.getElementById(
+                        errorId
                     );
 
 
-            if (clientError) {
+                if (error) {
 
-                clientError.remove();
+                    error.textContent = "";
+
+                }
+
+            }
+        );
+
+    });
+
+
+    // =====================================================
+    // CROP MODAL CLOSED
+    // =====================================================
+
+    cropModalElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+
+            if (cropper) {
+
+                cropper.destroy();
+
+                cropper = null;
 
             }
 
 
-            // Remove server error
+            imageInput.value = "";
 
-            const serverError =
-                document.getElementById(
-                    field.error
-                );
+        }
+    );
 
 
-            if (serverError) {
+    // =====================================================
+    // EDIT MODAL CLOSED
+    // =====================================================
 
-                serverError.remove();
+    editVariantModalElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
 
-            }
+            currentVariantId = null;
+
+            currentBox = null;
+
+            croppedFiles = {};
+
+            existingImages = {};
+
+            imageInput.value = "";
 
         }
     );
 
 });
-
-
-// ======================================================
-// 13. REMOVE IMAGE ERROR WHEN IMAGE IS SELECTED
-// ======================================================
-
-imageInput.addEventListener(
-    "change",
-    function() {
-
-        const error =
-            document.getElementById(
-                "imageError"
-            );
-
-
-        if (error) {
-
-            error.remove();
-
-        }
-
-    }
-);
 
 </script>
 

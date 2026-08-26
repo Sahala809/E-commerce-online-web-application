@@ -462,6 +462,10 @@ export const loadAddProduct = async (req, res) => {
             isActive: true
         })
 
+        const variants= await Variant.find()
+
+        //const priceLowToHigh = await Product.find().populate(variant.price).sort({variant.price:-1})
+
         const successMessage = req.session.successMessage || ""
         const errorMessage = req.session.errorMessage || ""
 
@@ -562,10 +566,17 @@ export const loadAddVariant = async (req,res) => {
         const successMessage = req.session.successMessage || ""
         const errorMessage = req.session.errorMessage || ""
 
+
+        console.log("SUCCESS FROM SESSION:", successMessage);
+console.log("ERROR FROM SESSION:", errorMessage);
+
+
         req.session.successMessage = null
         req.session.errorMessage = null
 
-        return res.render("admin/product/addVariant",{
+
+
+        return res.render("admin/product/manageVariant",{
             activePage : "product",
             pageTitle: "Product",
             product,
@@ -592,9 +603,14 @@ export const loadAddVariant = async (req,res) => {
 
 export const addVariant = async (req, res) => {
     try {
-        const result = await addVariantService(req)
-
         const { productId } =req.params
+
+        const result = await addVariantService(
+            productId,
+            req.body,
+            req.files
+        )
+
 
         
         const page = parseInt(req.query.page) || 1;
@@ -605,7 +621,7 @@ export const addVariant = async (req, res) => {
         if(!result.success){
             const product = await Product.findById(productId)
             const variants = await Variant.find({ productId })
-                                    .sort({ createAt: -1})
+                                    .sort({ createdAt: -1})
                                     .skip(skip)
                                     .limit(limit)
                                     .lean()
@@ -631,14 +647,14 @@ export const addVariant = async (req, res) => {
                 ...newUploadedImages
             ].slice(0, 4);
 
-            return res.render("admin/product/addVariant", {
+            return res.render("admin/product/manageVariant", {
                 activePage: "product",
                 pageTitle: "Add Variant",
                 product,
                 variants,
                 errors: result.errors,
                 formData: req.body,
-                uploadedImages: uploadedImages,
+                uploadedImages,
                 successMessage: "",
                 errorMessage: "",
                 skip,
@@ -650,7 +666,7 @@ export const addVariant = async (req, res) => {
 
         req.session.successMessage = "Variant added successfully.";
 
-        return res.redirect(`/admin/products/${req.params.productId}/variants`)
+        return res.redirect(`/admin/products/${req.params.productId}/variants/add`)
     } catch (error) {
 
         console.log("ADD VARIANT ERROR:", error);
@@ -837,6 +853,7 @@ export const deleteVariant = async (req, res) => {
 
         if (!result.success) {
             req.session.error = result.message;
+            
             return res.redirect(`/admin/products/${req.params.productId}/variants`);
         }
 

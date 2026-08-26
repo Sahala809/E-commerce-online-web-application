@@ -22,6 +22,7 @@ export const loadProductService = async (page, limit, search) => {
     }
     const products = await Product.find(filter)
         .populate("categoryId")
+        .sort({createdAt: -1})
         .skip(skip)
         .limit(limit)
     
@@ -105,11 +106,10 @@ export const addProductService = async (req,res) => {
     }
 }
 
-export const addVariantService = async (req,res) => {
-    console.log("REQ BODY:", req.body);
-    console.log("REQ FILES:", req.files);
-    console.log("REQ PARAMS:", req.params);
-    const { productId } = req.params
+export const addVariantService = async (productId,body,files) => {
+    console.log("REQ BODY:", body);
+    console.log("REQ FILES:", files);
+    console.log("REQ PARAMS:", productId);
 
     const { 
         color,
@@ -119,8 +119,40 @@ export const addVariantService = async (req,res) => {
         description,
         isActive,
         existingImages
-    } = req.body
+    } = body
+const errors = {};
 
+    // Required
+    if (!color || !color.trim()) {
+
+        errors.color = "Color is required.";
+
+    }
+
+    // Only letters and spaces
+    else if (!/^[A-Za-z\s]+$/.test(color.trim())) {
+
+        errors.color =
+            "Color must contain letters only.";
+
+    }
+
+
+
+    if (Object.keys(errors).length > 0) {
+        return {
+            success: false,
+            errors,
+            uploadedImages: files || [],
+            existingImages: existingImages
+                ? Array.isArray(existingImages)
+                    ? existingImages
+                    : [existingImages]
+                : []
+        };
+    }
+
+    
     const normalizedColor = color?.trim().toLowerCase();
 
     const existingVariant = await Variant.findOne({
@@ -137,29 +169,28 @@ export const addVariantService = async (req,res) => {
             errors: {
                 color: "This color already exists for this product."
             },
-            uploadedImages: req.files || []
+            uploadedImages: files || []
         };
     }
 
-    const errors = await validateAddVariant(req.body, req.files)
+      const validationErrors =
+        validateAddVariant(body, files);
 
-    if (Object.keys(errors).length > 0) {
-        return {
-            success: false,
-            errors,
-            uploadedImages: req.files || [],
-            existingImages: existingImages
-                ? Array.isArray(existingImages)
-                    ? existingImages
-                    : [existingImages]
-                : []
-        };
-    }
+
+    // Don't validate color again
+    delete validationErrors.color;
+
+    // Start with existing images if any
+    let images = existingImages
+        ? Array.isArray(existingImages)
+            ? [...existingImages]
+            : [existingImages]
+        : [];
 
     // Newly uploaded images
-    if (req.files && req.files.length > 0) {
+    if (files && files.length > 0) {
 
-        const newImages = req.files.map(
+        const newImages = files.map(
             file => file.filename
         );
 

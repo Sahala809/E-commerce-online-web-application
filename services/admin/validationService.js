@@ -87,24 +87,82 @@ export const validateAddVariant = (data, files) => {
     } = data;
 
     if (!color || !color.trim()) {
-        errors.color = "Color is required";
+
+        errors.color = "Color is required.";
+
+    } else if (!/[A-Za-z]/.test(color.trim())) {
+
+        errors.color = "Please enter a valid color.";
+
     }
 
-    if (!stock || stock <= 0) {
-        errors.stock = "Stock must be greater than 0";
+    
+          ////////
+
+    if (stock === undefined || stock === "") {
+
+        errors.stock = "Stock is required.";
+
+    } else if (Number(stock) < 0) {
+
+        errors.stock = "Stock cannot be negative.";
+
+    } else if (!Number.isInteger(Number(stock))) {
+
+        errors.stock = "Stock must be a valid number.";
+
+    }
+                            
+                //////////
+
+    if (price === undefined || price === "") {
+
+        errors.price = "Price is required.";
+
+    } else if (Number(price) <= 0) {
+
+        errors.price = "Price must be greater than 0.";
+
+    } else if (isNaN(Number(price))) {
+
+        errors.price = "Price must be a valid number.";
+
+    }
+            //////////
+
+    if (offerPrice !== undefined && offerPrice !== "") {
+
+        if (Number(offerPrice) < 0) {
+
+            errors.offerPrice =
+                "Offer price cannot be negative.";
+
+        } else if (
+            Number(offerPrice) >= Number(price)
+        ) {
+
+            errors.offerPrice =
+                "Offer price must be less than the regular price.";
+
+        }
+
     }
 
-    if (!price || price <= 0) {
-        errors.price = "Price is required";
+
+    if (!description || description.trim() === "") {
+
+        errors.description = "Description is required";
+
     }
 
-    if (offerPrice && Number(offerPrice) > Number(price)) {
-        errors.offerPrice = "Offer price cannot be greater than price";
-    }
+    ///////////
 
     if (!files || files.length === 0) {
         errors.images = "At least one image is required";
     }
+
+
+
 
     return errors
 }
@@ -127,20 +185,57 @@ export const validateEditVariant = (data) => {
     }
 
     if (stock === undefined || stock === "") {
+
         errors.stock = "Stock is required";
+
+    } else if (Number.isNaN(Number(stock))) {
+
+        errors.stock = "Stock must be a valid number";
+
     } else if (Number(stock) < 0) {
+
         errors.stock = "Stock cannot be negative";
+
     }
 
-    if (!price || price === "") {
+
+    if (price === undefined || price === "") {
+
         errors.price = "Price is required";
+
+    } else if (Number.isNaN(Number(price))) {
+
+        errors.price = "Price must be a valid number";
+
     } else if (Number(price) <= 0) {
+
         errors.price = "Price must be greater than zero";
+
     }
 
-    if (offerPrice && Number(offerPrice) >= Number(price)) {
-        errors.offerPrice = "Offer price must be less than price";
+
+    if (offerPrice !== undefined && offerPrice !== "") {
+
+        if (Number.isNaN(Number(offerPrice))) {
+
+            errors.offerPrice = "Offer price must be a valid number";
+
+        } else if (Number(offerPrice) <= 0) {
+
+            errors.offerPrice = "Offer price must be greater than zero";
+
+        } else if (
+            price !== undefined &&
+            price !== "" &&
+            Number(offerPrice) >= Number(price)
+        ) {
+
+            errors.offerPrice =
+                "Offer price must be less than price";
+
+        }
     }
+
 
     if (!description || description.trim() === "") {
         errors.description = "Description is required";
@@ -149,3 +244,10 @@ export const validateEditVariant = (data) => {
 
     return errors;
 };
+
+
+
+
+
+
+
