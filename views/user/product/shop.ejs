@@ -3,6 +3,48 @@
 
 <link rel="stylesheet" href="/css/product/shop.css">
 
+<!-- ================= WISHLIST POPUP ================= -->
+
+<% if (successMessage) { %>
+
+    <div class="wishlist-popup-overlay" id="wishlistPopup">
+
+        <div class="wishlist-popup">
+
+            <button
+                type="button"
+                class="wishlist-popup-close"
+                onclick="closeWishlistPopup()"
+            >
+                &times;
+            </button>
+
+            <div class="wishlist-popup-icon">
+                <i class="bi bi-heart-fill"></i>
+            </div>
+
+            <h3>
+                Added to Wishlist
+            </h3>
+
+            <p>
+                <%= successMessage %>
+            </p>
+
+            <button
+                type="button"
+                class="wishlist-popup-btn"
+                onclick="closeWishlistPopup()"
+            >
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+<% } %>
+
 <main class="shop-container">
 
     <!-- Breadcrumb -->
@@ -57,7 +99,7 @@
                             >
 
                             <span>
-                                <%= category.name %>
+                                <%= category.categoryName %>
                             </span>
 
                         </label>
@@ -103,16 +145,20 @@
                 <div class="price-values">
 
                     <span>₹0</span>
-                    <span>₹50,000</span>
+                    <span id="maxPriceValue">
+                        ₹50,000
+                    </span>
 
                 </div>
 
                 <input
                     type="range"
+                    id="priceSlider"
                     class="price-slider"
                     min="0"
                     max="50000"
                     value="50000"
+                    step="500"
                 >
 
             </div>
@@ -155,6 +201,14 @@
                     </small>
 
                 <% } %>
+
+                <button
+                    type="button"
+                    id="applyFilters"
+                    class="apply-filter-btn"
+                >
+                    Apply Filters
+                </button>
 
             </div>
 
@@ -223,9 +277,10 @@
 
 
 
-            <!-- ================= PRODUCTS ================= -->
+           
+           <!-- ================= PRODUCTS ================= -->
 
-            <div class="product-grid">
+<div class="product-grid">
 
     <% if (products && products.length > 0) { %>
 
@@ -233,64 +288,92 @@
 
             <% if (product.variant) { %>
 
-                <a
-                    href="/user/product/<%= product._id %>"
-                    class="product-card-link"
-                >
-
                 <div class="product-card">
 
-                    <!-- INNER IMAGE BOX -->
+                    <!-- ================= IMAGE ================= -->
+
                     <div class="product-image">
 
-                        <% if (
-                            product.variant.images &&
-                            product.variant.images.length > 0
-                        ) { %>
-
-                            <img
-                                src="/uploads/variants/<%= product.variant.images[0] %>"
-                                alt="<%= product.productName %>"
-                            >
-
-                        <% } else { %>
-
-                            <img
-                                src="/images/no-image.png"
-                                alt="No image"
-                            >
-
-                        <% } %>
-
-
-                        <!-- Wishlist -->
-                        <button
-                            type="button"
-                            class="wishlist-btn"
-                            title="Add to Wishlist"
+                        <!-- Product Detail Link -->
+                        <a
+                            href="/user/product/<%= product._id %>"
+                            class="product-image-link"
                         >
-                            <i class="bi bi-heart"></i>
-                        </button>
+
+                            <% if (
+                                product.variant.images &&
+                                product.variant.images.length > 0
+                            ) { %>
+
+                                <img
+                                    src="/uploads/variants/<%= product.variant.images[0] %>"
+                                    alt="<%= product.productName %>"
+                                >
+
+                            <% } else { %>
+
+                                <img
+                                    src="/images/no-image.png"
+                                    alt="No image"
+                                >
+
+                            <% } %>
+
+                        </a>
+
+
+                        <!-- ================= WISHLIST ================= -->
+
+                        <form
+                            action="/user/wishlist/add/<%= product._id %>/<%= product.variant._id %>"
+                            method="POST"
+                            class="wishlist-form"
+                        >
+
+                            <button
+                                type="submit"
+                                class="wishlist-btn"
+                                data-product-id="<%= product._id %>"
+    data-variant-id="<%= product.variant._id %>"
+                                title="Add to Wishlist"
+                            >
+
+                                <i class="bi bi-heart"></i>
+
+                            </button>
+
+                        </form>
 
                     </div>
 
 
-                    <!-- PRODUCT INFORMATION -->
+                    <!-- ================= PRODUCT INFORMATION ================= -->
+
                     <div class="product-info">
 
                         <!-- Product Name -->
-                        <h3 class="product-name">
-                            <%= product.productName %>
-                        </h3>
+
+                        <a
+                            href="/user/product/<%= product._id %>"
+                            class="product-name-link"
+                        >
+
+                            <h3 class="product-name">
+                                <%= product.productName %>
+                            </h3>
+
+                        </a>
 
 
                         <!-- Color -->
+
                         <p class="product-color">
                             <%= product.variant.color %>
                         </p>
 
 
                         <!-- Price -->
+
                         <div class="product-price">
 
                             <% if (
@@ -319,12 +402,18 @@
 
 
                         <!-- Add To Cart -->
+
                         <button
                             type="button"
                             class="add-cart-btn"
                         >
-                            <span>Add to Cart</span>
+
+                            <span>
+                                Add to Cart
+                            </span>
+
                             <i class="bi bi-cart-plus"></i>
+
                         </button>
 
                     </div>
@@ -338,8 +427,15 @@
     <% } else { %>
 
         <div class="no-products">
-            <h3>No products found</h3>
-            <p>Try changing your filters.</p>
+
+            <h3>
+                No products found
+            </h3>
+
+            <p>
+                Try changing your filters.
+            </p>
+
         </div>
 
     <% } %>
@@ -409,16 +505,53 @@
 
 <script>
 
-    // ================= COLOR FILTER =================
+    // =========================================================
+    // PRICE SLIDER
+    // =========================================================
 
-    const colorCheckboxes =
-        document.querySelectorAll('input[name="color"]');
+    const priceSlider =
+        document.getElementById("priceSlider");
+
+    const maxPriceValue =
+        document.getElementById("maxPriceValue");
 
 
-    colorCheckboxes.forEach(checkbox => {
+    if (priceSlider && maxPriceValue) {
 
-        checkbox.addEventListener("change", () => {
+        priceSlider.addEventListener("input", () => {
 
+            const value =
+                Number(priceSlider.value);
+
+            maxPriceValue.textContent =
+                `₹${value.toLocaleString("en-IN")}`;
+
+        });
+
+    }
+
+
+    // =========================================================
+    // APPLY FILTERS BUTTON
+    // =========================================================
+
+    const applyFilters =
+        document.getElementById("applyFilters");
+
+
+    if (applyFilters) {
+
+        applyFilters.addEventListener("click", () => {
+
+            // Selected categories
+            const selectedCategories = [
+                ...document.querySelectorAll(
+                    'input[name="category"]:checked'
+                )
+            ].map(checkbox => checkbox.value);
+
+
+            // Selected colors
             const selectedColors = [
                 ...document.querySelectorAll(
                     'input[name="color"]:checked'
@@ -426,24 +559,290 @@
             ].map(checkbox => checkbox.value);
 
 
-            const params = new URLSearchParams();
+            // Max price
+            const maxPrice =
+                priceSlider
+                    ? priceSlider.value
+                    : 50000;
 
 
-            selectedColors.forEach(color => {
+            // Create URL parameters
+            const params =
+                new URLSearchParams();
 
-                params.append("color", color);
+
+            // Add categories
+            selectedCategories.forEach(category => {
+
+                params.append(
+                    "category",
+                    category
+                );
 
             });
 
 
+            // Add colors
+            selectedColors.forEach(color => {
+
+                params.append(
+                    "color",
+                    color
+                );
+
+            });
+
+
+            // Add max price
+            params.set(
+                "maxPrice",
+                maxPrice
+            );
+
+
+            // Redirect
             window.location.href =
                 `/user/shop?${params.toString()}`;
 
         });
 
+    }
+
+
+    // =========================================================
+    // WISHLIST BUTTON
+    // =========================================================
+
+    const wishlistButtons =
+        document.querySelectorAll(".wishlist-btn");
+
+
+    wishlistButtons.forEach(button => {
+
+        button.addEventListener("click", async (event) => {
+
+            // Stop product card/link from opening
+            event.preventDefault();
+            event.stopPropagation();
+
+
+            const productId =
+                button.dataset.productId;
+
+            const variantId =
+                button.dataset.variantId;
+
+
+            // Check IDs
+            if (!productId || !variantId) {
+
+                console.error(
+                    "Product ID or Variant ID is missing."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `/user/wishlist/add/${productId}/${variantId}`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                console.log(
+                    "Wishlist response:",
+                    result
+                );
+
+
+                // Show popup
+                showWishlistPopup(
+                    result.message
+                );
+
+
+                // Change heart only when successfully added
+                if (result.success) {
+
+                    const icon =
+                        button.querySelector("i");
+
+                    if (icon) {
+
+                        icon.classList.remove(
+                            "bi-heart"
+                        );
+
+                        icon.classList.add(
+                            "bi-heart-fill"
+                        );
+
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Wishlist error:",
+                    error
+                );
+
+
+                showWishlistPopup(
+                    "Unable to add product to wishlist."
+                );
+
+            }
+
+        });
+
     });
 
-</script>
 
+    // =========================================================
+    // WISHLIST POPUP
+    // =========================================================
+
+    function showWishlistPopup(message) {
+
+        // Remove old popup if already exists
+        const oldPopup =
+            document.getElementById("wishlistPopup");
+
+        if (oldPopup) {
+            oldPopup.remove();
+        }
+
+
+        // Create popup overlay
+        const popup =
+            document.createElement("div");
+
+        popup.id =
+            "wishlistPopup";
+
+        popup.className =
+            "wishlist-popup-overlay";
+
+
+        // Popup HTML
+        popup.innerHTML = `
+
+            <div class="wishlist-popup">
+
+                <button
+                    type="button"
+                    class="wishlist-popup-close"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+
+                <div class="wishlist-popup-icon">
+
+                    <i class="bi bi-heart-fill"></i>
+
+                </div>
+
+
+                <h3>
+                    Wishlist
+                </h3>
+
+
+                <p>
+                    ${message}
+                </p>
+
+
+                <button
+                    type="button"
+                    class="wishlist-popup-btn"
+                >
+                    OK
+                </button>
+
+            </div>
+
+        `;
+
+
+        // Add popup to body
+        document.body.appendChild(popup);
+
+
+        // =====================================================
+        // CLOSE BUTTON
+        // =====================================================
+
+        const closeButton =
+            popup.querySelector(
+                ".wishlist-popup-close"
+            );
+
+
+        closeButton.addEventListener(
+            "click",
+            () => {
+
+                popup.remove();
+
+            }
+        );
+
+
+        // =====================================================
+        // OK BUTTON
+        // =====================================================
+
+        const okButton =
+            popup.querySelector(
+                ".wishlist-popup-btn"
+            );
+
+
+        okButton.addEventListener(
+            "click",
+            () => {
+
+                popup.remove();
+
+            }
+        );
+
+
+        // =====================================================
+        // CLICK OUTSIDE POPUP
+        // =====================================================
+
+        popup.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target === popup
+                ) {
+
+                    popup.remove();
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
 
 <%- include("../partials/footer") %>

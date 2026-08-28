@@ -246,6 +246,36 @@ body {
     accent-color: #222;
 }
 
+.apply-filter-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px 20px;
+
+    border: 1px solid #111;
+    border-radius: 6px;
+
+    background: #111;
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.apply-filter-btn:hover {
+    background: #fff;
+    color: #111;
+}
+
+.apply-filter-btn:active {
+    transform: scale(0.98);
+}
+
 
 /* =====================================================
    SHOP CONTENT
@@ -693,6 +723,192 @@ body {
 }
 
 
+/* =========================================================
+   WISHLIST POPUP OVERLAY
+   ========================================================= */
+
+.wishlist-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    padding: 20px;
+
+    animation: popupFadeIn 0.25s ease;
+}
+
+
+/* =========================================================
+   POPUP BOX
+   ========================================================= */
+
+.wishlist-popup {
+    position: relative;
+
+    width: 100%;
+    max-width: 420px;
+
+    padding: 38px 30px 30px;
+
+    background: #fff;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+
+    animation: popupScaleIn 0.3s ease;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.wishlist-popup-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    background: transparent;
+
+    color: #555;
+
+    font-size: 27px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.wishlist-popup-close:hover {
+    color: #000;
+}
+
+
+/* =========================================================
+   HEART ICON
+   ========================================================= */
+
+.wishlist-popup-icon {
+    width: 65px;
+    height: 65px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f5f5f5;
+}
+
+.wishlist-popup-icon i {
+    font-size: 28px;
+    color: #111;
+}
+
+
+/* =========================================================
+   POPUP TITLE
+   ========================================================= */
+
+.wishlist-popup h3 {
+    margin: 0 0 10px;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    color: #111;
+}
+
+
+/* =========================================================
+   POPUP MESSAGE
+   ========================================================= */
+
+.wishlist-popup p {
+    margin: 0 0 25px;
+
+    color: #777;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   OK BUTTON
+   ========================================================= */
+
+.wishlist-popup-btn {
+    width: 100%;
+
+    min-height: 45px;
+
+    border: none;
+
+    background: #111;
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background 0.25s ease;
+}
+
+.wishlist-popup-btn:hover {
+    background: #333;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes popupFadeIn {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+}
+
+
+@keyframes popupScaleIn {
+
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+
+
+
 /* =====================================================
    MEDIUM DESKTOP
 ===================================================== */
@@ -828,6 +1044,15 @@ body {
 ===================================================== */
 
 @media (max-width: 480px) {
+
+    .wishlist-popup {
+        max-width: 340px;
+        padding: 35px 22px 25px;
+    }
+
+    .wishlist-popup h3 {
+        font-size: 20px;
+    }
 
     .shop-title {
         font-size: 28px;

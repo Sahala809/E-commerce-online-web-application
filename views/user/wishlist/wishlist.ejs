@@ -1,0 +1,635 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/product/wishlist.css">
+
+<main class="wishlist-container">
+
+```
+<!-- ================= BREADCRUMB ================= -->
+
+<div class="breadcrumb">
+
+    <a href="/user/home">
+        Home
+    </a>
+
+    <span>›</span>
+
+    <span>
+        Wishlist
+    </span>
+
+</div>
+
+
+<!-- ================= WISHLIST HEADING ================= -->
+
+<div class="wishlist-title-section">
+
+    <h1 class="wishlist-title">
+        WISHLIST
+    </h1>
+
+    <p class="wishlist-subtitle">
+        Your favourite watches, all in one place
+    </p>
+
+</div>
+
+
+<!-- ================= WISHLIST CONTENT ================= -->
+
+<% if (wishlist && wishlist.items && wishlist.items.length > 0) { %>
+
+    <div class="wishlist-grid">
+
+        <% wishlist.items.forEach(item => { %>
+
+            <%
+                const product = item.productId;
+                const variant = item.variantId;
+            %>
+
+
+            <!-- ================= WISHLIST CARD ================= -->
+
+            <div class="wishlist-card">
+
+
+                <!-- ================= IMAGE ================= -->
+
+                <div class="wishlist-image">
+
+                    <% if (
+                        variant &&
+                        variant.images &&
+                        variant.images.length > 0
+                    ) { %>
+
+                        <img
+                            src="/uploads/variants/<%= variant.images[0] %>"
+                            alt="<%= product ? product.productName : 'Product unavailable' %>"
+                        >
+
+                    <% } else { %>
+
+                        <div class="no-wishlist-image">
+
+                            <i class="bi bi-image"></i>
+
+                        </div>
+
+                    <% } %>
+
+
+                    <!-- ================= DELETE BUTTON ================= -->
+
+                    <div class="wishlist-remove">
+
+                        <% if (product && variant) { %>
+
+                            <!--
+                                NORMAL ITEM
+                                Product and variant still exist
+                            -->
+
+                            <form
+                                action="/user/wishlist/remove/<%= product._id %>/<%= variant._id %>"
+                                method="POST"
+                                onsubmit="return confirm('Remove this item from your wishlist?');"
+    
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="_method"
+                                    value="DELETE"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="wishlist-remove-btn"
+                                    data-product-id="<%= product._id %>"
+                                    data-variant-id="<%= variant._id %>"
+                                    title="Remove from Wishlist"
+                                >
+
+                                    <i class="bi bi-trash3"></i>
+
+                                </button>
+
+                            </form>
+
+
+                        <% } else if (item._id) { %>
+
+                            <!--
+                                UNAVAILABLE ITEM
+                                Product or variant was deleted
+
+                                Use wishlist item _id
+                            -->
+
+                            <form
+                                action="/user/wishlist/remove-item/<%= item._id %>"
+                                method="POST"
+                                onsubmit="return confirm('Remove this unavailable item from your wishlist?');"
+                            
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="_method"
+                                    value="DELETE"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="wishlist-remove-btn"
+                                    title="Remove unavailable item"
+                                >
+
+                                    <i class="bi bi-trash3"></i>
+
+                                </button>
+
+                            </form>
+
+                        <% } %>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= PRODUCT INFORMATION ================= -->
+
+                <div class="wishlist-info">
+
+
+                    <!-- ================= PRODUCT NAME ================= -->
+
+                    <% if (product) { %>
+
+                        <h3 class="wishlist-product-name">
+
+                            <%= product.productName %>
+
+                        </h3>
+
+                    <% } else { %>
+
+                        <h3 class="wishlist-product-name">
+
+                            Product no longer available
+
+                        </h3>
+
+                    <% } %>
+
+
+                    <!-- ================= COLOR ================= -->
+
+                    <% if (variant) { %>
+
+                        <p class="wishlist-product-color">
+
+                            <%= variant.color %>
+
+                        </p>
+
+                    <% } else { %>
+
+                        <p class="wishlist-product-color">
+
+                            Variant unavailable
+
+                        </p>
+
+                    <% } %>
+
+
+                    <!-- ================= PRICE ================= -->
+
+                    <% if (variant) { %>
+
+                        <div class="wishlist-price">
+
+                            <% if (
+                                variant.offerPrice &&
+                                variant.offerPrice > 0 &&
+                                variant.offerPrice < variant.price
+                            ) { %>
+
+                                <span class="offer-price">
+
+                                    ₹<%= variant.offerPrice %>
+
+                                </span>
+
+                                <del class="original-price">
+
+                                    ₹<%= variant.price %>
+
+                                </del>
+
+                            <% } else { %>
+
+                                <span class="offer-price">
+
+                                    ₹<%= variant.price %>
+
+                                </span>
+
+                            <% } %>
+
+                        </div>
+
+                    <% } else { %>
+
+                        <div class="wishlist-price">
+
+                            <span class="offer-price">
+
+                                Not Available
+
+                            </span>
+
+                        </div>
+
+                    <% } %>
+
+
+                    <!-- ================= STOCK ================= -->
+
+                    <% if (variant && variant.stock > 0) { %>
+
+                        <p class="wishlist-stock in-stock">
+
+                            In Stock
+
+                        </p>
+
+                    <% } else { %>
+
+                        <p class="wishlist-stock out-of-stock">
+
+                            Out of Stock
+
+                        </p>
+
+                    <% } %>
+
+
+                    <!-- ================= VIEW PRODUCT ================= -->
+
+                    <% if (product) { %>
+
+                        <a
+                            href="/user/product/<%= product._id %>"
+                            class="view-product-btn"
+                        >
+
+                            View Product
+
+                        </a>
+
+                    <% } else { %>
+
+                        <span
+                            class="view-product-btn disabled"
+                        >
+
+                            Product Unavailable
+
+                        </span>
+
+                    <% } %>
+
+
+                </div>
+
+            </div>
+
+        <% }) %>
+
+    </div>
+
+
+<% } else { %>
+
+
+    <!-- ================= EMPTY WISHLIST ================= -->
+
+    <div class="empty-wishlist">
+
+        <div class="empty-wishlist-icon">
+
+            <i class="bi bi-heart"></i>
+
+        </div>
+
+        <h2>
+
+            Your Wishlist is Empty
+
+        </h2>
+
+        <p>
+
+            You haven't added any watches to your wishlist yet.
+
+        </p>
+
+        <a
+            href="/user/shop"
+            class="continue-shopping-btn"
+        >
+
+            Continue Shopping
+
+        </a>
+
+    </div>
+
+<% } %>
+```
+
+</main>
+
+<!-- ================= WISHLIST JAVASCRIPT ================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // =====================================================
+    // ADD TO WISHLIST
+    // =====================================================
+
+    const wishlistButtons =
+        document.querySelectorAll(".wishlist-btn");
+
+
+    wishlistButtons.forEach(button => {
+
+        button.addEventListener("click", async (event) => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+
+            const productId =
+                button.dataset.productId;
+
+            const variantId =
+                button.dataset.variantId;
+
+
+            if (!productId || !variantId) {
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `/user/wishlist/add/${productId}/${variantId}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                showWishlistPopup(
+                    result.message
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Wishlist error:",
+                    error
+                );
+
+
+                showWishlistPopup(
+                    "Unable to add product to wishlist."
+                );
+
+            }
+
+        });
+
+    });
+
+
+    // =====================================================
+    // REMOVE FROM WISHLIST
+    // =====================================================
+
+    const removeButtons =
+        document.querySelectorAll(".wishlist-remove-btn");
+
+
+    removeButtons.forEach(button => {
+
+        button.addEventListener("click", async (event) => {
+
+            event.preventDefault();
+
+
+            const productId =
+                button.dataset.productId;
+
+            const variantId =
+                button.dataset.variantId;
+
+
+            if (!productId || !variantId) {
+
+                alert("Unable to remove this item.");
+
+                return;
+            }
+
+
+            const confirmRemove =
+                confirm(
+                    "Remove this item from your wishlist?"
+                );
+
+
+            if (!confirmRemove) {
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `/user/wishlist/remove/${productId}/${variantId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!result.success) {
+
+                    alert(result.message);
+
+                    return;
+                }
+
+
+                // Remove card from page
+                const card =
+                    button.closest(".wishlist-card");
+
+
+                if (card) {
+                    card.remove();
+                }
+
+
+                // If no cards remain, reload page
+                const remainingCards =
+                    document.querySelectorAll(
+                        ".wishlist-card"
+                    );
+
+
+                if (remainingCards.length === 0) {
+                    window.location.reload();
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "REMOVE WISHLIST ERROR:",
+                    error
+                );
+
+
+                alert(
+                    "Something went wrong."
+                );
+
+            }
+
+        });
+
+    });
+
+
+    // =====================================================
+    // WISHLIST POPUP
+    // =====================================================
+
+    function showWishlistPopup(message) {
+
+        const oldPopup =
+            document.getElementById("wishlistPopup");
+
+
+        if (oldPopup) {
+            oldPopup.remove();
+        }
+
+
+        const popup =
+            document.createElement("div");
+
+
+        popup.id =
+            "wishlistPopup";
+
+
+        popup.className =
+            "wishlist-popup-overlay";
+
+
+        popup.innerHTML = `
+
+            <div class="wishlist-popup">
+
+                <button
+                    type="button"
+                    class="wishlist-popup-close"
+                >
+                    &times;
+                </button>
+
+
+                <div class="wishlist-popup-icon">
+
+                    <i class="bi bi-heart-fill"></i>
+
+                </div>
+
+
+                <h3>
+                    Wishlist
+                </h3>
+
+
+                <p>
+                    ${message}
+                </p>
+
+
+                <button
+                    type="button"
+                    class="wishlist-popup-btn"
+                >
+                    OK
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(popup);
+
+
+        popup
+            .querySelector(".wishlist-popup-close")
+            .addEventListener("click", () => {
+
+                popup.remove();
+
+            });
+
+
+        popup
+            .querySelector(".wishlist-popup-btn")
+            .addEventListener("click", () => {
+
+                popup.remove();
+
+            });
+
+    }
+
+});
+
+</script>
+
+<%- include("../partials/footer") %>

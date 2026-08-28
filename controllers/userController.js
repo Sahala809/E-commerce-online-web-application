@@ -54,8 +54,18 @@ import {
     addToCartService,
     loadCartService,
     updateCartService,
-    removeFromCartService
+    removeFromCartService,
+    removeUnavailableCartItemService
 } from "../services/cart/cartServices.js"
+
+import {
+
+    loadWishlistService,
+    addToWishlistService,
+    removeWishlistItemService,
+    removeFromWishlistService
+
+} from "../services/wishlist/wishlistService.js"
 
 
 export const loadHome = (req, res) => {
@@ -790,7 +800,11 @@ export const loadShop = async (req,res) => {
         //console.log("FILTERS:", req.query);
         const result = await loadShopService(req.query)
 
-        
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
 
         res.render("user/product/shop", {
             activePage:"shop",
@@ -800,7 +814,9 @@ export const loadShop = async (req,res) => {
 
             totalPages: result.totalPages,
             currentPage:result.currentPage,
-            totalProducts: result.totalProducts
+            totalProducts: result.totalProducts,
+            successMessage,
+            errorMessage
             
         })
     } catch (error) {
@@ -887,7 +903,7 @@ console.log("REDIRECTING TO CART");
 
 export const loadCart = async (req, res) => {
     try {
- console.log("LOAD CART CONTROLLER");
+ 
         const userId = req.session.user;
 
         const result = await loadCartService(userId);
@@ -949,22 +965,191 @@ export const removeFromCart = async (req, res) => {
 
         const userId = req.session.user;
 
-        const { variantId } = req.body;
+        const { productId, variantId } = req.params;
 
-        const result = await removeFromCartService(
-            userId,
-            variantId
+        const result = await removeFromCartService( 
+            userId, 
+            productId, 
+            variantId 
         );
 
-        return res.json(result);
+       if (!result.success) {
+         req.session.errorMessage = result.message; 
+         
+         return res.redirect("/user/cart"); 
+        
+        }
+        
+        req.session.successMessage = result.message; 
+        
+        return res.redirect("/user/cart");
 
     } catch (error) {
 
         console.log("REMOVE CART ERROR:", error);
 
+         req.session.errorMessage =
+            error.message || "Unable to remove item from cart.";
+
+        return res.redirect("/user/cart");
+    }
+};
+
+export const removeUnavailableCartItem = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        const { itemId } = req.params;
+
+        const result =
+            await removeUnavailableCartItemService(
+                userId,
+                itemId
+            );
+
+        return res.status(
+            result.success ? 200 : 400
+        ).json({
+            success: result.success,
+            message: result.message
+        });
+
+    } catch (error) {
+
+        console.log(
+            "REMOVE UNAVAILABLE CART ITEM ERROR:",
+            error
+        );
+
         return res.status(500).json({
             success: false,
-            message: "Something went wrong"
+            message:
+                error.message ||
+                "Unable to remove item from cart."
         });
+    }
+};
+
+    ///// wishlist //////
+
+export const loadWishlist = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        const wishlist = await loadWishlistService(userId);
+
+        res.render("user/wishlist/wishlist", {
+            wishlist
+        });
+
+    } catch (error) {
+
+        console.error("Load wishlist error:", error);
+
+        req.session.errorMessage = "Unable to load wishlist.";
+        res.redirect("/user/shop");
+    }
+};
+
+
+export const addToWishlist = async (req, res) => {
+    try {
+
+
+        const userId = req.session.user;
+
+        const { productId, variantId } = req.params;
+
+        const result = await addToWishlistService(
+            userId,
+            productId,
+            variantId
+        );
+
+        
+        return res.status(200).json({
+            success: result.success,
+            message: result.message
+        });
+    } catch (error) {
+
+        console.error("Add wishlist error:", error);
+
+        return res.status(400).json({
+            success: false,
+            message:
+                error.message ||
+                "Unable to add product to wishlist."
+        });
+    }
+};
+
+export const removeFromWishlist = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        const { productId, variantId } = req.params;
+
+        const result = await removeFromWishlistService(
+            userId,
+            productId,
+            variantId
+        );
+
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                message: result.message
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: result.message
+        });
+
+    } catch (error) {
+
+        console.error("Remove wishlist error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to remove product from wishlist."
+        });
+    }
+};
+
+export const removeWishlistItem = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const { itemId } = req.params;
+
+        const result = await removeWishlistItemService(
+            userId,
+            itemId
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/user/wishlist");
+        }
+
+        req.session.successMessage = "Item removed from wishlist.";
+
+        return res.redirect("/user/wishlist");
+
+
+    } catch (error) {
+
+        console.error("Remove wishlist item error:", error);
+
+        req.session.errorMessage =
+            error.message || "Unable to remove wishlist item.";
+
+        res.redirect("/user/wishlist");
     }
 };

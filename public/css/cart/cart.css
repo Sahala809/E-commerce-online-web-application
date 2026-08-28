@@ -569,6 +569,25 @@ body {
 }
 
 
+.cart-stock-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 8px;
+    margin-bottom: 8px;
+
+    color: #dc3545;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.cart-stock-warning i {
+    font-size: 15px;
+}
+
+
 /* =========================================================
    TABLET
 ========================================================= */

@@ -1,25 +1,46 @@
+
 <%- include("../partials/header") %>
 
 <%- include("../partials/navbar") %>
 
 <link rel="stylesheet" href="/css/cart/cart.css">
 
+
 <main class="cart-container">
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">
-        <a href="/user/home">Home</a>
+
+        <a href="/user/home">
+            Home
+        </a>
+
         <span>›</span>
-        <a href="/user/shop">Shop</a>
+
+        <a href="/user/shop">
+            Shop
+        </a>
+
         <span>›</span>
-        <span>Cart</span>
+
+        <span>
+            Cart
+        </span>
+
     </div>
 
 
     <!-- Cart Header -->
     <div class="cart-header">
-        <h1>Your Cart</h1>
-        <p>Review your selected products before checkout.</p>
+
+        <h1>
+            Your Cart
+        </h1>
+
+        <p>
+            Review your selected products before checkout.
+        </p>
+
     </div>
 
 
@@ -32,18 +53,24 @@
                 <i class="bi bi-cart-x"></i>
             </div>
 
-            <h2>Your Cart is Empty</h2>
+            <h2>
+                Your Cart is Empty
+            </h2>
 
             <p>
                 You haven't added any products to your cart yet.
             </p>
 
-            <a href="/user/shop" class="continue-shopping-btn">
+            <a
+                href="/user/shop"
+                class="continue-shopping-btn"
+            >
                 <i class="bi bi-bag"></i>
                 Continue Shopping
             </a>
 
         </section>
+
 
     <% } else { %>
 
@@ -55,19 +82,26 @@
             <!-- LEFT : CART ITEMS -->
             <section class="cart-items-section">
 
+
                 <div class="cart-items-header">
-                    <h2>Cart Items</h2>
+
+                    <h2>
+                        Cart Items
+                    </h2>
 
                     <span>
                         <%= cart.items.length %>
                         <%= cart.items.length === 1 ? "Item" : "Items" %>
                     </span>
+
                 </div>
 
 
                 <% cart.items.forEach((item) => { %>
 
+
                     <div class="cart-item">
+
 
                         <!-- Product Image -->
                         <div class="cart-item-image">
@@ -80,13 +114,15 @@
 
                                 <img
                                     src="/uploads/variants/<%= item.variantId.images[0] %>"
-                                    alt="<%= item.productId.productName %>"
+                                    alt="<%= item.productId ? item.productId.productName : 'Product unavailable' %>"
                                 >
 
                             <% } else { %>
 
                                 <div class="no-cart-image">
+
                                     <i class="bi bi-image"></i>
+
                                 </div>
 
                             <% } %>
@@ -97,78 +133,142 @@
                         <!-- Product Details -->
                         <div class="cart-item-details">
 
-                            <h3>
-                                <%= item.productId.productName %>
-                            </h3>
 
+                            <!-- Product Name -->
+                            <% if (item.productId) { %>
+
+                                <h3>
+                                    <%= item.productId.productName %>
+                                </h3>
+
+                            <% } else { %>
+
+                                <h3>
+                                    Product no longer available
+                                </h3>
+
+                            <% } %>
+
+
+                            <!-- Color -->
                             <% if (item.variantId) { %>
 
                                 <p class="cart-item-color">
+
                                     Color:
+
                                     <strong>
                                         <%= item.variantId.color %>
                                     </strong>
+
                                 </p>
 
                             <% } %>
 
 
                             <!-- Price -->
-                            <div class="cart-item-price">
+                            <% if (item.variantId) { %>
 
-                                <% if (
-                                    item.variantId.offerPrice &&
-                                    item.variantId.offerPrice > 0 &&
-                                    item.variantId.offerPrice < item.variantId.price
-                                ) { %>
+                                <div class="cart-item-price">
+
+                                    <% if (
+                                        item.variantId.offerPrice &&
+                                        item.variantId.offerPrice > 0 &&
+                                        item.variantId.offerPrice < item.variantId.price
+                                    ) { %>
+
+                                        <span class="offer-price">
+                                            ₹<%= item.variantId.offerPrice %>
+                                        </span>
+
+                                        <del>
+                                            ₹<%= item.variantId.price %>
+                                        </del>
+
+                                    <% } else { %>
+
+                                        <span class="offer-price">
+                                            ₹<%= item.variantId.price %>
+                                        </span>
+
+                                    <% } %>
+
+                                </div>
+
+                            <% } else { %>
+
+                                <div class="cart-item-price">
 
                                     <span class="offer-price">
-                                        ₹<%= item.variantId.offerPrice %>
+                                        Not Available
                                     </span>
 
-                                    <del>
-                                        ₹<%= item.variantId.price %>
-                                    </del>
+                                </div>
 
-                                <% } else { %>
+                            <% } %>
 
-                                    <span class="offer-price">
-                                        ₹<%= item.variantId.price %>
+
+                            <!-- Stock Warning -->
+                            <% if (item.isOutOfStock) { %>
+
+                                <div class="cart-stock-warning">
+
+                                    <i class="bi bi-exclamation-circle-fill"></i>
+
+                                    <span>
+                                        <%= item.stockMessage %>
                                     </span>
 
-                                <% } %>
+                                </div>
 
-                            </div>
+                            <% } %>
 
 
                             <!-- Quantity -->
-                            <div class="cart-quantity">
+                            <% if (item.variantId) { %>
 
-    <button
-        type="button"
-        class="quantity-btn"
-        data-action="decrease"
-        data-variant-id="<%= item.variantId._id %>"
-        data-stock="<%= item.variantId.stock %>"
-    >
-        −
-    </button>
+                                <div class="cart-quantity">
 
-    <span class="quantity-value">
-        <%= item.quantity %>
-    </span>
+                                    <button
+                                        type="button"
+                                        class="quantity-btn"
+                                        data-action="decrease"
+                                        data-variant-id="<%= item.variantId._id %>"
+                                        data-stock="<%= item.variantId.stock %>"
+                                    >
+                                        −
+                                    </button>
 
-    <button
-        type="button"
-        class="quantity-btn"
-        data-action="increase"
-        data-variant-id="<%= item.variantId._id %>"
-        data-stock="<%= item.variantId.stock %>"
-    >
-        +
-    </button>
 
-</div>
+                                    <span class="quantity-value">
+                                        <%= item.quantity %>
+                                    </span>
+
+
+                                    <button
+                                        type="button"
+                                        class="quantity-btn"
+                                        data-action="increase"
+                                        data-variant-id="<%= item.variantId._id %>"
+                                        data-stock="<%= item.variantId.stock %>"
+                                    >
+                                        +
+                                    </button>
+
+                                </div>
+
+                            <% } else { %>
+
+                                <div class="cart-quantity">
+
+                                    <span class="cart-unavailable">
+                                        Variant unavailable
+                                    </span>
+
+                                </div>
+
+                            <% } %>
+
 
                         </div>
 
@@ -176,125 +276,182 @@
                         <!-- Remove -->
                         <div class="cart-item-remove">
 
-    <button
-        type="button"
-        class="remove-cart-btn"
-        data-variant-id="<%= item.variantId._id %>"
-        title="Remove item"
-    >
-        <i class="bi bi-trash3"></i>
-    </button>
+                            <% if (item.productId && item.variantId) { %>
 
-</div>
+                                <!-- Normal item -->
+
+                                <button
+                                    type="button"
+                                    class="remove-cart-btn"
+                                    data-product-id="<%= item.productId._id %>"
+                                    data-variant-id="<%= item.variantId._id %>"
+                                    title="Remove item"
+                                >
+
+                                    <i class="bi bi-trash3"></i>
+
+                                </button>
+
+
+                            <% } else { %>
+
+                                <!-- Deleted product / variant -->
+
+                                <button
+                                    type="button"
+                                    class="remove-cart-btn"
+                                    data-cart-item-id="<%= item._id %>"
+                                    title="Remove unavailable item"
+                                >
+
+                                    <i class="bi bi-trash3"></i>
+
+                                </button>
+
+                            <% } %>
+
+                        </div>
+
 
                     </div>
 
+
                 <% }) %>
+
 
             </section>
 
 
-
             <!-- RIGHT : CART SUMMARY -->
-<aside class="cart-summary">
-
-    <h2>Order Summary</h2>
+            <aside class="cart-summary">
 
 
-    <!-- Subtotal -->
-    <div class="summary-row">
-
-        <span>Subtotal</span>
-
-        <span>
-            ₹<%= subtotal %>
-        </span>
-
-    </div>
+                <h2>
+                    Order Summary
+                </h2>
 
 
-    <!-- Discount -->
-    <div class="summary-row">
+                <!-- Subtotal -->
+                <div class="summary-row">
 
-        <span>Discount</span>
+                    <span>
+                        Subtotal
+                    </span>
 
-        <span class="discount-amount">
-           - ₹<%= discount %>
-        </span>
+                    <span>
+                        ₹<%= subtotal %>
+                    </span>
 
-    </div>
-
-
-    <!-- Shipping -->
-    <div class="summary-row">
-
-        <span>Shipping Charge</span>
-
-        <span class="free-delivery">
-            <% if (shippingCharge === 0) { %>
-
-                Free
-
-            <% } else { %>
-
-                ₹<%= shippingCharge %>
-
-            <% } %>
-        </span>
-
-    </div>
+                </div>
 
 
-    <!-- Tax -->
-    <div class="summary-row">
+                <!-- Discount -->
+                <div class="summary-row">
 
-        <span>Tax</span>
+                    <span>
+                        Discount
+                    </span>
 
-        <span>
-           ₹<%= tax %>
-        </span>
+                    <span class="discount-amount">
+                        - ₹<%= discount %>
+                    </span>
 
-    </div>
-
-
-    <div class="summary-line"></div>
+                </div>
 
 
-    <!-- Total -->
-    <div class="summary-total">
+                <!-- Shipping -->
+                <div class="summary-row">
 
-        <span>Total</span>
+                    <span>
+                        Shipping Charge
+                    </span>
 
-        <strong>
-            ₹<%= subtotal %>
-        </strong>
+                    <span class="free-delivery">
 
-    </div>
+                        <% if (shippingCharge === 0) { %>
 
+                            Free
+
+                        <% } else { %>
+
+                            ₹<%= shippingCharge %>
+
+                        <% } %>
+
+                    </span>
+
+                </div>
+
+
+                <!-- Tax -->
+                <div class="summary-row">
+
+                    <span>
+                        Tax
+                    </span>
+
+                    <span>
+                        ₹<%= tax %>
+                    </span>
+
+                </div>
+
+
+                <div class="summary-line"></div>
+
+
+                <!-- Total -->
+                <div class="summary-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        ₹<%= total %>
+                    </strong>
+
+                </div>
+
+
+                <!-- Checkout -->
                 <button
                     type="button"
                     class="checkout-btn"
                 >
                     Proceed to Checkout
+
                     <i class="bi bi-arrow-right"></i>
+
                 </button>
 
+
+                <!-- Continue Shopping -->
                 <a
                     href="/user/shop"
                     class="continue-shopping"
                 >
+
                     <i class="bi bi-arrow-left"></i>
+
                     Continue Shopping
+
                 </a>
+
 
             </aside>
 
+
         </div>
+
 
     <% } %>
 
+
 </main>
+
 
 <script src="/js/cart/cart.js"></script>
 
 <%- include("../partials/footer") %>
+

@@ -67,19 +67,21 @@ router.delete('/category/:id', deleteCategory)
 router.get("/products", loadProduct)
 router.get("/products/add", loadAddProduct)
 router.post("/products/add", addProduct)
+router.get("/products/edit/:id", loadEditProduct);
+router.patch("/products/edit/:id", editProduct)
+router.delete("/products/delete/:id", deleteProduct)
 
 router.get("/products/:productId/variants", loadAddVariant)
 
+router.get(
+    "/products/:productId/variants/add",
+    loadAddVariant
+);
 router.post(
     "/products/:productId/variants/add",
     upload.array("images", 3),
     addVariant
 );
-
-router.get("/products/edit/:id", loadEditProduct);
-router.patch("/products/edit/:id", editProduct)
-
-router.delete("/products/delete/:id", deleteProduct)
 
 router.get("/products/:productId/variants/edit/:variantId", loadEditVariant);
 router.patch(

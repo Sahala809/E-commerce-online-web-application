@@ -9,6 +9,40 @@ export const addToCartService = async (
     quantity
 ) => {
 
+
+    const requestedQuantity = Number(quantity);
+
+    if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+        return {
+            success: false,
+            message: "Invalid quantity"
+        };
+    }
+
+    const variant = await Variant.findById(variantId);
+
+    if (!variant) {
+        return {
+            success: false,
+            message: "Variant not found"
+        };
+    }
+
+    // Check stock before adding
+    if (variant.stock <= 0) {
+        return {
+            success: false,
+            message: "This product is out of stock"
+        };
+    }
+
+    if (requestedQuantity > variant.stock) {
+        return {
+            success: false,
+            message: `Only ${variant.stock} item(s) available`
+        };
+    }
+
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
@@ -19,7 +53,7 @@ export const addToCartService = async (
                 {
                     productId,
                     variantId,
-                    quantity
+                    quantity: requestedQuantity
                 }
             ]
         });
@@ -38,14 +72,24 @@ export const addToCartService = async (
 
     if (existingItem) {
 
-        existingItem.quantity += Number(quantity);
+         const newQuantity =
+            existingItem.quantity + requestedQuantity;
 
+        // Check total quantity against stock
+        if (newQuantity > variant.stock) {
+            return {
+                success: false,
+                message: `Only ${variant.stock} item(s) available. You already have ${existingItem.quantity} in your cart.`
+            };
+        }
+
+        existingItem.quantity = newQuantity;
     } else {
 
         cart.items.push({
             productId,
             variantId,
-            quantity
+            quantity: requestedQuantity
         });
     }
 
@@ -80,7 +124,43 @@ export const loadCartService = async (userId) => {
 
     cart.items.forEach((item) => {
 
+        // Product no longer exists
+        if (!item.productId) {
+
+            item.isOutOfStock = true;
+            item.stockMessage =
+                "Product is no longer available.";
+
+            return;
+        }
+
         const variant = item.variantId;
+
+        if (!variant) {
+
+            item.isOutOfStock = true;
+            item.stockMessage = "Product variant is no longer available.";
+
+            return;
+        }
+
+
+        if (variant.stock <= 0) {
+
+            item.isOutOfStock = true;
+            item.stockMessage = "Out of stock";
+
+        } else if (item.quantity > variant.stock) {
+
+            item.isOutOfStock = true;
+            item.stockMessage =
+                `Only ${variant.stock} item(s) available`;
+
+        } else {
+
+            item.isOutOfStock = false;
+            item.stockMessage = "";
+        }
 
         let price = variant.price;
 
@@ -183,6 +263,7 @@ export const updateCartService = async (
 
 export const removeFromCartService = async (
     userId,
+    productId,
     variantId
 ) => {
 
@@ -196,13 +277,54 @@ export const removeFromCartService = async (
     }
 
     const itemIndex = cart.items.findIndex(
-        item => item.variantId.toString() === variantId
+        item =>
+            item.productId &&
+            item.variantId &&
+            item.productId.toString() === productId &&
+            item.variantId.toString() === variantId
     );
 
     if (itemIndex === -1) {
         return {
             success: false,
             message: "Item not found in cart"
+        };
+    }
+
+    cart.items.splice(itemIndex, 1);
+
+    await cart.save();
+
+    return {
+        success: true,
+        message: "Item removed from cart"
+    };
+};
+
+
+
+export const removeUnavailableCartItemService = async (
+    userId,
+    itemId
+) => {
+
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+        return {
+            success: false,
+            message: "Cart not found"
+        };
+    }
+
+    const itemIndex = cart.items.findIndex(
+        item => item._id.toString() === itemId
+    );
+
+    if (itemIndex === -1) {
+        return {
+            success: false,
+            message: "Cart item not found"
         };
     }
 

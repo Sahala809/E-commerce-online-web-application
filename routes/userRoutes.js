@@ -53,7 +53,15 @@ import {
     addToCart,
     loadCart,
     updateCart,
-    removeFromCart
+    removeFromCart,
+    removeUnavailableCartItem
+} from "../controllers/userController.js"
+
+import {
+    loadWishlist,
+    addToWishlist,
+    removeWishlistItem,
+    removeFromWishlist
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -135,6 +143,24 @@ router.get("/product/:id", loadProductDetail);
 router.post("/cart", addToCart);
 router.get("/cart", loadCart);
 router.patch("/cart", updateCart);
-router.delete("/cart", removeFromCart);
+router.delete(
+    "/cart/remove/:productId/:variantId",
+    removeFromCart
+);
+router.delete(
+    "/cart/remove-item/:itemId",
+    removeUnavailableCartItem
+);
+
+router.get("/wishlist", loadWishlist);
+router.post("/wishlist/add/:productId/:variantId", addToWishlist);
+router.delete(
+    "/wishlist/remove/:productId/:variantId",
+    removeFromWishlist
+);
+router.delete(
+    "/wishlist/remove-item/:itemId",
+    removeWishlistItem
+);
 
 export default router;

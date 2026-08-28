@@ -52,15 +52,17 @@
     </div>
 
 
-    <!-- MAIN IMAGE BOX -->
-    <div class="main-image-box">
+   <!-- MAIN IMAGE BOX -->
+<div class="main-image-box" id="mainImageBox">
 
-        <% if (
-            variants &&
-            variants.length > 0 &&
-            variants[0].images &&
-            variants[0].images.length > 0
-        ) { %>
+    <% if (
+        variants &&
+        variants.length > 0 &&
+        variants[0].images &&
+        variants[0].images.length > 0
+    ) { %>
+
+        <div class="zoom-container">
 
             <img
                 id="mainProductImage"
@@ -68,26 +70,27 @@
                 alt="<%= product.productName %>"
             >
 
-        <% } else { %>
+        </div>
 
-            <div class="no-main-image">
-                No Image Available
-            </div>
+    <% } else { %>
 
-        <% } %>
+        <div class="no-main-image">
+            No Image Available
+        </div>
+
+    <% } %>
 
 
-        <!-- WISHLIST -->
-        <button
-            type="button"
-            class="detail-wishlist-btn"
-            title="Add to Wishlist"
-        >
-            <i class="bi bi-heart"></i>
-        </button>
+    <!-- WISHLIST -->
+    <button
+        type="button"
+        class="detail-wishlist-btn"
+        title="Add to Wishlist"
+    >
+        <i class="bi bi-heart"></i>
+    </button>
 
-    </div>
-
+</div>
 </section>
 
 
