@@ -796,7 +796,8 @@ export const setDefaultAddress = async (req, res) => {
 
 export const loadShop = async (req,res) => {
     try {
-        
+        const search = req.query.search?.trim() || "";
+
         //console.log("FILTERS:", req.query);
         const result = await loadShopService(req.query)
 
@@ -812,11 +813,13 @@ export const loadShop = async (req,res) => {
             categories: result.categories,
             colors: result.colors,
 
+            sort: req.query.sort || "",
             totalPages: result.totalPages,
             currentPage:result.currentPage,
             totalProducts: result.totalProducts,
             successMessage,
-            errorMessage
+            errorMessage,
+            search
             
         })
     } catch (error) {
@@ -1151,5 +1154,161 @@ export const removeWishlistItem = async (req, res) => {
             error.message || "Unable to remove wishlist item.";
 
         res.redirect("/user/wishlist");
+    }
+};
+
+
+export const loadCheckout = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+
+        if (!userId) {
+
+            req.session.errorMessage = "Please login to continue";
+
+            return res.redirect("/user/login");
+        }
+
+        const carResult = await loadCartService(userId);
+
+        if (
+            !carResult.cart ||
+            !carResult.cart.items ||
+            carResult.cart.items.length === 0
+        ) {
+            req.session.errorMessage = "Your cart is empty";
+            return res.redirect("/user/cart");
+        }
+
+        const userAddresses = await Address.findOne({ userId });
+
+        let selectedAddress = null;
+
+        if (
+            userAddresses && 
+            userAddresses.addresses &&
+            userAddresses.addresses.length > 0) {
+
+            if (req.session.checkoutAddressId) {
+
+                selectedAddress = userAddresses.addresses.find(
+                    address =>
+                        address._id.toString() ===
+                        req.session.checkoutAddressId.toString()
+                );
+
+            }
+
+            
+            if (!selectedAddress) {
+                selectedAddress = userAddresses.addresses.find(
+                    address => address.isDefault === true
+                );    
+            }
+
+            if (!selectedAddress) {
+
+                selectedAddress = userAddresses.addresses[0];
+
+            }
+        }
+
+        res.render("user/checkout/checkout",{
+            cart: carResult.cart,
+
+            subtotal: carResult.subtotal,
+            discount: carResult.discount,
+            shippingCharge: carResult.shippingCharge,
+            tax: carResult.tax,
+            total: carResult.total,
+
+            userAddresses:userAddresses
+                ? userAddresses.addresses
+                : [],
+            
+            selectedAddress,
+
+            activePage: "checkout"
+        });
+
+    } catch (error) {
+
+        console.log("LOAD CHECKOUT ERROR:", error);
+
+         req.session.errorMessage = "Something went wrong";
+         
+        return res.redirect("/user/cart");
+    }
+};
+
+
+export const loadCheckoutAddresses = async (req, res) => {
+    try {
+
+        const userAddresses = await Address.findOne({
+            userId: req.session.user
+        });
+
+        return res.render("user/checkout/selectAddress", {
+
+            userAddresses: userAddresses
+                ? userAddresses.addresses
+                : [],
+
+            selectedAddressId:
+                req.session.checkoutAddressId || null,
+
+            activePage: "checkout"
+        });
+
+    } catch (error) {
+
+        console.log("LOAD CHECKOUT ADDRESSES ERROR:", error);
+
+        return res.redirect("/user/checkout");
+    }
+};
+
+
+export const selectCheckoutAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { addressId } = req.body;
+
+        console.log("USER ID:", userId);
+        console.log("SELECTED ADDRESS ID:", addressId);
+
+        const userAddresses = await Address.findOne({
+            userId
+        });
+
+        if (!userAddresses) {
+            console.log("NO USER ADDRESSES FOUND");
+            return res.redirect("/user/checkout/address");
+        }
+
+        const selectedAddress = userAddresses.addresses.id(addressId);
+
+        console.log("SELECTED ADDRESS:", selectedAddress);
+
+        if (!selectedAddress) {
+            console.log("INVALID ADDRESS ID");
+            return res.redirect("/user/checkout/address");
+        }
+
+        req.session.checkoutAddressId = addressId;
+
+        console.log(
+            "SESSION CHECKOUT ADDRESS ID:",
+            req.session.checkoutAddressId
+        );
+
+        return res.redirect("/user/checkout");
+
+    } catch (error) {
+        console.log("SELECT CHECKOUT ADDRESS ERROR:", error);
+
+        return res.redirect("/user/checkout/address");
     }
 };

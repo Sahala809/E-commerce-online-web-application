@@ -618,56 +618,21 @@ export const addVariant = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        if(!result.success){
-            const product = await Product.findById(productId)
-            const variants = await Variant.find({ productId })
-                                    .sort({ createdAt: -1})
-                                    .skip(skip)
-                                    .limit(limit)
-                                    .lean()
-            const totalVariants = await Variant.countDocuments({
-                productId
-            });  
-
-            const totalPages = Math.ceil(
-                totalVariants / limit
-            );
-
-            const newUploadedImages =
-                (result.uploadedImages || []).map(
-                    file => file.filename
-                );
-
-            const oldUploadedImages =
-                result.existingImages || [];
-
-
-            const uploadedImages = [
-                ...oldUploadedImages,
-                ...newUploadedImages
-            ].slice(0, 4);
-
-            return res.render("admin/product/manageVariant", {
-                activePage: "product",
-                pageTitle: "Add Variant",
-                product,
-                variants,
+         if (!result.success) {
+            return res.status(422).json({
+                success: false,
                 errors: result.errors,
-                formData: req.body,
-                uploadedImages,
-                successMessage: "",
-                errorMessage: "",
-                skip,
-                page,
-                limit,
-                totalPages
+                message: "Please correct the highlighted fields."
             });
         }
-
+        
         req.session.successMessage = "Variant added successfully.";
 
-        return res.redirect(`/admin/products/${req.params.productId}/variants/add`)
-    } catch (error) {
+        return res.json({
+            success: true,
+            redirect: `/admin/products/${req.params.productId}/variants/add`
+        });
+ } catch (error) {
 
         console.log("ADD VARIANT ERROR:", error);
 
@@ -832,8 +797,10 @@ export const editVariant = async (req, res) => {
 
         req.session.successMessage = "Variant updated successfully.";
 
-        return res.redirect(`/admin/products/${req.params.productId}/variants`);
-
+        return res.json({
+            success: true,
+            redirect: `/admin/products/${req.params.productId}/variants/add`
+        });
     } catch (error) {
 
         console.log("EDIT VARIANT ERROR:", error);
@@ -868,3 +835,4 @@ export const deleteVariant = async (req, res) => {
         return res.redirect(`/admin/products/${req.params.productId}/variants`);
     }
 };
+

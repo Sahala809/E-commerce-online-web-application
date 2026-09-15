@@ -1,0 +1,205 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/checkout/selectAddress.css">
+
+<main class="address-selection-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/user/home">Home</a>
+        <span>›</span>
+
+        <a href="/user/shop">Shop</a>
+        <span>›</span>
+
+        <a href="/user/cart">Cart</a>
+        <span>›</span>
+
+        <a href="/user/checkout">Checkout</a>
+        <span>›</span>
+
+        <span>Select Address</span>
+    </div>
+
+
+    <!-- Header -->
+    <div class="address-page-header">
+
+        <div>
+            <h1>Select Delivery Address</h1>
+
+            <p>
+                Choose an address for your order.
+            </p>
+        </div>
+
+        <a href="/user/address/add" class="add-address-btn">
+            <i class="bi bi-plus"></i>
+            Add New Address
+        </a>
+
+    </div>
+
+
+    <% if (userAddresses && userAddresses.length > 0) { %>
+
+        <form
+            action="/user/checkout/address/select"
+            method="POST"
+        >
+
+            <div class="address-list">
+
+                <% userAddresses.forEach((address) => { %>
+
+                    <label
+                        class="address-card
+                        <%= selectedAddressId &&
+                            selectedAddressId.toString() === address._id.toString()
+                            ? 'selected'
+                            : '' %>"
+                    >
+
+                        <div class="address-radio">
+
+                            <input
+                                type="radio"
+                                name="addressId"
+                                value="<%= address._id %>"
+
+                                <%= selectedAddressId &&
+                                    selectedAddressId.toString() === address._id.toString()
+                                    ? 'checked'
+                                    : '' %>
+                            >
+
+                        </div>
+
+
+                        <div class="address-content">
+
+                            <div class="address-top">
+
+                                <div>
+                                    <h3>
+                                        <%= address.fullName %>
+                                    </h3>
+
+                                    <% if (address.isDefault) { %>
+
+                                        <span class="default-badge">
+                                            Default
+                                        </span>
+
+                                    <% } %>
+                                </div>
+
+                            </div>
+
+
+                            <div class="address-details">
+
+                                <p>
+                                    <%= address.houseName %>,
+                                    <%= address.street %>
+                                </p>
+
+                                <p>
+                                    <%= address.city %>,
+                                    <%= address.district %>
+                                </p>
+
+                                <p>
+                                    <%= address.state %>,
+                                    <%= address.country %>
+                                    - <%= address.pincode %>
+                                </p>
+
+                                <p>
+                                    <strong>Phone:</strong>
+                                    <%= address.phone %>
+                                </p>
+
+                            </div>
+
+
+                            <div class="address-edit">
+
+                                <a
+                                    href="/user/address/edit/<%= address._id %>"
+                                    onclick="event.stopPropagation()"
+                                >
+                                    Edit
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </label>
+
+                <% }) %>
+
+            </div>
+
+
+            <!-- Bottom actions -->
+            <div class="address-actions">
+
+                <a
+                    href="/user/checkout"
+                    class="back-btn"
+                >
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Checkout
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="select-address-btn"
+                >
+                    Select Address
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </div>
+
+        </form>
+
+
+    <% } else { %>
+
+        <!-- No Address -->
+        <div class="no-address">
+
+            <div class="no-address-icon">
+                <i class="bi bi-geo-alt"></i>
+            </div>
+
+            <h2>No Address Found</h2>
+
+            <p>
+                Please add a delivery address to continue.
+            </p>
+
+            <a
+                href="/user/address/add"
+                class="add-address-btn"
+            >
+                <i class="bi bi-plus"></i>
+                Add New Address
+            </a>
+
+        </div>
+
+    <% } %>
+
+</main>
+
+
+<script src="/js/checkout/selectAddress.js"></script>
+
+<%- include("../partials/footer") %>

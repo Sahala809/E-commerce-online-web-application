@@ -120,16 +120,15 @@ export const addVariantService = async (productId,body,files) => {
         isActive,
         existingImages
     } = body
+
 const errors = {};
 
-    // Required
     if (!color || !color.trim()) {
 
         errors.color = "Color is required.";
 
     }
 
-    // Only letters and spaces
     else if (!/^[A-Za-z\s]+$/.test(color.trim())) {
 
         errors.color =
@@ -138,6 +137,41 @@ const errors = {};
     }
 
 
+     if (!errors.color) {
+
+        const normalizedColor =
+            color.trim().toLowerCase();
+
+        const existingVariant =
+            await Variant.findOne({
+                productId,
+                color: {
+                    $regex: `^${normalizedColor}$`,
+                    $options: "i"
+                }
+            });
+
+        if (existingVariant) {
+
+            errors.color =
+                "This color already exists for this product.";
+        }
+    }
+
+    // --------------------------------
+    // OTHER VALIDATION
+    // --------------------------------
+
+    const validationErrors =
+        validateAddVariant(body, files);
+
+    // Color is already handled above
+    delete validationErrors.color;
+
+    Object.assign(
+        errors,
+        validationErrors
+    );
 
     if (Object.keys(errors).length > 0) {
         return {
@@ -173,12 +207,9 @@ const errors = {};
         };
     }
 
-      const validationErrors =
-        validateAddVariant(body, files);
+     
 
-
-    // Don't validate color again
-    delete validationErrors.color;
+    
 
     // Start with existing images if any
     let images = existingImages

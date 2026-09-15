@@ -64,6 +64,13 @@ import {
     removeFromWishlist
 } from "../controllers/userController.js"
 
+import {
+    loadCheckout,
+    loadCheckoutAddresses,
+    selectCheckoutAddress
+    //placeOrder
+} from "../controllers/userController.js"
+
 const router = express.Router();
 
 
@@ -162,5 +169,12 @@ router.delete(
     "/wishlist/remove-item/:itemId",
     removeWishlistItem
 );
+
+router.get("/checkout", loadCheckout);
+
+router.get("/checkout/address", isLogin, loadCheckoutAddresses);
+router.post("/checkout/address/select", isLogin, selectCheckoutAddress);
+
+//router.post("/checkout/place-order", placeOrder);
 
 export default router;

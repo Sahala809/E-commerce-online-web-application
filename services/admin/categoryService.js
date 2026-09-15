@@ -103,9 +103,14 @@ export const editCategoryService =  async(req, res) => {
     const { categoryName, description ,isActive} = req.body;
     const { id } = req.params
 
+    const name = categoryName.trim();
+
     const existingCategory = await Category.findOne({
-        categoryName: categoryName.trim(),
-        _id: { $ne: id}
+        _id: { $ne: id},
+        categoryName: {
+            $regex: `^${name}$`,
+            $options: "i"
+        }
 
     })
 
@@ -120,7 +125,7 @@ export const editCategoryService =  async(req, res) => {
     }
 
     await Category.findByIdAndUpdate(id, {
-        categoryName: categoryName.trim(),
+        categoryName: name,
         description: description.trim(),
         isActive: isActive === "on"
     })

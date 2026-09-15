@@ -1,0 +1,609 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/checkout/checkout.css">
+
+
+<main class="checkout-container">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+
+        <a href="/user/home">
+            Home
+        </a>
+
+        <span>›</span>
+
+        <a href="/user/shop">
+            Shop
+        </a>
+
+        <span>›</span>
+
+        <a href="/user/cart">
+            Cart
+        </a>
+
+        <span>›</span>
+
+        <span>
+            Checkout
+        </span>
+
+    </div>
+
+
+    <!-- Checkout Header -->
+    <div class="checkout-header">
+
+        <h1>
+            Checkout
+        </h1>
+
+        <p>
+            Complete your order by confirming your details.
+        </p>
+
+    </div>
+
+
+    <!-- Checkout Layout -->
+    <div class="checkout-layout">
+
+
+        <!-- =========================================
+             LEFT SIDE
+        ========================================== -->
+
+        <section class="checkout-left">
+
+
+            <!-- CONTACT -->
+            <div class="checkout-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Contact
+                    </h2>
+
+                </div>
+
+
+                <div class="contact-info">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Email Address"
+                        value="<%= typeof user !== 'undefined' && user ? user.email : '' %>"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 DELIVERY
+            ====================================== -->
+
+            <div class="checkout-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Delivery
+                    </h2>
+
+                </div>
+
+
+                <% if (selectedAddress) { %>
+
+
+                    <!-- Selected Address -->
+                    <div class="selected-address">
+
+                        <div class="address-name">
+
+                            <strong>
+                                <%= selectedAddress.fullName %>
+                            </strong>
+
+                        </div>
+
+
+                        <div class="address-details">
+
+                            <p>
+                                <%= selectedAddress.houseName %>
+                            </p>
+
+                            <p>
+                                <%= selectedAddress.street %>
+                            </p>
+
+                            <p>
+                                <%= selectedAddress.city %>,
+                                <%= selectedAddress.district %>
+                            </p>
+
+                            <p>
+                                <%= selectedAddress.state %>,
+                                <%= selectedAddress.country %>
+                            </p>
+
+                            <p>
+                                PIN: <%= selectedAddress.pincode %>
+                            </p>
+
+                            <p>
+                                Phone: <%= selectedAddress.phone %>
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Address Actions -->
+                    <div class="address-actions">
+
+                        <a
+                            href="/user/checkout/address"
+                            class="change-address-link"
+                        >
+                            Change
+                        </a>
+
+
+                        <a
+                            href="/user/address/add"
+                            class="add-address-link"
+                        >
+                            + Add New Address
+                        </a>
+
+                    </div>
+
+
+                <% } else { %>
+
+
+                    <!-- No Address -->
+                    <div class="no-address">
+
+                        <div class="no-address-icon">
+
+                            <i class="bi bi-geo-alt"></i>
+
+                        </div>
+
+                        <p>
+                            No delivery address found.
+                        </p>
+
+                        <a
+                            href="/user/address/add"
+                            class="add-address-link"
+                        >
+                            + Add New Address
+                        </a>
+
+                    </div>
+
+
+                <% } %>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 PAYMENT
+            ====================================== -->
+
+            <div class="checkout-section">
+
+                <div class="section-title">
+
+                    <h2>
+                        Payment
+                    </h2>
+
+                </div>
+
+
+                <div class="payment-options">
+
+
+                    <!-- Cash On Delivery -->
+                    <label class="payment-option">
+
+                        <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="COD"
+                            checked
+                        >
+
+                        <div class="payment-content">
+
+                            <div class="payment-icon">
+
+                                <i class="bi bi-cash-stack"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Cash on Delivery
+                                </strong>
+
+                                <p>
+                                    Pay when your order is delivered.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </label>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 PLACE ORDER
+            ====================================== -->
+
+            <div class="place-order-section">
+
+                <% if (selectedAddress) { %>
+
+                    <form
+                        action="/user/order/place"
+                        method="POST"
+                    >
+
+                        <!-- Payment method -->
+                        <input
+                            type="hidden"
+                            name="paymentMethod"
+                            value="COD"
+                        >
+
+
+                        <!-- Selected address -->
+                        <input
+                            type="hidden"
+                            name="addressId"
+                            value="<%= selectedAddress._id %>"
+                        >
+
+
+                        <button
+                            type="submit"
+                            class="place-order-btn"
+                        >
+                            Place Order
+
+                            <i class="bi bi-arrow-right"></i>
+
+                        </button>
+
+                    </form>
+
+                <% } else { %>
+
+                    <button
+                        type="button"
+                        class="place-order-btn disabled"
+                        disabled
+                    >
+                        Add Address to Continue
+                    </button>
+
+                <% } %>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================================
+             RIGHT SIDE
+        ========================================== -->
+
+        <aside class="checkout-right">
+
+
+            <!-- =====================================
+                 APPLY COUPON
+            ====================================== -->
+
+            <div class="coupon-section">
+
+                <h2>
+                    Apply Coupon
+                </h2>
+
+
+                <form
+                    action="/user/cart/apply-coupon"
+                    method="POST"
+                    class="coupon-form"
+                >
+
+                    <input
+                        type="text"
+                        name="couponCode"
+                        placeholder="Discount code"
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="submit"
+                    >
+                        Apply
+                    </button>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 ORDER ITEMS
+            ====================================== -->
+
+            <div class="order-items-section">
+
+                <h2>
+                    Your Order
+                </h2>
+
+
+                <% if (cart && cart.items && cart.items.length > 0) { %>
+
+
+                    <div class="checkout-items">
+
+                        <% cart.items.forEach((item) => { %>
+
+
+                            <% if (item.productId && item.variantId) { %>
+
+
+                                <div class="checkout-item">
+
+
+                                    <!-- Product Image -->
+                                    <div class="checkout-item-image">
+
+                                        <% if (
+                                            item.variantId.images &&
+                                            item.variantId.images.length > 0
+                                        ) { %>
+
+                                            <img
+                                                src="/uploads/variants/<%= item.variantId.images[0] %>"
+                                                alt="<%= item.productId.productName %>"
+                                            >
+
+                                        <% } else { %>
+
+                                            <div class="no-checkout-image">
+
+                                                <i class="bi bi-image"></i>
+
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <!-- Quantity Badge -->
+                                        <span class="item-quantity">
+                                            <%= item.quantity %>
+                                        </span>
+
+                                    </div>
+
+
+
+                                    <!-- Product Details -->
+                                    <div class="checkout-item-details">
+
+                                        <h3>
+                                            <%= item.productId.productName %>
+                                        </h3>
+
+
+                                        <% if (item.variantId.color) { %>
+
+                                            <p>
+                                                Color:
+                                                <%= item.variantId.color %>
+                                            </p>
+
+                                        <% } %>
+
+
+                                    </div>
+
+
+
+                                    <!-- Product Price -->
+                                    <div class="checkout-item-price">
+
+                                        <% if (
+                                            item.variantId.offerPrice &&
+                                            item.variantId.offerPrice > 0 &&
+                                            item.variantId.offerPrice <
+                                            item.variantId.price
+                                        ) { %>
+
+                                            ₹<%= (
+                                                item.variantId.offerPrice *
+                                                item.quantity
+                                            ).toLocaleString("en-IN") %>
+
+                                        <% } else { %>
+
+                                            ₹<%= (
+                                                item.variantId.price *
+                                                item.quantity
+                                            ).toLocaleString("en-IN") %>
+
+                                        <% } %>
+
+                                    </div>
+
+
+                                </div>
+
+
+                            <% } %>
+
+                        <% }) %>
+
+                    </div>
+
+
+                <% } %>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 ORDER SUMMARY
+            ====================================== -->
+
+            <div class="order-summary">
+
+                <h2>
+                    Order Summary
+                </h2>
+
+
+                <!-- Subtotal -->
+                <div class="summary-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+                        ₹<%= Number(subtotal).toLocaleString("en-IN") %>
+                    </span>
+
+                </div>
+
+
+
+                <!-- Discount -->
+                <div class="summary-row">
+
+                    <span>
+                        Discount
+                    </span>
+
+                    <span class="discount-amount">
+
+                        - ₹<%= Number(discount).toLocaleString("en-IN") %>
+
+                    </span>
+
+                </div>
+
+
+
+                <!-- Shipping -->
+                <div class="summary-row">
+
+                    <span>
+                        Shipping
+                    </span>
+
+                    <span>
+
+                        <% if (Number(shippingCharge) === 0) { %>
+
+                            Free
+
+                        <% } else { %>
+
+                            ₹<%= Number(shippingCharge).toLocaleString("en-IN") %>
+
+                        <% } %>
+
+                    </span>
+
+                </div>
+
+
+
+                <!-- Tax -->
+                <div class="summary-row">
+
+                    <span>
+                        Tax
+                    </span>
+
+                    <span>
+                        ₹<%= Number(tax).toLocaleString("en-IN") %>
+                    </span>
+
+                </div>
+
+
+                <div class="summary-line"></div>
+
+
+                <!-- Total -->
+                <div class="summary-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        ₹<%= Number(total).toLocaleString("en-IN") %>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </aside>
+
+
+    </div>
+
+</main>
+
+
+<script src="/js/checkout/checkout.js"></script>
+
+
+<%- include("../partials/footer") %>

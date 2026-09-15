@@ -64,6 +64,26 @@
         </p>
     </div>
 
+    <!-- SEARCH -->
+<div class="shop-search">
+    <form action="/user/shop" method="GET" id="shopSearchForm">
+        <div class="search-box">
+            <input
+                type="text"
+                name="search"
+                id="shopSearch"
+                placeholder="Search watches..."
+                value="<%= search || '' %>"
+            >
+
+            <button type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+
 
     <div class="shop-layout">
 
@@ -225,6 +245,8 @@
 
             <div class="shop-toolbar">
 
+                
+
                 <div class="product-count">
 
                     <% if (products && products.length > 0) { %>
@@ -253,23 +275,23 @@
 
                     <select id="sort" name="sort">
 
-                        <option value="">
-                            Default
-                        </option>
+    <option value="" <%= sort === "" ? "selected" : "" %>>
+        Default
+    </option>
 
-                        <option value="priceLow">
-                            Price: Low to High
-                        </option>
+    <option value="priceLow" <%= sort === "priceLow" ? "selected" : "" %>>
+        Price: Low to High
+    </option>
 
-                        <option value="priceHigh">
-                            Price: High to Low
-                        </option>
+    <option value="priceHigh" <%= sort === "priceHigh" ? "selected" : "" %>>
+        Price: High to Low
+    </option>
 
-                        <option value="newest">
-                            Newest
-                        </option>
+    <option value="newest" <%= sort === "newest" ? "selected" : "" %>>
+        Newest
+    </option>
 
-                    </select>
+</select>
 
                 </div>
 
@@ -401,20 +423,7 @@
                         </div>
 
 
-                        <!-- Add To Cart -->
-
-                        <button
-                            type="button"
-                            class="add-cart-btn"
-                        >
-
-                            <span>
-                                Add to Cart
-                            </span>
-
-                            <i class="bi bi-cart-plus"></i>
-
-                        </button>
+                        
 
                     </div>
 
@@ -532,7 +541,7 @@
 
 
     // =========================================================
-    // APPLY FILTERS BUTTON
+    // APPLY FILTERS
     // =========================================================
 
     const applyFilters =
@@ -543,35 +552,64 @@
 
         applyFilters.addEventListener("click", () => {
 
-            // Selected categories
+
+            // =================================================
+            // GET CURRENT URL PARAMETERS
+            // =================================================
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            // =================================================
+            // SEARCH
+            // =================================================
+
+            const searchInput =
+                document.getElementById("shopSearch");
+
+            const search =
+                searchInput
+                    ? searchInput.value.trim()
+                    : "";
+
+
+            if (search) {
+
+                params.set(
+                    "search",
+                    search
+                );
+
+            } else {
+
+                params.delete("search");
+
+            }
+
+
+            // =================================================
+            // CATEGORY
+            // =================================================
+
             const selectedCategories = [
+
                 ...document.querySelectorAll(
                     'input[name="category"]:checked'
                 )
-            ].map(checkbox => checkbox.value);
+
+            ].map(
+                checkbox => checkbox.value
+            );
 
 
-            // Selected colors
-            const selectedColors = [
-                ...document.querySelectorAll(
-                    'input[name="color"]:checked'
-                )
-            ].map(checkbox => checkbox.value);
+            // Remove old categories first
+            params.delete("category");
 
 
-            // Max price
-            const maxPrice =
-                priceSlider
-                    ? priceSlider.value
-                    : 50000;
-
-
-            // Create URL parameters
-            const params =
-                new URLSearchParams();
-
-
-            // Add categories
+            // Add selected categories
             selectedCategories.forEach(category => {
 
                 params.append(
@@ -582,7 +620,26 @@
             });
 
 
-            // Add colors
+            // =================================================
+            // COLOR
+            // =================================================
+
+            const selectedColors = [
+
+                ...document.querySelectorAll(
+                    'input[name="color"]:checked'
+                )
+
+            ].map(
+                checkbox => checkbox.value
+            );
+
+
+            // Remove old colors first
+            params.delete("color");
+
+
+            // Add selected colors
             selectedColors.forEach(color => {
 
                 params.append(
@@ -593,14 +650,58 @@
             });
 
 
-            // Add max price
+            // =================================================
+            // MAX PRICE
+            // =================================================
+
+            const maxPrice =
+                priceSlider
+                    ? priceSlider.value
+                    : 50000;
+
+
             params.set(
                 "maxPrice",
                 maxPrice
             );
 
 
-            // Redirect
+            // =================================================
+            // SORT
+            // =================================================
+
+            const sort =
+                document.getElementById("sort").value;
+
+
+            if (sort) {
+
+                params.set(
+                    "sort",
+                    sort
+                );
+
+            } else {
+
+                params.delete("sort");
+
+            }
+
+
+            // =================================================
+            // RESET TO PAGE 1
+            // =================================================
+
+            params.set(
+                "page",
+                "1"
+            );
+
+
+            // =================================================
+            // REDIRECT
+            // =================================================
+
             window.location.href =
                 `/user/shop?${params.toString()}`;
 
@@ -610,236 +711,56 @@
 
 
     // =========================================================
-    // WISHLIST BUTTON
+    // SORT
     // =========================================================
 
-    const wishlistButtons =
-        document.querySelectorAll(".wishlist-btn");
+    const sortSelect =
+        document.getElementById("sort");
 
 
-    wishlistButtons.forEach(button => {
+    if (sortSelect) {
 
-        button.addEventListener("click", async (event) => {
+        sortSelect.addEventListener("change", () => {
 
-            // Stop product card/link from opening
-            event.preventDefault();
-            event.stopPropagation();
-
-
-            const productId =
-                button.dataset.productId;
-
-            const variantId =
-                button.dataset.variantId;
-
-
-            // Check IDs
-            if (!productId || !variantId) {
-
-                console.error(
-                    "Product ID or Variant ID is missing."
+            // Get current URL parameters
+            const params =
+                new URLSearchParams(
+                    window.location.search
                 );
 
-                return;
+
+            // Get selected sort
+            const sort =
+                sortSelect.value;
+
+
+            // Update sort
+            if (sort) {
+
+                params.set(
+                    "sort",
+                    sort
+                );
+
+            } else {
+
+                params.delete("sort");
+
             }
 
 
-            try {
-
-                const response = await fetch(
-                    `/user/wishlist/add/${productId}/${variantId}`,
-                    {
-                        method: "POST"
-                    }
-                );
+            // Sorting should start from page 1
+            params.set(
+                "page",
+                "1"
+            );
 
 
-                const result =
-                    await response.json();
-
-
-                console.log(
-                    "Wishlist response:",
-                    result
-                );
-
-
-                // Show popup
-                showWishlistPopup(
-                    result.message
-                );
-
-
-                // Change heart only when successfully added
-                if (result.success) {
-
-                    const icon =
-                        button.querySelector("i");
-
-                    if (icon) {
-
-                        icon.classList.remove(
-                            "bi-heart"
-                        );
-
-                        icon.classList.add(
-                            "bi-heart-fill"
-                        );
-
-                    }
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Wishlist error:",
-                    error
-                );
-
-
-                showWishlistPopup(
-                    "Unable to add product to wishlist."
-                );
-
-            }
+            // Reload shop
+            window.location.href =
+                `/user/shop?${params.toString()}`;
 
         });
-
-    });
-
-
-    // =========================================================
-    // WISHLIST POPUP
-    // =========================================================
-
-    function showWishlistPopup(message) {
-
-        // Remove old popup if already exists
-        const oldPopup =
-            document.getElementById("wishlistPopup");
-
-        if (oldPopup) {
-            oldPopup.remove();
-        }
-
-
-        // Create popup overlay
-        const popup =
-            document.createElement("div");
-
-        popup.id =
-            "wishlistPopup";
-
-        popup.className =
-            "wishlist-popup-overlay";
-
-
-        // Popup HTML
-        popup.innerHTML = `
-
-            <div class="wishlist-popup">
-
-                <button
-                    type="button"
-                    class="wishlist-popup-close"
-                    aria-label="Close"
-                >
-                    &times;
-                </button>
-
-
-                <div class="wishlist-popup-icon">
-
-                    <i class="bi bi-heart-fill"></i>
-
-                </div>
-
-
-                <h3>
-                    Wishlist
-                </h3>
-
-
-                <p>
-                    ${message}
-                </p>
-
-
-                <button
-                    type="button"
-                    class="wishlist-popup-btn"
-                >
-                    OK
-                </button>
-
-            </div>
-
-        `;
-
-
-        // Add popup to body
-        document.body.appendChild(popup);
-
-
-        // =====================================================
-        // CLOSE BUTTON
-        // =====================================================
-
-        const closeButton =
-            popup.querySelector(
-                ".wishlist-popup-close"
-            );
-
-
-        closeButton.addEventListener(
-            "click",
-            () => {
-
-                popup.remove();
-
-            }
-        );
-
-
-        // =====================================================
-        // OK BUTTON
-        // =====================================================
-
-        const okButton =
-            popup.querySelector(
-                ".wishlist-popup-btn"
-            );
-
-
-        okButton.addEventListener(
-            "click",
-            () => {
-
-                popup.remove();
-
-            }
-        );
-
-
-        // =====================================================
-        // CLICK OUTSIDE POPUP
-        // =====================================================
-
-        popup.addEventListener(
-            "click",
-            (event) => {
-
-                if (
-                    event.target === popup
-                ) {
-
-                    popup.remove();
-
-                }
-
-            }
-        );
 
     }
 
