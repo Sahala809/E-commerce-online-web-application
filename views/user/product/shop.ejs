@@ -113,10 +113,14 @@
                         <label class="filter-option">
 
                             <input
-                                type="checkbox"
-                                name="category"
-                                value="<%= category._id %>"
-                            >
+    type="checkbox"
+    name="category"
+    value="<%= category._id %>"
+    <%= Array.isArray(selectedCategories) &&
+        selectedCategories.includes(category._id.toString())
+        ? "checked"
+        : "" %>
+>
 
                             <span>
                                 <%= category.categoryName %>
@@ -166,7 +170,7 @@
 
                     <span>₹0</span>
                     <span id="maxPriceValue">
-                        ₹50,000
+                        ₹<%= Number(maxPrice || 50000).toLocaleString("en-IN") %>
                     </span>
 
                 </div>
@@ -177,7 +181,7 @@
                     class="price-slider"
                     min="0"
                     max="50000"
-                    value="50000"
+                    value="<%= maxPrice || 50000 %>"
                     step="500"
                 >
 
@@ -201,10 +205,13 @@
                         <label class="filter-option">
 
                             <input
-                                type="checkbox"
-                                name="color"
-                                value="<%= color.toLowerCase() %>"
-                            >
+    type="checkbox"
+    name="color"
+    value="<%= color.toLowerCase() %>"
+    <%= selectedColors.includes(color.toLowerCase())
+        ? "checked"
+        : "" %>
+>
 
                             <span>
                                 <%= color %>
@@ -229,6 +236,14 @@
                 >
                     Apply Filters
                 </button>
+
+                <button
+    type="button"
+    id="clearFilters"
+    class="clear-filter-btn"
+>
+    Clear Filters
+</button>
 
             </div>
 
@@ -708,6 +723,15 @@
         });
 
     }
+
+    const clearFilters =
+    document.getElementById("clearFilters");
+
+if (clearFilters) {
+    clearFilters.addEventListener("click", () => {
+        window.location.href = "/user/shop";
+    });
+}
 
 
     // =========================================================

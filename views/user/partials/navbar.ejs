@@ -180,21 +180,35 @@
                     </div>
                 </div>
 
+                
+
                 <a href="/user/wishlist"
-                    class="text-dark fs-5"
-                    title="Wishlist">
+   class="nav-icon text-dark fs-5"
+   title="Wishlist">
 
-                    <i class="bi bi-heart"></i>
+    <i class="bi bi-heart"></i>
 
-                </a>
+    <% if (wishlistCount > 0) { %>
+        <span class="nav-count">
+            <%= wishlistCount %>
+        </span>
+    <% } %>
+
+</a>
 
                 <a href="/user/cart"
-                    class="text-dark fs-5"
-                    title="Cart">
+   class="nav-icon text-dark fs-5"
+   title="Cart">
 
-                    <i class="bi bi-bag"></i>
+    <i class="bi bi-bag"></i>
 
-                </a>
+    <% if (cartCount > 0) { %>
+        <span class="nav-count">
+            <%= cartCount %>
+        </span>
+    <% } %>
+
+</a>
 
             </div>
 

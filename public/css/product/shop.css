@@ -929,6 +929,34 @@ body {
 }
 
 
+/* =========================
+   CLEAR FILTER BUTTON
+   ========================= */
+
+.clear-filter-btn {
+    width: 100%;
+    padding: 11px 20px;
+    margin-top: 10px;
+
+    background-color: transparent;
+    color: #555;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-filter-btn:hover {
+    background-color: #f5f5f5;
+    border-color: #999;
+    color: #222;
+}
+
 /* =========================================================
    ANIMATIONS
    ========================================================= */

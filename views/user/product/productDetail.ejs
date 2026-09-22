@@ -1,97 +1,138 @@
 <%- include("../partials/header") %>
+
 <%- include("../partials/navbar") %>
 
 <link rel="stylesheet" href="/css/product/productDetail.css">
 
+
 <main class="product-detail-container">
 
-    <!-- Breadcrumb -->
+    <!-- =================================================
+         BREADCRUMB
+    ================================================== -->
+
     <div class="breadcrumb">
+
         <a href="/user/home">Home</a>
+
         <span>›</span>
+
         <a href="/user/shop">Shop</a>
+
         <span>›</span>
-        <span><%= product.productName %></span>
+
+        <span>
+            <%= product.productName %>
+        </span>
+
     </div>
 
+
+
+    <!-- =================================================
+         PRODUCT DETAIL LAYOUT
+    ================================================== -->
 
     <div class="product-detail-layout">
 
 
         <!-- =================================================
-     LEFT : PRODUCT IMAGE GALLERY
-================================================== -->
-<section class="product-gallery">
+             LEFT : PRODUCT IMAGE GALLERY
+        ================================================== -->
 
-    <!-- THREE SMALL IMAGE BOXES -->
-    <div class="thumbnail-list" id="thumbnailList">
-
-        <% if (
-            variants &&
-            variants.length > 0 &&
-            variants[0].images &&
-            variants[0].images.length > 0
-        ) { %>
-
-            <% variants[0].images.slice(0, 3).forEach((image, index) => { %>
-
-                <div
-                    class="thumbnail <%= index === 0 ? 'active' : '' %>"
-                    data-image="/uploads/variants/<%= image %>"
-                >
-                    <img
-                        src="/uploads/variants/<%= image %>"
-                        alt="<%= product.productName %>"
-                    >
-                </div>
-
-            <% }) %>
-
-        <% } %>
-
-    </div>
+        <section class="product-gallery">
 
 
-   <!-- MAIN IMAGE BOX -->
-<div class="main-image-box" id="mainImageBox">
+            <!-- THUMBNAILS -->
 
-    <% if (
-        variants &&
-        variants.length > 0 &&
-        variants[0].images &&
-        variants[0].images.length > 0
-    ) { %>
-
-        <div class="zoom-container">
-
-            <img
-                id="mainProductImage"
-                src="/uploads/variants/<%= variants[0].images[0] %>"
-                alt="<%= product.productName %>"
+            <div
+                class="thumbnail-list"
+                id="thumbnailList"
             >
 
-        </div>
+                <% if (
+                    variants &&
+                    variants.length > 0 &&
+                    variants[0].images &&
+                    variants[0].images.length > 0
+                ) { %>
 
-    <% } else { %>
+                    <% variants[0].images
+                        .slice(0, 3)
+                        .forEach((image, index) => {
+                    %>
 
-        <div class="no-main-image">
-            No Image Available
-        </div>
+                        <div
+                            class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                            data-image="/uploads/variants/<%= image %>"
+                        >
 
-    <% } %>
+                            <img
+                                src="/uploads/variants/<%= image %>"
+                                alt="<%= product.productName %>"
+                            >
+
+                        </div>
+
+                    <% }) %>
+
+                <% } %>
+
+            </div>
 
 
-    <!-- WISHLIST -->
-    <button
-        type="button"
-        class="detail-wishlist-btn"
-        title="Add to Wishlist"
-    >
-        <i class="bi bi-heart"></i>
-    </button>
 
-</div>
-</section>
+            <!-- =================================================
+                 MAIN IMAGE
+            ================================================== -->
+
+            <div
+                class="main-image-box"
+                id="mainImageBox"
+            >
+
+                <% if (
+                    variants &&
+                    variants.length > 0 &&
+                    variants[0].images &&
+                    variants[0].images.length > 0
+                ) { %>
+
+                    <div class="zoom-container">
+
+                        <img
+                            id="mainProductImage"
+                            src="/uploads/variants/<%= variants[0].images[0] %>"
+                            alt="<%= product.productName %>"
+                        >
+
+                    </div>
+
+                <% } else { %>
+
+                    <div class="no-main-image">
+                        No Image Available
+                    </div>
+
+                <% } %>
+
+
+                <!-- WISHLIST -->
+
+                <button
+                    type="button"
+                    class="detail-wishlist-btn"
+                    title="Add to Wishlist"
+                >
+
+                    <i class="bi bi-heart"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
 
 
         <!-- =================================================
@@ -101,25 +142,31 @@
         <section class="product-details">
 
 
-            <!-- Product Name -->
+            <!-- PRODUCT NAME -->
 
             <h1 class="detail-product-name">
+
                 <%= product.productName %>
+
             </h1>
 
 
-            <!-- Category -->
+
+            <!-- CATEGORY -->
 
             <% if (product.categoryId) { %>
 
                 <p class="detail-category">
+
                     <%= product.categoryId.name %>
+
                 </p>
 
             <% } %>
 
 
-            <!-- Rating -->
+
+            <!-- RATING -->
 
             <div class="product-rating">
 
@@ -134,7 +181,10 @@
             </div>
 
 
-            <!-- Price -->
+
+            <!-- =================================================
+                 PRICE
+            ================================================== -->
 
             <% if (variants && variants.length > 0) { %>
 
@@ -167,11 +217,14 @@
                 </div>
 
 
-                <!-- Color -->
+
+                <!-- COLOR -->
 
                 <div class="detail-section">
 
-                    <h3>Color</h3>
+                    <h3>
+                        Color
+                    </h3>
 
                     <div class="color-options">
 
@@ -182,7 +235,9 @@
                                 class="color-option <%= index === 0 ? 'selected' : '' %>"
                                 data-variant-id="<%= item._id %>"
                             >
+
                                 <%= item.color %>
+
                             </button>
 
                         <% }) %>
@@ -192,21 +247,27 @@
                 </div>
 
 
-                <!-- Stock -->
+
+                <!-- STOCK -->
 
                 <div class="stock-info">
 
                     <% if (variant.stock > 0) { %>
 
                         <span class="in-stock">
+
                             <i class="bi bi-check-circle"></i>
+
                             In Stock
+
                         </span>
 
                     <% } else { %>
 
                         <span class="out-stock">
+
                             Out of Stock
+
                         </span>
 
                     <% } %>
@@ -216,11 +277,16 @@
             <% } %>
 
 
-            <!-- Description -->
+
+            <!-- =================================================
+                 DESCRIPTION
+            ================================================== -->
 
             <div class="detail-description">
 
-                <h3>Description</h3>
+                <h3>
+                    Description
+                </h3>
 
                 <p>
                     <%= product.description %>
@@ -229,11 +295,16 @@
             </div>
 
 
-            <!-- Quantity -->
+
+            <!-- =================================================
+                 QUANTITY
+            ================================================== -->
 
             <div class="quantity-section">
 
-                <h3>Quantity</h3>
+                <h3>
+                    Quantity
+                </h3>
 
                 <div class="quantity-control">
 
@@ -260,50 +331,67 @@
             </div>
 
 
-            <!-- Buttons -->
+
+            <!-- =================================================
+                 ADD TO CART
+            ================================================== -->
 
             <div class="detail-actions">
 
-    <form action="/user/cart" method="POST">
+                <form
+                    action="/user/cart"
+                    method="POST"
+                >
 
-        <input
-            type="hidden"
-            name="productId"
-            value="<%= product._id %>"
-        >
+                    <input
+                        type="hidden"
+                        name="productId"
+                        value="<%= product._id %>"
+                    >
 
-        <input
-            type="hidden"
-            name="variantId"
-            id="selectedVariantId"
-            value="<%= variants[0]._id %>"
-        >
+                    <input
+                        type="hidden"
+                        name="variantId"
+                        id="selectedVariantId"
+                        value="<%= variants.length > 0 ? variants[0]._id : '' %>"
+                    >
 
-        <input
-            type="hidden"
-            name="quantity"
-            id="cartQuantity"
-            value="1"
-        >
+                    <input
+                        type="hidden"
+                        name="quantity"
+                        id="cartQuantity"
+                        value="1"
+                    >
 
-        <button
-            type="submit"
-            class="detail-add-cart"
-        >
-            <i class="bi bi-cart-plus"></i>
-            Add to Cart
-        </button>
+                    <button
+                        type="submit"
+                        class="detail-add-cart"
+                    >
 
-    </form>
+                        <i class="bi bi-cart-plus"></i>
 
-</div>
+                        Add to Cart
 
+                    </button>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 WISHLIST
+            ================================================== -->
 
             <div class="detail-wishlist-link">
 
                 <button type="button">
+
                     <i class="bi bi-heart"></i>
+
                     Add to Wishlist
+
                 </button>
 
             </div>
@@ -313,12 +401,197 @@
 
     </div>
 
+
+
+    <!-- =================================================
+         RELATED PRODUCTS
+    ================================================== -->
+
+    <% if (
+        relatedProducts &&
+        relatedProducts.length > 0
+    ) { %>
+
+        <section class="related-products-section">
+
+
+            <!-- HEADER -->
+
+            <div class="related-products-header">
+
+                <h2>
+                    Related Products
+                </h2>
+
+                <p>
+                    You may also like these products
+                </p>
+
+            </div>
+
+
+
+            <!-- PRODUCTS GRID -->
+
+            <div class="related-products-grid">
+
+                <% relatedProducts.forEach(item => { %>
+
+                    <div class="related-product-card">
+
+
+                        <!-- =================================================
+                             PRODUCT IMAGE
+                        ================================================== -->
+
+                        <a
+                            href="/user/product/<%= item._id %>"
+                            class="related-product-image"
+                        >
+
+                            <% if (
+                                item.variant &&
+                                item.variant.images &&
+                                item.variant.images.length > 0
+                            ) { %>
+
+                                <img
+                                    src="/uploads/variants/<%= item.variant.images[0] %>"
+                                    alt="<%= item.productName %>"
+                                >
+
+                            <% } else { %>
+
+                                <div class="no-related-image">
+                                    No Image
+                                </div>
+
+                            <% } %>
+
+                        </a>
+
+
+
+                        <!-- =================================================
+                             PRODUCT INFORMATION
+                        ================================================== -->
+
+                        <div class="related-product-info">
+
+
+                            <!-- CATEGORY -->
+
+                            <% if (item.categoryId) { %>
+
+                                <p class="related-category">
+
+                                    <%= item.categoryId.name %>
+
+                                </p>
+
+                            <% } %>
+
+
+
+                            <!-- PRODUCT NAME -->
+
+                            <h3>
+
+                                <a
+                                    href="/user/product/<%= item._id %>"
+                                >
+
+                                    <%= item.productName %>
+
+                                </a>
+
+                            </h3>
+
+
+
+                            <!-- =================================================
+                                 PRICE
+                            ================================================== -->
+
+                            <% if (item.variant) { %>
+
+                                <div class="related-price">
+
+                                    <% if (
+                                        item.variant.offerPrice &&
+                                        item.variant.offerPrice > 0 &&
+                                        item.variant.offerPrice < item.variant.price
+                                    ) { %>
+
+                                        <span class="offer-price">
+
+                                            ₹<%= item.variant.offerPrice %>
+
+                                        </span>
+
+                                        <del>
+
+                                            ₹<%= item.variant.price %>
+
+                                        </del>
+
+                                    <% } else { %>
+
+                                        <span class="offer-price">
+
+                                            ₹<%= item.variant.price %>
+
+                                        </span>
+
+                                    <% } %>
+
+                                </div>
+
+                            <% } %>
+
+
+
+                            <!-- VIEW PRODUCT -->
+
+                            <a
+                                href="/user/product/<%= item._id %>"
+                                class="view-product-btn"
+                            >
+
+                                View Product
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        </section>
+
+    <% } %>
+
+
+
 </main>
 
+
+
+<!-- =================================================
+     JAVASCRIPT DATA
+================================================== -->
+
 <script>
-    const variants = <%- JSON.stringify(variants) %>;
+
+    const variants = <%- JSON.stringify(variants || []) %>;
+
 </script>
 
+
 <script src="/js/product/productDetail.js"></script>
+
 
 <%- include("../partials/footer") %>

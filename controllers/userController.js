@@ -798,6 +798,21 @@ export const loadShop = async (req,res) => {
     try {
         const search = req.query.search?.trim() || "";
 
+        const selectedCategories = req.query.category
+    ? Array.isArray(req.query.category)
+        ? req.query.category
+        : [req.query.category]
+    : [];
+
+const selectedColors = req.query.color
+    ? Array.isArray(req.query.color)
+        ? req.query.color
+        : [req.query.color]
+    : [];
+
+const maxPrice = Number(req.query.maxPrice) || 50000;
+
+
         //console.log("FILTERS:", req.query);
         const result = await loadShopService(req.query)
 
@@ -813,7 +828,12 @@ export const loadShop = async (req,res) => {
             categories: result.categories,
             colors: result.colors,
 
+            selectedCategories,
+            selectedColors,
+            maxPrice,
+
             sort: req.query.sort || "",
+            
             totalPages: result.totalPages,
             currentPage:result.currentPage,
             totalProducts: result.totalProducts,
@@ -849,7 +869,8 @@ export const loadProductDetail = async (req, res) => {
         res.render("user/product/productDetail", {
             activePage:"shop",
             product: result.product,
-            variants: result.variants || []
+            variants: result.variants || [],
+            relatedProducts: result.relatedProducts || []
         })
     } catch (error) {
 
@@ -977,15 +998,16 @@ export const removeFromCart = async (req, res) => {
         );
 
        if (!result.success) {
-         req.session.errorMessage = result.message; 
-         
-         return res.redirect("/user/cart"); 
-        
+         return res.status(400).json({
+                success: false,
+                message: result.message
+            });
         }
         
-        req.session.successMessage = result.message; 
-        
-        return res.redirect("/user/cart");
+        return res.status(200).json({
+            success: true,
+            message: result.message
+        });
 
     } catch (error) {
 
@@ -1312,3 +1334,5 @@ export const selectCheckoutAddress = async (req, res) => {
         return res.redirect("/user/checkout/address");
     }
 };
+
+

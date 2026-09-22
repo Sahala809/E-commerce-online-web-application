@@ -1,12 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // ==========================================
+    // VALIDATION MODAL
+    // ==========================================
+
+    const validationModalElement =
+        document.getElementById("cartValidationModal");
+
+    const validationMessage =
+        document.getElementById("cartValidationMessage");
+
+    const validationModal =
+        bootstrap.Modal.getOrCreateInstance(
+            validationModalElement
+        );
+
+    function showValidationPopup(message) {
+        validationMessage.textContent = message;
+        validationModal.show();
+    }
+
+
+    // ==========================================
     // QUANTITY BUTTONS
     // ==========================================
 
     const quantityButtons =
         document.querySelectorAll(".quantity-btn");
-
 
     quantityButtons.forEach((button) => {
 
@@ -21,39 +41,33 @@ document.addEventListener("DOMContentLoaded", () => {
             const stock =
                 parseInt(button.dataset.stock);
 
-
             const quantityValue =
                 button.parentElement.querySelector(
                     ".quantity-value"
                 );
 
-
             let quantity =
                 parseInt(quantityValue.textContent);
 
 
-            // ==========================================
             // STOCK = 0
-            // ==========================================
-
             if (stock <= 0) {
 
-                alert("This product is out of stock.");
+                showValidationPopup(
+                    "This product is out of stock."
+                );
 
                 return;
             }
 
 
-            // ==========================================
             // INCREASE
-            // ==========================================
-
             if (action === "increase") {
 
                 if (quantity >= stock) {
 
-                    alert(
-                        `Only ${stock} item(s) available`
+                    showValidationPopup(
+                        `Only ${stock} item(s) available.`
                     );
 
                     return;
@@ -63,10 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
 
-            // ==========================================
             // DECREASE
-            // ==========================================
-
             if (action === "decrease") {
 
                 if (quantity <= 1) {
@@ -77,28 +88,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
 
-            // ==========================================
             // UPDATE CART
-            // ==========================================
-
             try {
 
                 const response =
                     await fetch("/user/cart", {
-
                         method: "PATCH",
-
                         headers: {
                             "Content-Type":
                                 "application/json"
                         },
-
                         body: JSON.stringify({
                             variantId,
                             quantity
                         })
                     });
-
 
                 const result =
                     await response.json();
@@ -106,12 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!result.success) {
 
-                    alert(result.message);
+                    showValidationPopup(
+                        result.message
+                    );
 
                     return;
                 }
 
 
+                // Update quantity on page
                 quantityValue.textContent =
                     quantity;
 
@@ -123,11 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     error
                 );
 
-                alert("Something went wrong");
+                showValidationPopup(
+                    "Unable to update the cart."
+                );
             }
-
         });
-
     });
 
 
@@ -139,79 +146,106 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".remove-cart-btn");
 
 
+    // Remove confirmation modal
+    const removeCartModalElement =
+        document.getElementById("removeCartModal");
+
+    const removeCartModal =
+        bootstrap.Modal.getOrCreateInstance(
+            removeCartModalElement
+        );
+
+
+    // Confirm button
+    const confirmRemoveCartBtn =
+        document.getElementById(
+            "confirmRemoveCartBtn"
+        );
+
+
+    // Selected item
+    let selectedProductId = null;
+    let selectedVariantId = null;
+    let selectedCartItemId = null;
+
+
+    // ==========================================
+    // OPEN REMOVE CONFIRMATION MODAL
+    // ==========================================
+
     removeButtons.forEach((button) => {
 
-        button.addEventListener("click", async () => {
+        button.addEventListener("click", () => {
 
-            const productId =
-                button.dataset.productId;
+            selectedProductId =
+                button.dataset.productId || null;
 
-            const variantId =
-                button.dataset.variantId;
+            selectedVariantId =
+                button.dataset.variantId || null;
 
-            const cartItemId =
-                button.dataset.cartItemId;
-
-
-            const cartItem =
-                button.closest(".cart-item");
+            selectedCartItemId =
+                button.dataset.cartItemId || null;
 
 
-            const confirmRemove =
-                confirm(
-                    "Remove this item from your cart?"
+            // Show Bootstrap modal
+            removeCartModal.show();
+        });
+    });
+
+
+    // ==========================================
+    // CONFIRM REMOVE
+    // ==========================================
+
+    confirmRemoveCartBtn.addEventListener(
+        "click",
+        async () => {
+
+            let url = null;
+
+
+            // Normal product + variant
+            if (
+                selectedProductId &&
+                selectedVariantId
+            ) {
+
+                url =
+                    `/user/cart/remove/${selectedProductId}/${selectedVariantId}`;
+
+            }
+
+
+            // Product / variant unavailable
+            else if (selectedCartItemId) {
+
+                url =
+                    `/user/cart/remove-item/${selectedCartItemId}`;
+
+            }
+
+
+            // Invalid item
+            else {
+
+                removeCartModal.hide();
+
+                showValidationPopup(
+                    "Unable to remove this item from your cart."
                 );
 
-
-            if (!confirmRemove) {
                 return;
             }
 
 
             try {
 
-                let url;
+                // Disable button while removing
+                confirmRemoveCartBtn.disabled = true;
 
+                confirmRemoveCartBtn.textContent =
+                    "Removing...";
 
-                // ==========================================
-                // NORMAL PRODUCT + VARIANT
-                // ==========================================
-
-                if (productId && variantId) {
-
-                    url =
-                        `/user/cart/remove/${productId}/${variantId}`;
-
-                }
-
-
-                // ==========================================
-                // DELETED PRODUCT / VARIANT
-                // ==========================================
-
-                else if (cartItemId) {
-
-                    url =
-                        `/user/cart/remove-item/${cartItemId}`;
-
-                }
-
-
-                // ==========================================
-                // INVALID CART ITEM
-                // ==========================================
-
-                else {
-
-                    alert("Unable to remove this item.");
-
-                    return;
-                }
-
-
-                // ==========================================
-                // DELETE REQUEST
-                // ==========================================
 
                 const response =
                     await fetch(url, {
@@ -223,30 +257,28 @@ document.addEventListener("DOMContentLoaded", () => {
                     await response.json();
 
 
-                // ==========================================
-                // SERVER ERROR
-                // ==========================================
-
+                // Remove failed
                 if (!result.success) {
 
-                    alert(result.message);
+                    removeCartModal.hide();
+
+                    showValidationPopup(
+                        result.message ||
+                        "Unable to remove this item from your cart."
+                    );
 
                     return;
                 }
 
 
-                // ==========================================
-                // REMOVE FROM PAGE
-                // ==========================================
-
-                cartItem.remove();
+                // Remove confirmation modal
+                removeCartModal.hide();
 
 
-                // ==========================================
-                // RELOAD CART
-                // ==========================================
+                // Reload cart
+                window.location.href =
+                    "/user/cart";
 
-                window.location.reload();
 
             } catch (error) {
 
@@ -255,11 +287,43 @@ document.addEventListener("DOMContentLoaded", () => {
                     error
                 );
 
-                alert("Something went wrong");
+                removeCartModal.hide();
+
+                showValidationPopup(
+                    "Unable to remove this item from your cart."
+                );
+
+
+            } finally {
+
+                confirmRemoveCartBtn.disabled =
+                    false;
+
+                confirmRemoveCartBtn.textContent =
+                    "Remove";
             }
+        }
+    );
 
-        });
 
-    });
+    // ==========================================
+    // RESET MODAL DATA
+    // ==========================================
+
+    removeCartModalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            selectedProductId = null;
+            selectedVariantId = null;
+            selectedCartItemId = null;
+
+            confirmRemoveCartBtn.disabled =
+                false;
+
+            confirmRemoveCartBtn.textContent =
+                "Remove";
+        }
+    );
 
 });

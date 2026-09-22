@@ -234,6 +234,36 @@
 .search-btn:hover{
     background:#333;
 }
+.nav-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-count {
+    position: absolute;
+    top: -3px;
+    right: -7px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f0031f;
+    color: #111;
+
+    border-radius: 50%;
+
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+}
 
 /* Mobile */
 

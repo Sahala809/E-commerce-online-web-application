@@ -15,6 +15,7 @@ import "./config/passport.js";
 import userRoutes from "./routes/userRoutes.js"
 import sendOtp from "./utils/sendOtp.js";
 import adminRouter from "./routes/adminRoutes.js"
+import { navbarCount } from "./middleware/navbarCount.js";
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
@@ -39,7 +40,7 @@ app.use(
 );
 
 
-
+app.use(navbarCount);
 app.use(methodOverride("_method"));
 app.use(passport.initialize());
 app.use(passport.session());
