@@ -1,0 +1,193 @@
+.order-success-page {
+    min-height: 75vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    background: #f8f8f8;
+}
+
+.success-container {
+    width: 100%;
+    max-width: 600px;
+    background: #ffffff;
+    padding: 50px 45px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+
+/* SUCCESS ICON */
+
+.success-icon {
+    width: 75px;
+    height: 75px;
+    margin: 0 auto 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #198754;
+    color: #ffffff;
+
+    font-size: 42px;
+    font-weight: 600;
+}
+
+
+/* TITLE */
+
+.success-container h1 {
+    margin-bottom: 12px;
+
+    font-size: 30px;
+    font-weight: 600;
+
+    color: #222222;
+}
+
+
+/* MESSAGE */
+
+.success-message {
+    margin: 0 auto 30px;
+
+    max-width: 450px;
+
+    font-size: 16px;
+    line-height: 1.6;
+
+    color: #666666;
+}
+
+
+/* ORDER INFORMATION */
+
+.order-info {
+    margin: 25px 0;
+
+    padding: 20px;
+
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+
+    background: #fafafa;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 13px 5px;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 15px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span {
+    color: #666666;
+}
+
+.info-row strong {
+    color: #222222;
+    word-break: break-word;
+}
+
+.info-row .status {
+    color: #198754;
+}
+
+
+/* BUTTONS */
+
+.success-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+
+    margin-top: 30px;
+}
+
+.success-actions a {
+    min-width: 160px;
+
+    padding: 12px 20px;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: 0.2s ease;
+}
+
+
+/* PRIMARY BUTTON */
+
+.btn-primary {
+    background: #111111;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #333333;
+}
+
+
+/* OUTLINE BUTTON */
+
+.btn-outline {
+    background: #ffffff;
+    color: #222222;
+
+    border: 1px solid #222222;
+}
+
+.btn-outline:hover {
+    background: #222222;
+    color: #ffffff;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+
+    .order-success-page {
+        padding: 30px 15px;
+    }
+
+    .success-container {
+        padding: 35px 20px;
+    }
+
+    .success-container h1 {
+        font-size: 24px;
+    }
+
+    .success-actions {
+        flex-direction: column;
+    }
+
+    .success-actions a {
+        width: 100%;
+    }
+
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}

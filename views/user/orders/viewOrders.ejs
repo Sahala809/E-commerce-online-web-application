@@ -1,0 +1,277 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/userOrders/viewOrders.css">
+
+<main class="orders-page">
+
+    <div class="orders-container">
+
+        <!-- PAGE HEADER -->
+        <div class="orders-header">
+            <div>
+                <h1>My Orders</h1>
+                <p>View your recent orders</p>
+            </div>
+
+            <a href="/user/shop" class="continue-shopping">
+                Continue Shopping
+            </a>
+        </div>
+
+
+        <% if (!orders || orders.length === 0) { %>
+
+            <!-- EMPTY ORDERS -->
+            <div class="empty-orders">
+
+                <div class="empty-icon">
+                    🛍️
+                </div>
+
+                <h2>No Orders Yet</h2>
+
+                <p>
+                    You haven't placed any orders yet.
+                    Start shopping and your orders will appear here.
+                </p>
+
+                <a href="/user/shop" class="shop-now-btn">
+                    Start Shopping
+                </a>
+
+            </div>
+
+        <% } else { %>
+
+
+            <!-- ORDERS LIST -->
+            <div class="orders-list">
+
+                <% orders.forEach(order => { %>
+
+                    <div class="order-card">
+
+                        <!-- ORDER HEADER -->
+                        <div class="order-top">
+
+                            <div class="order-number">
+
+                                <span>Order ID</span>
+
+                                <strong>
+                                    #<%= order._id %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="order-date">
+
+                                <span>Order Date</span>
+
+                                <strong>
+                                    <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric"
+                                    }) %>
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ORDER ITEMS -->
+                        <div class="order-items">
+
+                            <h3>Items</h3>
+
+                            <% if (order.orderItemId && order.orderItemId.length > 0) { %>
+
+                                <% order.orderItemId.forEach(item => { %>
+
+                                    <div class="order-item">
+
+                                        <!-- PRODUCT IMAGE -->
+                                        <div class="item-image">
+
+                                            <% if (
+                                                item.variantId &&
+                                                item.variantId.images &&
+                                                item.variantId.images.length > 0
+                                            ) { %>
+
+                                                <img
+    src="/uploads/variants/<%= item.variantId.images[0] %>"
+    alt="<%= item.productId?.productName || 'Product' %>"
+>
+
+                                            <% } else { %>
+
+                                                <div class="no-image">
+                                                    No Image
+                                                </div>
+
+                                            <% } %>
+
+                                        </div>
+
+
+                                        <!-- PRODUCT INFORMATION -->
+                                        <div class="item-info">
+
+                                            <h4>
+                                                <%= item.productId?.productName || "Product unavailable" %>
+                                            </h4>
+
+                                            <% if (item.variantId?.color) { %>
+
+                                                <p>
+                                                    Color:
+                                                    <span>
+                                                        <%= item.variantId.color %>
+                                                    </span>
+                                                </p>
+
+                                            <% } %>
+
+                                        </div>
+
+
+                                        <!-- QUANTITY -->
+                                        <div class="item-quantity">
+
+                                            <span>Quantity</span>
+
+                                            <strong>
+                                                <%= item.quantity %>
+                                            </strong>
+
+                                        </div>
+
+
+                                        <!-- PRICE -->
+                                        <div class="item-price">
+
+                                            <span>Price</span>
+
+                                            <strong>
+                                                ₹<%= Number(item.price).toLocaleString("en-IN") %>
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                <% }) %>
+
+                            <% } else { %>
+
+                                <p class="no-items">
+                                    No items found for this order.
+                                </p>
+
+                            <% } %>
+
+                        </div>
+
+
+                        <!-- ORDER SUMMARY -->
+                        <div class="order-summary">
+
+                            <div class="summary-item">
+
+                                <span>Payment</span>
+
+                                <strong>
+                                    <%= order.paymentMethod === "COD"
+                                        ? "Cash on Delivery"
+                                        : order.paymentMethod %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-item">
+
+                                <span>Payment Status</span>
+
+                                <strong>
+                                    <%= order.paymentStatus %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-item">
+
+                                <span>Total</span>
+
+                                <strong class="total-amount">
+                                    ₹<%= Number(order.totalAmount).toLocaleString("en-IN") %>
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-item">
+
+                                <span>Status</span>
+
+                                <span class="status-badge
+                                    <%= order.status.toLowerCase().replace(/_/g, "-") %>">
+
+                                    <%= order.status
+                                        .replace(/_/g, " ")
+                                        .toLowerCase()
+                                        .replace(/\b\w/g, letter => letter.toUpperCase()) %>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ACTIONS -->
+                        <div class="order-actions">
+
+                            <a
+                                href="/user/orders/<%= order._id %>"
+                                class="view-order-btn">
+                                View Details
+                            </a>
+
+
+                            <% if (order.status === "PLACED") { %>
+
+                                <form
+                                    action="/user/orders/<%= order._id %>/cancel"
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to cancel this order?');">
+
+                                    <button
+                                        type="submit"
+                                        class="cancel-order-btn">
+                                        Cancel Order
+                                    </button>
+
+                                </form>
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        <% } %>
+
+    </div>
+
+</main>

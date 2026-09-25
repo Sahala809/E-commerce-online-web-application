@@ -68,6 +68,11 @@ import {
 } from "../services/wishlist/wishlistService.js"
 
 
+import {
+    placeOrderService,
+    getUserOrdersService
+} from "../services/orderManagement/orderService.js"
+
 export const loadHome = (req, res) => {
     
     res.render("user/home", {
@@ -998,16 +1003,15 @@ export const removeFromCart = async (req, res) => {
         );
 
        if (!result.success) {
-         return res.status(400).json({
-                success: false,
-                message: result.message
-            });
+         req.session.errorMessage = result.message; 
+         
+         return res.redirect("/user/cart"); 
+        
         }
         
-        return res.status(200).json({
-            success: true,
-            message: result.message
-        });
+        req.session.successMessage = result.message; 
+        
+        return res.redirect("/user/cart");
 
     } catch (error) {
 
@@ -1335,4 +1339,159 @@ export const selectCheckoutAddress = async (req, res) => {
     }
 };
 
+
+
+
+export const placeOrder = async (req, res) => {
+
+    console.log("================================");
+    console.log("PLACE ORDER CONTROLLER REACHED");
+    console.log("User:", req.session.user);
+    console.log("Body:", req.body);
+    console.log("Address:", req.session.checkoutAddressId);
+    console.log("================================");
+
+    try {
+
+        const userId = req.session.user;
+
+        // Check login
+        if (!userId) {
+
+            req.session.errorMessage =
+                "Please login to continue";
+
+            return res.redirect("/user/login");
+        }
+
+
+        // Get selected checkout address
+        const addressId =
+            req.body.addressId;
+        if (!addressId) {
+
+            req.session.errorMessage =
+                "Please select a delivery address";
+
+            return res.redirect("/user/checkout");
+        }
+
+
+        // Payment method
+        const paymentMethod =
+            req.body.paymentMethod || "COD";
+
+        console.log("Payment:", paymentMethod);
+
+        // Place order
+        const result = await placeOrderService(
+            userId,
+            addressId,
+            paymentMethod
+        );
+
+        console.log("SERVICE RESULT:", result);
+
+
+        // If order failed
+        if (!result.success) {
+
+            req.session.errorMessage =
+                result.message;
+
+            return res.redirect("/user/checkout");
+        }
+
+
+        // Save order ID
+        req.session.orderId =
+            result.orderId;
+
+
+        // Remove checkout address from session
+        delete req.session.checkoutAddressId;
+
+        console.log("ORDER SUCCESS");
+        console.log("ORDER ID:", result.orderId);
+
+
+        // Go to success page
+        return res.redirect("/user/order-success");
+
+
+    } catch (error) {
+
+        console.error(
+            "Place Order Controller Error:",
+            error
+        );
+
+        req.session.errorMessage =
+            "Something went wrong while placing the order";
+
+        return res.redirect("/user/checkout");
+    }
+};
+
+export const loadOrderSuccess = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const orderId = req.session.orderId;
+
+        // User must be logged in
+        if (!userId) {
+            return res.redirect("/user/login");
+        }
+
+        // Order ID should exist in session
+        if (!orderId) {
+            return res.redirect("/user/orders");
+        }
+
+        return res.render("user/orders/orderSuccess", {
+            pageTitle: "Order Placed Successfully",
+            orderId
+        });
+
+    } catch (error) {
+
+        console.error("Load Order Success Error:", error);
+
+        return res.redirect("/user/shop");
+    }
+};
+
+
+
+
+
+export const loadOrders = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+        const result = await getUserOrdersService(userId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/user/shop");
+        }
+
+        return res.render("user/orders/viewOrders", {
+            pageTitle: "My Orders",
+            orders: result.orders
+        });
+
+    } catch (error) {
+        console.error("Load Orders Error:", error);
+
+        req.session.errorMessage = "Something went wrong while loading orders";
+        return res.redirect("/user/shop");
+    }
+};
 

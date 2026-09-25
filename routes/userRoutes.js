@@ -67,8 +67,10 @@ import {
 import {
     loadCheckout,
     loadCheckoutAddresses,
-    selectCheckoutAddress
-    //placeOrder
+    selectCheckoutAddress,
+    placeOrder,
+    loadOrderSuccess,
+    loadOrders
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -175,6 +177,8 @@ router.get("/checkout", loadCheckout);
 router.get("/checkout/address", isLogin, loadCheckoutAddresses);
 router.post("/checkout/address/select", isLogin, selectCheckoutAddress);
 
-//router.post("/checkout/place-order", placeOrder);
+router.post("/order/place", placeOrder);
+router.get("/order-success",loadOrderSuccess);
 
+router.get("/orders", loadOrders)
 export default router;
