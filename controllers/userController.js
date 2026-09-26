@@ -70,7 +70,9 @@ import {
 
 import {
     placeOrderService,
-    getUserOrdersService
+    getUserOrdersService,
+    getOrderDetailsService,
+    cancelOrderItemService
 } from "../services/orderManagement/orderService.js"
 
 export const loadHome = (req, res) => {
@@ -1492,6 +1494,100 @@ export const loadOrders = async (req, res) => {
 
         req.session.errorMessage = "Something went wrong while loading orders";
         return res.redirect("/user/shop");
+    }
+};
+
+
+export const loadOrderDetails = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+        const result = await getOrderDetailsService(
+            userId,
+            orderId
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/user/orders");
+        }
+
+        return res.render("user/orders/orderDetails", {
+            pageTitle: "Order Details",
+            order: result.order
+        });
+
+    } catch (error) {
+
+        console.error("Load Order Details Error:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while loading order details";
+
+        return res.redirect("/user/orders");
+    }
+};
+
+export const cancelOrderItem = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+        const itemId = req.params.itemId;
+
+
+        // Check login
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+
+        // Cancel item
+        const result = await cancelOrderItemService(
+            userId,
+            orderId,
+            itemId
+        );
+
+
+        // If cancellation failed
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+
+            return res.redirect(
+                `/user/orders/${orderId}`
+            );
+        }
+
+
+        // Success
+        req.session.successMessage = result.message;
+
+        return res.redirect(
+            `/user/orders/${orderId}`
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Cancel Order Item Controller Error:",
+            error
+        );
+
+        req.session.errorMessage =
+            "Something went wrong while cancelling the item";
+
+        return res.redirect(
+            `/user/orders/${req.params.orderId}`
+        );
     }
 };
 

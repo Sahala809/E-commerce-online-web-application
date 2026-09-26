@@ -70,7 +70,9 @@ import {
     selectCheckoutAddress,
     placeOrder,
     loadOrderSuccess,
-    loadOrders
+    loadOrders,
+    loadOrderDetails,
+    cancelOrderItem
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -180,5 +182,11 @@ router.post("/checkout/address/select", isLogin, selectCheckoutAddress);
 router.post("/order/place", placeOrder);
 router.get("/order-success",loadOrderSuccess);
 
-router.get("/orders", loadOrders)
+router.get("/orders",isLogin, loadOrders)
+router.get("/orders/:orderId", isLogin, loadOrderDetails);
+router.post(
+    "/orders/:orderId/items/:itemId/cancel",
+    isLogin,
+    cancelOrderItem
+);
 export default router;

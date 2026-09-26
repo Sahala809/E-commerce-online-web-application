@@ -1,0 +1,502 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/userOrders/orderDetails.css">
+
+<main class="order-details-page">
+
+    <div class="order-details-container">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+
+            <div>
+
+                <p class="breadcrumb">
+                    <a href="/user/orders">My Orders</a>
+                    <span>/</span>
+                    Order Details
+                </p>
+
+                <h1>Order Details</h1>
+
+                <p>View your order information and items</p>
+
+            </div>
+
+            <a href="/user/orders" class="back-orders-btn">
+                ← Back to My Orders
+            </a>
+
+        </div>
+
+
+        <!-- ORDER INFORMATION -->
+        <div class="order-info-card">
+
+            <div class="info-item">
+                <span>Order ID</span>
+
+                <strong>
+                    #<%= order._id %>
+                </strong>
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Order Date</span>
+
+                <strong>
+                    <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                    }) %>
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Payment Method</span>
+
+                <strong>
+                    <%= order.paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : order.paymentMethod %>
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Payment Status</span>
+
+                <strong>
+                    <%= order.paymentStatus %>
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>Order Status</span>
+
+                <span class="status-badge">
+
+                    <%= order.status
+                        .replace(/_/g, " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, letter => letter.toUpperCase()) %>
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- MAIN CONTENT -->
+        <div class="details-grid">
+
+
+            <!-- LEFT SIDE -->
+            <div class="left-section">
+
+
+                <!-- ORDERED ITEMS -->
+                <div class="details-card">
+
+                    <div class="card-header">
+
+                        <h2>Ordered Items</h2>
+
+                        <span>
+                            <%= order.orderItemId.length %>
+                            <%= order.orderItemId.length === 1
+                                ? "Item"
+                                : "Items" %>
+                        </span>
+
+                    </div>
+
+
+                    <% order.orderItemId.forEach(item => { %>
+
+                        <div class="order-item">
+
+
+                            <!-- IMAGE -->
+                            <div class="item-image">
+
+                                <% if (
+                                    item.variantId &&
+                                    item.variantId.images &&
+                                    item.variantId.images.length > 0
+                                ) { %>
+
+                                    <img
+                                        src="/uploads/variants/<%= item.variantId.images[0] %>"
+                                        alt="<%= item.productId?.productName || 'Product' %>"
+                                    >
+
+                                <% } else { %>
+
+                                    <div class="no-image">
+                                        No Image
+                                    </div>
+
+                                <% } %>
+
+                            </div>
+
+
+                            <!-- PRODUCT INFO -->
+                            <div class="item-info">
+
+                                <h3>
+                                    <%= item.productId?.productName || "Product unavailable" %>
+                                </h3>
+
+
+                                <% if (item.variantId?.color) { %>
+
+                                    <p>
+                                        Color:
+                                        <strong>
+                                            <%= item.variantId.color %>
+                                        </strong>
+                                    </p>
+
+                                <% } %>
+
+
+                                <p>
+                                    Quantity:
+                                    <strong>
+                                        <%= item.quantity %>
+                                    </strong>
+                                </p>
+
+                            </div>
+
+
+                            <!-- PRICE -->
+                            <div class="item-price">
+
+                                <span>Unit Price</span>
+
+                                <strong>
+                                    ₹<%= Number(item.price).toLocaleString("en-IN") %>
+                                </strong>
+
+                                <small>
+                                    Total:
+                                    ₹<%= Number(
+                                        item.price * item.quantity
+                                    ).toLocaleString("en-IN") %>
+                                </small>
+
+                            </div>
+
+
+                            <!-- STATUS + CANCEL ITEM -->
+                            <div class="item-status">
+
+                                <span class="status-badge">
+                                    <%= item.orderItemStatus %>
+                                </span>
+
+
+                                <% if (item.orderItemStatus === "PLACED") { %>
+
+    <button
+        type="button"
+        class="cancel-item-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#cancelItemModal<%= item._id %>">
+        Cancel Item
+    </button>
+
+
+    <!-- CANCEL ITEM MODAL -->
+    <div
+        class="modal fade"
+        id="cancelItemModal<%= item._id %>"
+        tabindex="-1"
+        aria-labelledby="cancelItemModalLabel<%= item._id %>"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5
+                        class="modal-title"
+                        id="cancelItemModalLabel<%= item._id %>">
+                        Cancel Item
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <p>
+                        Are you sure you want to cancel this item?
+                    </p>
+
+                    <p class="cancel-product-name">
+                        <strong>
+                            <%= item.productId?.productName || "Product" %>
+                        </strong>
+                    </p>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Keep Item
+                    </button>
+
+
+                    <form
+                        action="/user/orders/<%= order._id %>/items/<%= item._id %>/cancel"
+                        method="POST">
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger">
+                            Confirm Cancellation
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<% } %>
+
+                            </div>
+
+                        </div>
+
+                    <% }) %>
+
+                </div>
+
+
+                <!-- DELIVERY ADDRESS -->
+                <div class="details-card">
+
+                    <div class="card-header">
+
+                        <h2>Delivery Address</h2>
+
+                    </div>
+
+
+                    <div class="address-details">
+
+                        <strong>
+                            <%= order.shippingAddress.fullName %>
+                        </strong>
+
+                        <p>
+                            <%= order.shippingAddress.houseName %>
+                        </p>
+
+                        <p>
+                            <%= order.shippingAddress.street %>
+                        </p>
+
+                        <p>
+                            <%= order.shippingAddress.city %>,
+                            <%= order.shippingAddress.district %>
+                        </p>
+
+                        <p>
+                            <%= order.shippingAddress.state %>,
+                            <%= order.shippingAddress.country %>
+                        </p>
+
+                        <p>
+                            Pincode:
+                            <%= order.shippingAddress.pincode %>
+                        </p>
+
+                        <p>
+                            Phone:
+                            <%= order.shippingAddress.phone %>
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+            <div class="right-section">
+
+
+                <!-- ORDER SUMMARY -->
+                <div class="details-card summary-card">
+
+                    <div class="card-header">
+
+                        <h2>Order Summary</h2>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>Subtotal</span>
+
+                        <strong>
+                            ₹<%= Number(order.subTotal)
+                                .toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>Delivery Charge</span>
+
+                        <strong>
+                            ₹<%= Number(order.deliveryCharge)
+                                .toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>Discount</span>
+
+                        <strong>
+                            - ₹<%= Number(order.discountAmount)
+                                .toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-divider"></div>
+
+
+                    <div class="summary-total">
+
+                        <span>Total</span>
+
+                        <strong>
+                            ₹<%= Number(order.totalAmount)
+                                .toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAYMENT INFORMATION -->
+                <div class="details-card">
+
+                    <div class="card-header">
+
+                        <h2>Payment</h2>
+
+                    </div>
+
+
+                    <div class="payment-info">
+
+                        <div>
+
+                            <span>Method</span>
+
+                            <strong>
+                                <%= order.paymentMethod === "COD"
+                                    ? "Cash on Delivery"
+                                    : order.paymentMethod %>
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>Status</span>
+
+                            <strong>
+                                <%= order.paymentStatus %>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const cancelButtons = document.querySelectorAll(".cancel-item-btn");
+
+    cancelButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const modalId = button.getAttribute("data-bs-target");
+            const modalElement = document.querySelector(modalId);
+
+            if (modalElement) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            }
+
+        });
+
+    });
+
+});
+</script>
