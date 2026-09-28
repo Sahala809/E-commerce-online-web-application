@@ -103,11 +103,10 @@
                                                 item.variantId.images.length > 0
                                             ) { %>
 
-                                                <img
+                                             <img
     src="/uploads/variants/<%= item.variantId.images[0] %>"
     alt="<%= item.productId?.productName || 'Product' %>"
 >
-
                                             <% } else { %>
 
                                                 <div class="no-image">

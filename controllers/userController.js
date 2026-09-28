@@ -72,7 +72,8 @@ import {
     placeOrderService,
     getUserOrdersService,
     getOrderDetailsService,
-    cancelOrderItemService
+    cancelOrderItemService,
+    requestReturnService
 } from "../services/orderManagement/orderService.js"
 
 export const loadHome = (req, res) => {
@@ -1591,3 +1592,57 @@ export const cancelOrderItem = async (req, res) => {
     }
 };
 
+export const requestReturn = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        const { orderId, orderItemId } = req.params;
+
+        const {
+            returnReason,
+            returnDetails
+        } = req.body;
+
+        if (!userId) {
+            req.session.errorMessage =
+                "Please login to continue";
+
+            return res.redirect("/user/login");
+        }
+
+        const result = await requestReturnService(
+            orderId,
+            orderItemId,
+            userId,
+            returnReason,
+            returnDetails
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+
+            return res.redirect(
+                `/user/orders/${orderId}`
+            );
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect(
+            `/user/orders/${orderId}`
+        );
+
+    } catch (error) {
+        console.log(
+            "REQUEST RETURN CONTROLLER ERROR:",
+            error
+        );
+
+        req.session.errorMessage =
+            "Something went wrong while submitting return request";
+
+        return res.redirect(
+            `/user/orders/${req.params.orderId}`
+        );
+    }
+};

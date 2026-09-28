@@ -1,0 +1,548 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/orders.css">
+
+<body>
+
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-grow-1">
+
+        <%- include("../partials/navbar", { pageTitle: "Orders" }) %>
+
+        <div class="container-fluid">
+
+            <!-- ================= Page Header ================= -->
+
+            <div class="page-header">
+
+                <div class="page-title">
+                    <h1>Order Management</h1>
+
+                    <p>
+                        Manage customer orders and track order status.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- ================= Success Message ================= -->
+
+            <% if (successMessage) { %>
+
+                <div class="alert alert-success">
+                    <%= successMessage %>
+                </div>
+
+            <% } %>
+
+
+            <!-- ================= Error Message ================= -->
+
+            <% if (errorMessage) { %>
+
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+
+            <% } %>
+
+
+            <!-- ================= Summary Cards ================= -->
+
+            <div class="summary-grid">
+
+                <!-- Pending Orders -->
+
+                <div class="summary-card">
+
+                    <div class="summary-content">
+
+                        <p>Pending Orders</p>
+
+                        <h2>
+                            <%= pendingOrders %>
+                        </h2>
+
+                    </div>
+
+                    <div class="summary-icon pending-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- Shipped Today -->
+
+                <div class="summary-card">
+
+                    <div class="summary-content">
+
+                        <p>Shipped Today</p>
+
+                        <h2>
+                            <%= shippedToday %>
+                        </h2>
+
+                    </div>
+
+                    <div class="summary-icon shipped-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- Processing -->
+
+                <div class="summary-card">
+
+                    <div class="summary-content">
+
+                        <p>Processing</p>
+
+                        <h2>
+                            <%= processingOrders %>
+                        </h2>
+
+                    </div>
+
+                    <div class="summary-icon processing-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- Returns -->
+
+                <div class="summary-card">
+
+                    <div class="summary-content">
+
+                        <p>Returns</p>
+
+                        <h2>
+                            <%= returnedOrders %>
+                        </h2>
+
+                    </div>
+
+                    <div class="summary-icon return-icon">
+                        <i class="bi bi-arrow-return-left"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- Cancellations -->
+
+                <div class="summary-card">
+
+                    <div class="summary-content">
+
+                        <p>Cancellations</p>
+
+                        <h2>
+                            <%= cancelledOrders %>
+                        </h2>
+
+                    </div>
+
+                    <div class="summary-icon cancel-icon">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= Recent Orders ================= -->
+
+            <div class="table-card">
+
+<div class="orders-header">
+
+    <div>
+        <h3>Recent Orders</h3>
+        <p>Latest customer orders</p>
+    </div>
+
+
+    <form
+        action="/admin/orders"
+        method="GET"
+        class="order-search-form"
+    >
+
+        <!-- Search -->
+        <div class="search-wrapper">
+
+            <i class="bi bi-search"></i>
+
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search orders..."
+                value="<%= search || '' %>"
+            >
+
+        </div>
+
+
+        <!-- Status Filter -->
+        <select
+            name="status"
+            class="form-select order-filter"
+            onchange="this.form.submit()"
+        >
+
+            <option value="">All Status</option>
+
+            <option
+                value="PLACED"
+                <%= status === "PLACED" ? "selected" : "" %>
+            >
+                Placed
+            </option>
+
+            <option
+                value="SHIPPED"
+                <%= status === "SHIPPED" ? "selected" : "" %>
+            >
+                Shipped
+            </option>
+
+            <option
+                value="OUT_FOR_DELIVERY"
+                <%= status === "OUT_FOR_DELIVERY" ? "selected" : "" %>
+            >
+                Out for Delivery
+            </option>
+
+            <option
+                value="DELIVERED"
+                <%= status === "DELIVERED" ? "selected" : "" %>
+            >
+                Delivered
+            </option>
+
+            <option
+                value="CANCELLED"
+                <%= status === "CANCELLED" ? "selected" : "" %>
+            >
+                Cancelled
+            </option>
+
+            <option
+                value="RETURNED"
+                <%= status === "RETURNED" ? "selected" : "" %>
+            >
+                Returned
+            </option>
+
+        </select>
+
+
+        <!-- Sort -->
+        <select
+            name="sort"
+            class="form-select order-sort"
+            onchange="this.form.submit()"
+        >
+
+            <option
+                value="newest"
+                <%= sort === "newest" ? "selected" : "" %>
+            >
+                Newest
+            </option>
+
+            <option
+                value="oldest"
+                <%= sort === "oldest" ? "selected" : "" %>
+            >
+                Oldest
+            </option>
+
+            <option
+                value="highest"
+                <%= sort === "highest" ? "selected" : "" %>
+            >
+                Highest Amount
+            </option>
+
+            <option
+                value="lowest"
+                <%= sort === "lowest" ? "selected" : "" %>
+            >
+                Lowest Amount
+            </option>
+
+        </select>
+
+
+        <!-- Clear -->
+        <% if (search || status || sort !== "newest") { %>
+
+            <a
+                href="/admin/orders"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+        <% } %>
+
+    </form>
+
+</div>
+
+
+                <!-- ================= Orders Table ================= -->
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Order ID</th>
+
+                                <th>Customer</th>
+
+                                <th>Email</th>
+
+                                <th>Date</th>
+
+                                <th>Total</th>
+
+                                <th>Payment</th>
+
+                                <th>Status</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <% if (orders && orders.length > 0) { %>
+
+                                <% orders.forEach(order => { %>
+
+                                    <tr>
+
+                                        <!-- Order ID -->
+
+                                        <td>
+
+                                            <span class="order-id">
+
+                                                #<%= order._id.toString().slice(-8).toUpperCase() %>
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Customer -->
+
+                                        <td>
+
+                                            <%= order.userId?.name || "N/A" %>
+
+                                        </td>
+
+
+                                        <!-- Email -->
+
+                                        <td>
+
+                                            <%= order.userId?.email || "N/A" %>
+
+                                        </td>
+
+
+                                        <!-- Date -->
+
+                                        <td>
+
+                                            <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
+
+                                        </td>
+
+
+                                        <!-- Total -->
+
+                                        <td>
+
+                                            <span class="order-total">
+
+                                                ₹<%= Number(order.totalAmount).toFixed(2) %>
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Payment -->
+
+                                        <td>
+
+                                            <%= order.paymentMethod %>
+
+                                        </td>
+
+
+                                        <!-- Status -->
+
+                                        <td>
+
+                                            <% if (order.status === "PLACED") { %>
+
+                                                <span class="order-status status-placed">
+                                                    Placed
+                                                </span>
+
+                                            <% } else if (order.status === "SHIPPED") { %>
+
+                                                <span class="order-status status-shipped">
+                                                    Shipped
+                                                </span>
+
+                                            <% } else if (order.status === "OUT_FOR_DELIVERY") { %>
+
+                                                <span class="order-status status-out-for-delivery">
+                                                    Out for Delivery
+                                                </span>
+
+                                            <% } else if (order.status === "DELIVERED") { %>
+
+                                                <span class="order-status status-delivered">
+                                                    Delivered
+                                                </span>
+
+                                            <% } else if (order.status === "CANCELLED") { %>
+
+                                                <span class="order-status status-cancelled">
+                                                    Cancelled
+                                                </span>
+
+                                            <% } else if (order.status === "RETURNED") { %>
+
+                                                <span class="order-status status-returned">
+                                                    Returned
+                                                </span>
+
+                                            <% } %>
+
+                                        </td>
+
+
+                                        <!-- Action -->
+
+                                        <td>
+
+                                            <a
+                                                href="/admin/orders/<%= order._id %>"
+                                                class="view-btn"
+                                            >
+                                                View
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
+
+                                <% }) %>
+
+
+                            <% } else { %>
+
+                                <tr>
+
+                                    <td colspan="8">
+
+                                        <div class="no-result">
+
+                                            No orders found.
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            <% } %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <% if (totalPages > 1) { %>
+
+    <div class="pagination-container">
+
+        <% if (page > 1) { %>
+
+            <a
+                href="/admin/orders?search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || 'newest') %>&page=<%= page - 1 %>"
+                class="pagination-btn"
+            >
+                Previous
+            </a>
+
+        <% } %>
+
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+
+            <a
+                href="/admin/orders?search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || 'newest') %>&page=<%= i %>"
+                class="pagination-btn <%= page === i ? 'active' : '' %>"
+            >
+                <%= i %>
+            </a>
+
+        <% } %>
+
+
+        <% if (page < totalPages) { %>
+
+            <a
+                href="/admin/orders?search=<%= encodeURIComponent(search || '') %>&status=<%= encodeURIComponent(status || '') %>&sort=<%= encodeURIComponent(sort || 'newest') %>&page=<%= page + 1 %>"
+                class="pagination-btn"
+            >
+                Next
+            </a>
+
+        <% } %>
+
+    </div>
+
+<% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<%- include("../partials/footer") %>

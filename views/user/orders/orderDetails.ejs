@@ -205,89 +205,235 @@
                             </div>
 
 
-                            <!-- STATUS + CANCEL ITEM -->
-                            <div class="item-status">
+                           <!-- STATUS + ACTIONS -->
+<div class="item-status">
 
-                                <span class="status-badge">
-                                    <%= item.orderItemStatus %>
-                                </span>
-
-
-                                <% if (item.orderItemStatus === "PLACED") { %>
-
-    <button
-        type="button"
-        class="cancel-item-btn"
-        data-bs-toggle="modal"
-        data-bs-target="#cancelItemModal<%= item._id %>">
-        Cancel Item
-    </button>
+    <!-- ITEM STATUS -->
+    <span class="status-badge">
+        <%= item.orderItemStatus
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/\b\w/g, letter => letter.toUpperCase()) %>
+    </span>
 
 
-    <!-- CANCEL ITEM MODAL -->
-    <div
-        class="modal fade"
-        id="cancelItemModal<%= item._id %>"
-        tabindex="-1"
-        aria-labelledby="cancelItemModalLabel<%= item._id %>"
-        aria-hidden="true">
+    <!-- CANCEL ITEM -->
+    <% if (item.orderItemStatus === "PLACED") { %>
 
-        <div class="modal-dialog modal-dialog-centered">
+        <button
+            type="button"
+            class="cancel-item-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#cancelItemModal<%= item._id %>">
+            Cancel Item
+        </button>
 
-            <div class="modal-content">
 
-                <div class="modal-header">
+        <!-- CANCEL ITEM MODAL -->
+        <div
+            class="modal fade"
+            id="cancelItemModal<%= item._id %>"
+            tabindex="-1"
+            aria-labelledby="cancelItemModalLabel<%= item._id %>"
+            aria-hidden="true">
 
-                    <h5
-                        class="modal-title"
-                        id="cancelItemModalLabel<%= item._id %>">
-                        Cancel Item
-                    </h5>
+            <div class="modal-dialog modal-dialog-centered">
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5
+                            class="modal-title"
+                            id="cancelItemModalLabel<%= item._id %>">
+                            Cancel Item
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    <div class="modal-body">
+
+                        <p>
+                            Are you sure you want to cancel this item?
+                        </p>
+
+                        <p class="cancel-product-name">
+                            <strong>
+                                <%= item.productId?.productName || "Product" %>
+                            </strong>
+                        </p>
+
+                    </div>
+
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Keep Item
+                        </button>
+
+
+                        <form
+                            action="/user/orders/<%= order._id %>/items/<%= item._id %>/cancel"
+                            method="POST">
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger">
+                                Confirm Cancellation
+                            </button>
+
+                        </form>
+
+                    </div>
 
                 </div>
 
+            </div>
 
-                <div class="modal-body">
-
-                    <p>
-                        Are you sure you want to cancel this item?
-                    </p>
-
-                    <p class="cancel-product-name">
-                        <strong>
-                            <%= item.productId?.productName || "Product" %>
-                        </strong>
-                    </p>
-
-                </div>
+        </div>
 
 
-                <div class="modal-footer">
+    <!-- RETURN ITEM -->
+    <% } else if (
+        item.orderItemStatus === "DELIVERED" &&
+        (!item.returnStatus || item.returnStatus === "NONE")
+    ) { %>
 
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
-                        Keep Item
-                    </button>
+        <button
+            type="button"
+            class="return-item-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#returnItemModal<%= item._id %>">
+            Return Item
+        </button>
+
+
+        <!-- RETURN ITEM MODAL -->
+        <div
+            class="modal fade"
+            id="returnItemModal<%= item._id %>"
+            tabindex="-1"
+            aria-labelledby="returnItemModalLabel<%= item._id %>"
+            aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5
+                            class="modal-title"
+                            id="returnItemModalLabel<%= item._id %>">
+                            Return Item
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+
+                    </div>
 
 
                     <form
-                        action="/user/orders/<%= order._id %>/items/<%= item._id %>/cancel"
+                        action="/user/orders/<%= order._id %>/items/<%= item._id %>/return"
                         method="POST">
 
-                        <button
-                            type="submit"
-                            class="btn btn-danger">
-                            Confirm Cancellation
-                        </button>
+                        <div class="modal-body">
+
+                            <p>
+                                Why do you want to return this item?
+                            </p>
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Return Reason <span class="text-danger">*</span>
+                                </label>
+
+                                <select
+                                    name="returnReason"
+                                    class="form-select"
+                                    required>
+
+                                    <option value="">
+                                        Select a reason
+                                    </option>
+
+                                    <option value="Damaged product">
+                                        Damaged product
+                                    </option>
+
+                                    <option value="Wrong product received">
+                                        Wrong product received
+                                    </option>
+
+                                    <option value="Defective product">
+                                        Defective product
+                                    </option>
+
+                                    <option value="Product not as described">
+                                        Product not as described
+                                    </option>
+
+                                    <option value="Other">
+                                        Other
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Additional Details
+                                </label>
+
+                                <textarea
+                                    name="returnDetails"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Please describe the issue..."></textarea>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="btn btn-warning">
+                                Submit Return Request
+                            </button>
+
+                        </div>
 
                     </form>
 
@@ -297,12 +443,36 @@
 
         </div>
 
-    </div>
 
-<% } %>
+    <!-- RETURN REQUESTED -->
+    <% } else if (item.returnStatus === "REQUESTED") { %>
 
-                            </div>
+        <span class="return-requested-status">
+            Return Requested
+        </span>
 
+
+    <!-- RETURN APPROVED -->
+    <% } else if (
+        item.returnStatus === "APPROVED" &&
+        item.orderItemStatus === "RETURNED"
+    ) { %>
+
+        <span class="return-approved-status">
+            Returned
+        </span>
+
+
+    <!-- RETURN REJECTED -->
+    <% } else if (item.returnStatus === "REJECTED") { %>
+
+        <span class="return-rejected-status">
+            Return Rejected
+        </span>
+
+    <% } %>
+
+</div>
                         </div>
 
                     <% }) %>

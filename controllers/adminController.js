@@ -1,6 +1,9 @@
 import Address from "../models/addressModel.js";
 import User from "../models/userModel.js";
 import Category from "../models/categoryModel.js";
+import Product from "../models/productModel.js";
+import Variant from "../models/variantModel.js";
+
 
 import {
     adminLoginService
@@ -29,9 +32,12 @@ import {
     editVariantService,
     deleteVariantService
 } from "../services/admin/productService.js"
-import Product from "../models/productModel.js";
-import Variant from "../models/variantModel.js";
 
+import { 
+    loadOrdersService,
+    loadOrderDetailsService,
+    updateOrderItemStatusService
+ } from "../services/admin/orderService.js";
 
 export const loadAdminLogin = (req, res) => {
 
@@ -836,3 +842,136 @@ export const deleteVariant = async (req, res) => {
     }
 };
 
+
+
+
+export const loadOrders = async (req, res) => {
+    try {
+
+        const search = req.query.search?.trim() || "";
+        const status = req.query.status || "";
+        const sort = req.query.sort || "newest"
+
+        const page = parseInt(req.query.page) || 1;
+
+        const result = await loadOrdersService(
+            search,
+            status,
+            sort,
+            page
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = "Failed to load orders";
+            return res.redirect("/admin/dashboard");
+        }
+
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+
+        return res.render("admin/orders/orders", {
+            activePage: "orders",
+            pageTitle: "Orders",
+            orders: result.orders,
+            pendingOrders: result.pendingOrders,
+            shippedToday: result.shippedToday,
+            processingOrders: result.processingOrders,
+            returnedOrders: result.returnedOrders,
+            cancelledOrders: result.cancelledOrders,
+
+            search,
+            status,
+            sort,
+            
+            page: result.page,
+            totalPages: result.totalPages,
+            
+            successMessage,
+            errorMessage
+        });
+
+    } catch (error) {
+        console.log("LOAD ORDERS CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Something went wrong while loading orders";
+        return res.redirect("/admin/dashboard");
+    }
+};
+
+
+export const loadOrderDetails = async (req, res) => {
+    try {
+
+        const { orderId } = req.params;
+
+        const result = await loadOrderDetailsService(orderId);
+
+        if (!result.success) {
+
+            req.session.errorMessage = result.message || "Order not found";
+
+            return res.redirect("/admin/orders");
+        }
+
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+
+        return res.render("admin/orders/orderDetails", {
+            activePage: "orders",
+            pageTitle: "Order Details",
+            order: result.order,
+            successMessage,
+            errorMessage
+        });
+
+    } catch (error) {
+
+        console.log("LOAD ORDER DETAILS CONTROLLER ERROR:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while loading order details";
+
+        return res.redirect("/admin/orders");
+    }
+};
+
+
+
+export const updateOrderItemStatus = async (req, res) => {
+    try {
+        const { orderItemId } = req.params;
+        const { status, orderId } = req.body;
+
+        console.log("ORDER ITEM ID:", orderItemId);
+        console.log("STATUS:", status);
+        console.log("ORDER ID:", orderId);
+
+        const result = await updateOrderItemStatusService(
+            orderItemId,
+            status
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect(`/admin/orders/${orderId}`);
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect(`/admin/orders/${orderId}`);
+
+    } catch (error) {
+        console.log("UPDATE ORDER ITEM STATUS CONTROLLER ERROR:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while updating order status";
+
+        return res.redirect(`/admin/orders/${req.body.orderId}`);
+    }
+};

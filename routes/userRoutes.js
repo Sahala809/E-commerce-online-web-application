@@ -72,7 +72,8 @@ import {
     loadOrderSuccess,
     loadOrders,
     loadOrderDetails,
-    cancelOrderItem
+    cancelOrderItem,
+    requestReturn
 } from "../controllers/userController.js"
 
 const router = express.Router();
@@ -188,5 +189,12 @@ router.post(
     "/orders/:orderId/items/:itemId/cancel",
     isLogin,
     cancelOrderItem
+);
+
+
+router.post(
+    "/orders/:orderId/items/:orderItemId/return",
+    isLogin,
+    requestReturn
 );
 export default router;

@@ -44,6 +44,17 @@ const orderItemSchema = new mongoose.Schema(
             default: "PLACED"
         },
 
+        returnStatus: {
+            type: String,
+            enum: [
+                "NONE",
+                "REQUESTED",
+                "APPROVED",
+                "REJECTED"
+            ],
+            default: "NONE"
+        },
+
         returnReason: {
             type: String,
             default: null

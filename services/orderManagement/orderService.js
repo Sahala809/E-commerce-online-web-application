@@ -490,3 +490,77 @@ export const cancelOrderItemService = async (
 };
 
 
+export const requestReturnService = async (
+    orderId,
+    orderItemId,
+    userId,
+    returnReason,
+    returnDetails
+) => {
+    try {
+        if (!returnReason || !returnReason.trim()) {
+            return {
+                success: false,
+                message: "Return reason is required"
+            };
+        }
+
+        const order = await Order.findOne({
+            _id: orderId,
+            userId: userId
+        });
+
+        if (!order) {
+            return {
+                success: false,
+                message: "Order not found"
+            };
+        }
+
+        const orderItem = await OrderItem.findOne({
+            _id: orderItemId,
+            orderId: orderId
+        });
+
+        if (!orderItem) {
+            return {
+                success: false,
+                message: "Order item not found"
+            };
+        }
+
+        if (orderItem.orderItemStatus !== "DELIVERED") {
+            return {
+                success: false,
+                message: "Only delivered items can be returned"
+            };
+        }
+
+        orderItem.orderItemStatus = "REQUESTED";
+
+         orderItem.orderItemStatus = "DELIVERED";
+
+
+        orderItem.returnReason = returnReason.trim();
+
+        await orderItem.save();
+
+        return {
+            success: true,
+            message: "Return request submitted successfully"
+        };
+
+    } catch (error) {
+        console.log(
+            "REQUEST RETURN SERVICE ERROR:",
+            error
+        );
+
+        return {
+            success: false,
+            message: "Failed to submit return request"
+        };
+    }
+};
+
+

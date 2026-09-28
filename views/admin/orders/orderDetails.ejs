@@ -1,0 +1,564 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/orderDetails.css">
+
+<body>
+
+<div class="wrapper">
+
+```
+<%- include("../partials/sidebar") %>
+
+<div class="flex-grow-1">
+
+    <%- include("../partials/navbar", { pageTitle: "Order Details" }) %>
+
+    <div class="container-fluid">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+
+            <div class="page-title">
+                <h1>Order Details</h1>
+                <p>View complete information about this order.</p>
+            </div>
+
+            <a href="/admin/orders" class="back-btn">
+                <i class="bi bi-arrow-left"></i>
+                Back to Orders
+            </a>
+
+        </div>
+
+
+        <!-- SUCCESS MESSAGE -->
+        <% if (successMessage) { %>
+
+            <div class="alert alert-success">
+                <%= successMessage %>
+            </div>
+
+        <% } %>
+
+
+        <!-- ERROR MESSAGE -->
+        <% if (errorMessage) { %>
+
+            <div class="alert alert-danger">
+                <%= errorMessage %>
+            </div>
+
+        <% } %>
+
+
+        <!-- ORDER TOP -->
+        <div class="details-card order-top-card">
+
+            <div class="order-top">
+
+                <div>
+                    <span class="label">Order ID</span>
+
+                    <h2>
+                        #<%= order._id %>
+                    </h2>
+                </div>
+
+                <div>
+                    <span class="label">Order Date</span>
+
+                    <strong>
+                        <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        }) %>
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="label">Order Status</span>
+
+                    <% if (order.status === "PLACED") { %>
+
+                        <span class="order-status status-placed">
+                            Placed
+                        </span>
+
+                    <% } else if (order.status === "SHIPPED") { %>
+
+                        <span class="order-status status-shipped">
+                            Shipped
+                        </span>
+
+                    <% } else if (order.status === "OUT_FOR_DELIVERY") { %>
+
+                        <span class="order-status status-out-for-delivery">
+                            Out for Delivery
+                        </span>
+
+                    <% } else if (order.status === "DELIVERED") { %>
+
+                        <span class="order-status status-delivered">
+                            Delivered
+                        </span>
+
+                    <% } else if (order.status === "CANCELLED") { %>
+
+                        <span class="order-status status-cancelled">
+                            Cancelled
+                        </span>
+
+                    <% } else if (order.status === "RETURNED") { %>
+
+                        <span class="order-status status-returned">
+                            Returned
+                        </span>
+
+                    <% } %>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CUSTOMER + SHIPPING -->
+        <div class="details-grid">
+
+            <!-- CUSTOMER INFORMATION -->
+            <div class="details-card">
+
+                <h3 class="section-title">
+                    Customer Information
+                </h3>
+
+                <div class="info-list">
+
+                    <div class="info-row">
+                        <span>Name</span>
+
+                        <strong>
+                            <%= order.userId?.name || "N/A" %>
+                        </strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Email</span>
+
+                        <strong>
+                            <%= order.userId?.email || "N/A" %>
+                        </strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Phone</span>
+
+                        <strong>
+                            <%= order.userId?.phone || "N/A" %>
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SHIPPING ADDRESS -->
+            <div class="details-card">
+
+                <h3 class="section-title">
+                    Shipping Address
+                </h3>
+
+                <div class="address">
+
+                    <strong>
+                        <%= order.shippingAddress?.fullName || "N/A" %>
+                    </strong>
+
+                    <p>
+                        <%= order.shippingAddress?.houseName || "" %>
+                    </p>
+
+                    <p>
+                        <%= order.shippingAddress?.street || "" %>
+                    </p>
+
+                    <p>
+                        <%= order.shippingAddress?.city || "" %>,
+                        <%= order.shippingAddress?.district || "" %>
+                    </p>
+
+                    <p>
+                        <%= order.shippingAddress?.state || "" %>,
+                        <%= order.shippingAddress?.country || "" %>
+                    </p>
+
+                    <p>
+                        PIN:
+                        <%= order.shippingAddress?.pincode || "N/A" %>
+                    </p>
+
+                    <p>
+                        Phone:
+                        <%= order.shippingAddress?.phone || "N/A" %>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ORDER ITEMS -->
+        <div class="details-card">
+
+            <div class="section-heading">
+
+                <div>
+                    <h3 class="section-title">
+                        Ordered Products
+                    </h3>
+
+                    <p class="section-description">
+                        Products included in this order
+                    </p>
+                </div>
+
+            </div>
+
+
+            <% if (order.orderItemId && order.orderItemId.length > 0) { %>
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Item Total</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <% order.orderItemId.forEach(item => { %>
+
+                                <tr>
+
+                                    <!-- PRODUCT -->
+                                    <td>
+
+                                        <div class="product-info">
+
+                                            <!-- PRODUCT IMAGE -->
+                                            <div class="product-image">
+
+                                                <% if (
+                                                    item.variantId &&
+                                                    item.variantId.images &&
+                                                    item.variantId.images.length > 0
+                                                ) { %>
+
+                                                    <img
+                                                        src="/uploads/variants/<%= item.variantId.images[0] %>"
+                                                        alt="<%= item.productId?.productName || 'Product' %>"
+                                                    >
+
+                                                <% } else { %>
+
+                                                    <div class="product-placeholder">
+                                                        No Image
+                                                    </div>
+
+                                                <% } %>
+
+                                            </div>
+
+
+                                            <!-- PRODUCT NAME -->
+                                            <div>
+
+                                                <strong>
+                                                    <%= item.productId?.productName || "Product unavailable" %>
+                                                </strong>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- VARIANT -->
+                                    <td>
+
+                                        <% if (item.variantId?.color) { %>
+
+                                            <span class="variant-color">
+                                                <%= item.variantId.color %>
+                                            </span>
+
+                                        <% } else { %>
+
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+
+                                        <% } %>
+
+                                    </td>
+
+
+                                    <!-- PRICE -->
+                                    <td>
+
+                                        ₹<%= Number(item.price).toLocaleString("en-IN") %>
+
+                                    </td>
+
+
+                                    <!-- QUANTITY -->
+                                    <td>
+
+                                        <strong>
+                                            <%= item.quantity %>
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- ITEM TOTAL -->
+                                    <td>
+
+                                        <strong>
+                                            ₹<%= Number(item.price * item.quantity).toLocaleString("en-IN") %>
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- ITEM STATUS -->
+<td>
+
+    <form
+        action="/admin/orders/item/<%= item._id %>/status"
+        method="POST"
+        class="status-form"
+    >
+
+        
+
+        <input
+            type="hidden"
+            name="orderId"
+            value="<%= order._id %>"
+        >
+
+        <select
+            name="status"
+            class="form-select status-select"
+            onchange="this.form.submit()"
+        >
+
+            <option
+                value="PLACED"
+                <%= item.orderItemStatus === "PLACED" ? "selected" : "" %>
+            >
+                Placed
+            </option>
+
+            <option
+                value="SHIPPED"
+                <%= item.orderItemStatus === "SHIPPED" ? "selected" : "" %>
+            >
+                Shipped
+            </option>
+
+            <option
+                value="OUT_FOR_DELIVERY"
+                <%= item.orderItemStatus === "OUT_FOR_DELIVERY" ? "selected" : "" %>
+            >
+                Out for Delivery
+            </option>
+
+            <option
+                value="DELIVERED"
+                <%= item.orderItemStatus === "DELIVERED" ? "selected" : "" %>
+            >
+                Delivered
+            </option>
+
+            <option
+                value="CANCELLED"
+                <%= item.orderItemStatus === "CANCELLED" ? "selected" : "" %>
+            >
+                Cancelled
+            </option>
+
+            <option
+                value="RETURNED"
+                <%= item.orderItemStatus === "RETURNED" ? "selected" : "" %>
+            >
+                Returned
+            </option>
+
+        </select>
+
+    </form>
+
+</td>
+
+                                </tr>
+
+                            <% }) %>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            <% } else { %>
+
+                <div class="no-result">
+                    No items found for this order.
+                </div>
+
+            <% } %>
+
+        </div>
+
+
+        <!-- PAYMENT + SUMMARY -->
+        <div class="details-grid">
+
+            <!-- PAYMENT INFORMATION -->
+            <div class="details-card">
+
+                <h3 class="section-title">
+                    Payment Information
+                </h3>
+
+                <div class="info-list">
+
+                    <div class="info-row">
+
+                        <span>Payment Method</span>
+
+                        <strong>
+
+                            <% if (order.paymentMethod === "COD") { %>
+                                Cash on Delivery
+                            <% } else { %>
+                                <%= order.paymentMethod || "N/A" %>
+                            <% } %>
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>Payment Status</span>
+
+                        <strong>
+                            <%= order.paymentStatus || "PENDING" %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>Paid</span>
+
+                        <strong>
+                            <%= order.isPaid ? "Yes" : "No" %>
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORDER SUMMARY -->
+            <div class="details-card">
+
+                <h3 class="section-title">
+                    Order Summary
+                </h3>
+
+                <div class="summary-list">
+
+                    <div class="summary-row">
+
+                        <span>Subtotal</span>
+
+                        <strong>
+                            ₹<%= Number(order.subTotal || 0).toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>Discount</span>
+
+                        <strong>
+                            - ₹<%= Number(order.discountAmount || 0).toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>Delivery Charge</span>
+
+                        <strong>
+                            ₹<%= Number(order.deliveryCharge || 0).toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row total-row">
+
+                        <span>Total</span>
+
+                        <strong>
+                            ₹<%= Number(order.totalAmount || 0).toLocaleString("en-IN") %>
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<%- include("../partials/footer") %>

@@ -45,6 +45,14 @@ import { isAdminLogin, isAdminLogout } from "../middleware/adminAuth.js";
 import { noCache } from "../middleware/noCache.js";
 
 
+import {
+    loadOrders,
+    loadOrderDetails,
+    updateOrderItemStatus
+} from "../controllers/adminController.js"
+
+
+
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
  
@@ -93,6 +101,17 @@ router.patch(
 router.post(
     "/products/:productId/variants/:variantId/delete",
     deleteVariant
+);
+
+
+router.get("/orders", isAdminLogin, noCache, loadOrders);
+
+router.get("/orders/:orderId", isAdminLogin, noCache, loadOrderDetails);
+
+router.post(
+    "/orders/item/:orderItemId/status",
+    isAdminLogin,
+    updateOrderItemStatus
 );
 
 
