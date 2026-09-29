@@ -20,6 +20,13 @@ const productSchema = new mongoose.Schema(
             required: true
 
         },
+
+        brandId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Brand",
+            default: null
+        },
+
         
         isActive: {
             type: Boolean,

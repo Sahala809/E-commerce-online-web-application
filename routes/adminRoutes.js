@@ -1,6 +1,7 @@
 import express from "express"
 import nocache from "nocache";
 import upload from "../middleware/multer.js";
+import brandUpload from "../middleware/brandMulter.js";
 const router = express.Router();
 
 import {
@@ -51,7 +52,15 @@ import {
     updateOrderItemStatus
 } from "../controllers/adminController.js"
 
-
+import {
+    loadBrands,
+    loadAddBrand,
+    createBrand,
+    loadEditBrand,
+    editBrand,
+    toggleBrandStatus,
+    deleteBrand
+} from "../controllers/adminController.js"
 
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
@@ -114,5 +123,33 @@ router.post(
     updateOrderItemStatus
 );
 
+router.get("/brands", noCache, isAdminLogin, loadBrands);
+router.get("/brands/add", noCache,isAdminLogin, loadAddBrand);
 
+router.post("/brands/add",
+    isAdminLogin,
+    brandUpload.single("brandImage"),
+    createBrand
+);
+
+router.get("/brands/edit/:brandId",isAdminLogin,noCache,loadEditBrand);
+
+router.patch(
+    "/brands/edit/:brandId",
+    isAdminLogin,
+    brandUpload.single("brandImage"),
+    editBrand
+);
+
+router.post(
+    "/brands/toggle-status/:brandId",
+    isAdminLogin,
+    toggleBrandStatus
+);
+
+router.delete(
+    "/brands/delete/:brandId",
+    isAdminLogin,
+    deleteBrand
+);
 export default router;

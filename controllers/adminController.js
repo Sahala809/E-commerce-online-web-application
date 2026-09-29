@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 import Category from "../models/categoryModel.js";
 import Product from "../models/productModel.js";
 import Variant from "../models/variantModel.js";
-
+import Brand from "../models/brandModel.js";
 
 import {
     adminLoginService
@@ -39,6 +39,15 @@ import {
     updateOrderItemStatusService
  } from "../services/admin/orderService.js";
 
+
+import {
+    createBrandService,
+    getBrandsService,
+    getBrandByIdService,
+    editBrandService,
+    toggleBrandStatusService,
+    deleteBrandService
+} from "../services/admin/brandService.js"
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -468,6 +477,11 @@ export const loadAddProduct = async (req, res) => {
             isActive: true
         })
 
+        const brands = await Brand.find({
+            isActive: true
+        }).sort({ brandName: 1 });
+
+
         const variants= await Variant.find()
 
         //const priceLowToHigh = await Product.find().populate(variant.price).sort({variant.price:-1})
@@ -482,7 +496,7 @@ export const loadAddProduct = async (req, res) => {
             activePage: "product",
             pageTitle: "Products",
             categories,
-            brands:[],
+            brands,
             formData: {},
             errors: {},
             successMessage,
@@ -510,13 +524,18 @@ export const addProduct = async (req, res) => {
                 isActive: true
             });
 
+        const brands = await Brand.find({
+            isActive: true
+        }).sort({ brandName: 1 });
+
+
         if(!result.success){
 
             return res.render("admin/product/addProduct", {
                 activePage: "product",
                 pageTitle: "Products",
                 categories,
-                brands:[],
+                brands,
                 errors: result.errors,
                 formData: req.body,
                 successMessage:"",
@@ -888,7 +907,7 @@ export const loadOrders = async (req, res) => {
             
             page: result.page,
             totalPages: result.totalPages,
-            
+
             successMessage,
             errorMessage
         });
@@ -973,5 +992,242 @@ export const updateOrderItemStatus = async (req, res) => {
             "Something went wrong while updating order status";
 
         return res.redirect(`/admin/orders/${req.body.orderId}`);
+    }
+};
+
+
+export const loadBrands = async (req, res) => {
+    try {
+        const result = await getBrandsService();
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/dashboard");
+        }
+
+        return res.render("admin/brands/brands", {
+            brands: result.brands || [],
+            activePage: "brands",
+            pageTitle: "Brand Management",
+            successMessage: req.session.successMessage || "",
+            errorMessage: req.session.errorMessage || ""
+        });
+
+    } catch (error) {
+        console.log("LOAD BRANDS CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to load brands";
+
+        return res.render("admin/brands/brands", {
+
+            brands: [],
+
+            activePage: "brands",
+
+            pageTitle: "Brand Management",
+
+            successMessage: "",
+
+            errorMessage: "Failed to load brands"
+
+        });
+    }
+};
+
+export const loadAddBrand = async (req, res) => {
+    try {
+
+        return res.render("admin/brands/addBrand", {
+
+            activePage: "brands",
+
+            pageTitle: "Add Brand",
+
+            successMessage:
+                req.session.successMessage || "",
+
+            errorMessage:
+                req.session.errorMessage || "",
+
+            formData: {},
+
+            errors: {}
+
+        });
+
+    } catch (error) {
+
+        console.log(
+            "LOAD ADD BRAND CONTROLLER ERROR:",
+            error
+        );
+
+        return res.render("admin/brands/addBrand", {
+
+            activePage: "brands",
+
+            pageTitle: "Add Brand",
+
+            successMessage: "",
+
+            errorMessage: "Failed to load add brand page",
+
+            formData: {},
+
+            errors: {}
+
+        });
+    }
+};
+
+export const createBrand = async (req, res) => {
+    try {
+        const { brandName, description } = req.body;
+
+        const brandImage = req.file
+            ? `/uploads/brands/${req.file.filename}`
+            : null;
+
+        const result = await createBrandService(
+            brandName,
+            description,
+            brandImage
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/brands");
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect("/admin/brands");
+
+    } catch (error) {
+        console.log("CREATE BRAND CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to create brand";
+
+        return res.redirect("/admin/brands");
+    }
+};
+
+export const loadEditBrand = async (req, res) => {
+    try {
+        const { brandId } = req.params;
+
+        const result = await getBrandByIdService(brandId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/brands");
+        }
+
+        return res.render("admin/editBrand", {
+            brand: result.brand,
+            message: req.session.successMessage || "",
+            errorMessage: req.session.errorMessage || ""
+        });
+
+    } catch (error) {
+        console.log("LOAD EDIT BRAND CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to load brand";
+
+        return res.redirect("/admin/brands");
+    }
+};
+
+
+export const editBrand = async (req, res) => {
+    try {
+        const { brandId } = req.params;
+        const { brandName, description } = req.body;
+
+        const brandImage = req.file
+            ? `/uploads/brands/${req.file.filename}`
+            : null;
+
+        const result = await editBrandService(
+            brandId,
+            brandName,
+            description,
+            brandImage
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+
+            return res.redirect(
+                `/admin/brands/edit/${brandId}`
+            );
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect("/admin/brands");
+
+    } catch (error) {
+        console.log("UPDATE BRAND CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to update brand";
+
+        return res.redirect(
+            `/admin/brands/edit/${req.params.brandId}`
+        );
+    }
+};
+
+
+export const toggleBrandStatus = async (req, res) => {
+    try {
+        const { brandId } = req.params;
+
+        const result = await toggleBrandStatusService(brandId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/brands");
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect("/admin/brands");
+
+    } catch (error) {
+        console.log(
+            "TOGGLE BRAND STATUS CONTROLLER ERROR:",
+            error
+        );
+
+        req.session.errorMessage =
+            "Failed to update brand status";
+
+        return res.redirect("/admin/brands");
+    }
+};
+
+
+export const deleteBrand = async (req, res) => {
+    try {
+        const { brandId } = req.params;
+
+        const result = await deleteBrandService(brandId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/brands");
+        }
+
+        req.session.successMessage = result.message;
+
+        return res.redirect("/admin/brands");
+
+    } catch (error) {
+        console.log("DELETE BRAND CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to delete brand";
+
+        return res.redirect("/admin/brands");
     }
 };
