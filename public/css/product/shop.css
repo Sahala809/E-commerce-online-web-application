@@ -957,6 +957,22 @@ body {
     color: #222;
 }
 
+
+.shop-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.clear-search-btn {
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
 /* =========================================================
    ANIMATIONS
    ========================================================= */

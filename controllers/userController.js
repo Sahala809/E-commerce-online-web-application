@@ -820,6 +820,11 @@ const selectedColors = req.query.color
 
 const maxPrice = Number(req.query.maxPrice) || 50000;
 
+const queryParams = {
+    ...req.query
+};
+
+delete queryParams.page;
 
         //console.log("FILTERS:", req.query);
         const result = await loadShopService(req.query)
@@ -847,7 +852,8 @@ const maxPrice = Number(req.query.maxPrice) || 50000;
             totalProducts: result.totalProducts,
             successMessage,
             errorMessage,
-            search
+            search,
+            queryParams
             
         })
     } catch (error) {
@@ -1089,10 +1095,14 @@ export const loadWishlist = async (req, res) => {
 export const addToWishlist = async (req, res) => {
     try {
 
-
         const userId = req.session.user;
 
         const { productId, variantId } = req.params;
+
+        console.log("User ID:", userId);
+        console.log("Product ID:", productId);
+        console.log("Variant ID:", variantId);
+
 
         const result = await addToWishlistService(
             userId,
@@ -1100,21 +1110,31 @@ export const addToWishlist = async (req, res) => {
             variantId
         );
 
-        
-        return res.status(200).json({
-            success: result.success,
-            message: result.message
-        });
+
+        if (!result.success) {
+
+            req.session.errorMessage = result.message;
+
+            return res.redirect("/user/shop");
+        }
+
+
+        req.session.successMessage = result.message;
+
+        return res.redirect("/user/shop");
+
     } catch (error) {
 
-        console.error("Add wishlist error:", error);
+        console.error(
+            "Add wishlist error:",
+            error
+        );
 
-        return res.status(400).json({
-            success: false,
-            message:
-                error.message ||
-                "Unable to add product to wishlist."
-        });
+        req.session.errorMessage =
+            error.message ||
+            "Unable to add product to wishlist.";
+
+        return res.redirect("/user/shop");
     }
 };
 

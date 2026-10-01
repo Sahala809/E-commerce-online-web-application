@@ -80,7 +80,24 @@
                 <i class="bi bi-search"></i>
             </button>
         </div>
+
+
     </form>
+
+    <% if (search) { %>
+
+        <button
+            type="button"
+            id="clearSearch"
+            class="clear-search-btn"
+        >
+            Clear
+        </button>
+
+    <% } %>
+
+
+
 </div>
 
 
@@ -371,7 +388,7 @@
                                 type="submit"
                                 class="wishlist-btn"
                                 data-product-id="<%= product._id %>"
-    data-variant-id="<%= product.variant._id %>"
+                                data-variant-id="<%= product.variant._id || "" %>" 
                                 title="Add to Wishlist"
                             >
 
@@ -468,58 +485,69 @@
 
             <!-- ================= PAGINATION ================= -->
 
-            <div class="pagination-container">
+            <!-- ================= PAGINATION ================= -->
+<div class="pagination-container">
 
-                <% if (totalPages && totalPages > 1) { %>
+    <% if (totalPages && totalPages > 1) { %>
 
-                    <div class="pagination">
+        <div class="pagination">
 
-                        <% if (currentPage > 1) { %>
+            <!-- PREVIOUS -->
+            <% if (currentPage > 1) { %>
 
-                            <a
-                                href="/user/shop?page=<%= currentPage - 1 %>"
-                                class="pagination-btn"
-                            >
-                                <i class="bi bi-chevron-left"></i>
-                            </a>
+                <a
+                    href="/user/shop?<%= new URLSearchParams({
+                        ...queryParams,
+                        page: currentPage - 1
+                    }).toString() %>"
+                    class="pagination-btn"
+                >
+                    <i class="bi bi-chevron-left"></i>
+                </a>
 
-                        <% } %>
-
-
-                        <% for (
-                            let page = 1;
-                            page <= totalPages;
-                            page++
-                        ) { %>
-
-                            <a
-                                href="/user/shop?page=<%= page %>"
-                                class="pagination-number
-                                <%= page === currentPage ? 'active' : '' %>"
-                            >
-                                <%= page %>
-                            </a>
-
-                        <% } %>
+            <% } %>
 
 
-                        <% if (currentPage < totalPages) { %>
+            <!-- PAGE NUMBERS -->
+            <% for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) { %>
 
-                            <a
-                                href="/user/shop?page=<%= currentPage + 1 %>"
-                                class="pagination-btn"
-                            >
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
+                <a
+                    href="/user/shop?<%= new URLSearchParams({
+                        ...queryParams,
+                        page: page
+                    }).toString() %>"
+                    class="pagination-number <%= page === currentPage ? 'active' : '' %>"
+                >
+                    <%= page %>
+                </a>
 
-                        <% } %>
+            <% } %>
 
-                    </div>
 
-                <% } %>
+            <!-- NEXT -->
+            <% if (currentPage < totalPages) { %>
 
-            </div>
+                <a
+                    href="/user/shop?<%= new URLSearchParams({
+                        ...queryParams,
+                        page: currentPage + 1
+                    }).toString() %>"
+                    class="pagination-btn"
+                >
+                    <i class="bi bi-chevron-right"></i>
+                </a>
 
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>
         </section>
 
     </div>
@@ -538,7 +566,6 @@
 
     const maxPriceValue =
         document.getElementById("maxPriceValue");
-
 
     if (priceSlider && maxPriceValue) {
 
@@ -562,15 +589,9 @@
     const applyFilters =
         document.getElementById("applyFilters");
 
-
     if (applyFilters) {
 
         applyFilters.addEventListener("click", () => {
-
-
-            // =================================================
-            // GET CURRENT URL PARAMETERS
-            // =================================================
 
             const params =
                 new URLSearchParams(
@@ -589,7 +610,6 @@
                 searchInput
                     ? searchInput.value.trim()
                     : "";
-
 
             if (search) {
 
@@ -620,11 +640,9 @@
             );
 
 
-            // Remove old categories first
             params.delete("category");
 
 
-            // Add selected categories
             selectedCategories.forEach(category => {
 
                 params.append(
@@ -650,11 +668,9 @@
             );
 
 
-            // Remove old colors first
             params.delete("color");
 
 
-            // Add selected colors
             selectedColors.forEach(color => {
 
                 params.append(
@@ -724,14 +740,70 @@
 
     }
 
-    const clearFilters =
-    document.getElementById("clearFilters");
 
-if (clearFilters) {
-    clearFilters.addEventListener("click", () => {
-        window.location.href = "/user/shop";
-    });
-}
+    // =========================================================
+    // CLEAR SEARCH
+    // =========================================================
+
+    const clearSearch =
+        document.getElementById("clearSearch");
+
+    if (clearSearch) {
+
+        clearSearch.addEventListener("click", () => {
+
+            window.location.href =
+                "/user/shop";
+
+        });
+
+    }
+
+
+    // =========================================================
+    // CLEAR FILTERS
+    // =========================================================
+
+    const clearFilters =
+        document.getElementById("clearFilters");
+
+    if (clearFilters) {
+
+        clearFilters.addEventListener("click", () => {
+
+            const params =
+                new URLSearchParams();
+
+            const searchInput =
+                document.getElementById("shopSearch");
+
+            const search =
+                searchInput
+                    ? searchInput.value.trim()
+                    : "";
+
+            // Keep search
+            if (search) {
+
+                params.set(
+                    "search",
+                    search
+                );
+
+            }
+
+            // Go to page 1
+            params.set(
+                "page",
+                "1"
+            );
+
+            window.location.href =
+                `/user/shop?${params.toString()}`;
+
+        });
+
+    }
 
 
     // =========================================================
@@ -741,24 +813,20 @@ if (clearFilters) {
     const sortSelect =
         document.getElementById("sort");
 
-
     if (sortSelect) {
 
         sortSelect.addEventListener("change", () => {
 
-            // Get current URL parameters
             const params =
                 new URLSearchParams(
                     window.location.search
                 );
 
 
-            // Get selected sort
             const sort =
                 sortSelect.value;
 
 
-            // Update sort
             if (sort) {
 
                 params.set(
@@ -773,14 +841,13 @@ if (clearFilters) {
             }
 
 
-            // Sorting should start from page 1
+            // Sorting starts from page 1
             params.set(
                 "page",
                 "1"
             );
 
 
-            // Reload shop
             window.location.href =
                 `/user/shop?${params.toString()}`;
 

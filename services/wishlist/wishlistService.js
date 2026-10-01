@@ -21,63 +21,95 @@ export const loadWishlistService = async (userId) => {
     return wishlist;
 };
 
-
 export const addToWishlistService = async (
     userId,
     productId,
     variantId
 ) => {
+    try {
 
-    let wishlist = await Wishlist.findOne({ userId });
+        // Check required values
+        if (!userId || !productId || !variantId) {
+            return {
+                success: false,
+                message: "Required wishlist information is missing."
+            };
+        }
 
-    // Create wishlist if user doesn't have one
-    if (!wishlist) {
 
-        wishlist = await Wishlist.create({
-            userId,
-            items: [
-                {
-                    productId,
-                    variantId
-                }
-            ]
+        // Find user's wishlist
+        let wishlist = await Wishlist.findOne({
+            userId
         });
+
+
+        // If wishlist doesn't exist, create it
+        if (!wishlist) {
+
+            await Wishlist.create({
+                userId,
+                items: [
+                    {
+                        productId,
+                        variantId
+                    }
+                ]
+            });
+
+            return {
+                success: true,
+                message: "Product added to wishlist."
+            };
+        }
+
+
+        // Check whether the same product + variant
+        // already exists
+        const existingItem = wishlist.items.find(
+            (item) =>
+                item.productId.toString() === productId &&
+                item.variantId.toString() === variantId
+        );
+
+
+        if (existingItem) {
+
+            return {
+                success: false,
+                message: "Product is already in your wishlist."
+            };
+        }
+
+
+        // Add new wishlist item
+        wishlist.items.push({
+            productId,
+            variantId
+        });
+
+
+        await wishlist.save();
+
 
         return {
             success: true,
             message: "Product added to wishlist."
         };
-    }
 
-    // Check whether same product + variant already exists
-    const alreadyExists = wishlist.items.some(
-        item =>
-            item.productId.toString() === productId.toString() &&
-            item.variantId.toString() === variantId.toString()
-    );
+    } catch (error) {
 
-    if (alreadyExists) {
+        console.error(
+            "Add wishlist service error:",
+            error
+        );
 
         return {
             success: false,
-            message: "Product is already in your wishlist."
+            message:
+                "Unable to add product to wishlist."
         };
     }
-
-    // Add new item
-    wishlist.items.push({
-        productId,
-        variantId
-    });
-
-    await wishlist.save();
-
-    return {
-        success: true,
-        message: "Product added to wishlist."
-    };
 };
-
 export const removeFromWishlistService = async (
     userId,
     productId,

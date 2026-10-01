@@ -1,244 +1,274 @@
-import Product from "../../models/productModel.js"
-import Category from "../../models/categoryModel.js"
-import Variant from "../../models/variantModel.js"
+import Product from "../../models/productModel.js";
+import Category from "../../models/categoryModel.js";
+import Variant from "../../models/variantModel.js";
 
 export const loadShopService = async (filters = {}) => {
-     
-    console.log("FILTERS RECEIVED:", filters);
+    try {
+        console.log("FILTERS RECEIVED:", filters);
 
-    const page = Number(filters.page) || 1
-    const limit = 12
-    const skip = (page - 1) * limit
+        const page = Number(filters.page) || 1;
+        const limit = 8;
+        const skip = (page - 1) * limit;
 
-    
-    const sort = filters.sort || "";
+        const sort = filters.sort || "";
+        const search = filters.search?.trim() || "";
 
-    const search = filters.search?.trim() || "";
+        const selectedCategories = filters.category
+            ? Array.isArray(filters.category)
+                ? filters.category
+                : [filters.category]
+            : [];
 
-    const selectedCategories = filters.category
-    ? Array.isArray(filters.category)
-        ? filters.category
-        : [filters.category]
-    : [];
+        const selectedColors = filters.color
+            ? Array.isArray(filters.color)
+                ? filters.color
+                : [filters.color]
+            : [];
 
-    const selectedColors = filters.color || []
-    const maxPrice = Number(filters.maxPrice) || 50000;
+        const maxPrice = Number(filters.maxPrice) || 50000;
 
-    const variantFilter = {
-        isActive: true, 
-        stock: { $gt: 0 },
-        price: { $lte: maxPrice}
-    }
+        // -----------------------------------
+        // VARIANT FILTER
+        // -----------------------------------
 
+        const variantFilter = {
+            isActive: true,
+            stock: { $gt: 0 },
+            price: { $lte: maxPrice }
+        };
 
-    if(selectedColors.length > 0) {
-        variantFilter.color = {
-            $in: selectedColors
+        if (selectedColors.length > 0) {
+            variantFilter.color = {
+                $in: selectedColors
+            };
         }
-    }
 
-    const variants = await Variant.find(variantFilter)
-    .populate("productId")
-    .lean()
+        const variants = await Variant.find(variantFilter)
+            .populate("productId")
+            .lean();
 
-    const productIds = variants
-        .map(variant => variant.productId?._id)
-        .filter(Boolean);
+        // -----------------------------------
+        // PRODUCT FILTER
+        // -----------------------------------
 
+        const productFilter = {
+            isActive: true
+        };
 
-   const productFilter = {
-    isActive: true
-};
+        if (selectedCategories.length > 0) {
+            productFilter.categoryId = {
+                $in: selectedCategories
+            };
+        }
 
-if (selectedCategories.length > 0) {
-    productFilter.categoryId = {
-        $in: selectedCategories
-    };
-}
+        // Search by product name
+        if (search) {
+            const escapedSearch = search.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                "\\$&"
+            );
 
-// Search by product name
-if (search) {
-    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            productFilter.productName = {
+                $regex: escapedSearch,
+                $options: "i"
+            };
+        }
 
-    productFilter.productName = {
-        $regex: escapedSearch,
-        $options: "i"
-    };
-}
- 
-    if (selectedColors.length > 0) {
+        // Only products having available variants
+        const productIds = variants
+            .map(variant => variant.productId?._id)
+            .filter(Boolean);
 
         productFilter._id = {
             $in: productIds
         };
 
-    }
+        // -----------------------------------
+        // GET PRODUCTS
+        // -----------------------------------
 
-    if (variants.length === 0) { 
-        productFilter._id = { 
-            $in: [] 
-        }; 
-    }
+        let products = await Product.find(productFilter)
+            .populate("categoryId")
+            .lean();
 
-    const totalProducts = await Product.countDocuments(
-        productFilter
-    ).lean();
+        // -----------------------------------
+        // ATTACH ONE VARIANT TO EACH PRODUCT
+        // -----------------------------------
 
+        const shopProducts = products.map(product => {
 
-    if (sort === "priceLow") { 
-        variants.sort((a, b) => {
-             const priceA = 
-                a.offerPrice && 
-                a.offerPrice > 0 && 
-                a.offerPrice < a.price 
-                ? a.offerPrice 
-                : a.price; 
-             const priceB = 
-                b.offerPrice && 
-                b.offerPrice > 0 && 
-                b.offerPrice < b.price 
-                ? b.offerPrice 
-                : b.price; 
-             return priceA - priceB; 
-            }); 
-
-        } else if (sort === "priceHigh") { 
-            variants.sort((a, b) => {
-                const priceA = 
-                    a.offerPrice && 
-                    a.offerPrice > 0 && 
-                    a.offerPrice < a.price 
-                    ? a.offerPrice 
-                    : a.price;
-
-                const priceB = 
-                    b.offerPrice && 
-                    b.offerPrice > 0 && 
-                    b.offerPrice < b.price 
-                    ? b.offerPrice 
-                    : b.price; 
-                    
-                return priceB - priceA; 
-            }); 
-        
-        } else if (sort === "newest") { 
-            // Newest product first 
-            
-            variants.sort((a, b) => { 
-                const dateA = 
-                    a.productId?.createdAt 
-                    ? new Date(a.productId.createdAt) 
-                    : 0; 
-                    
-                const dateB = 
-                    b.productId?.createdAt 
-                    ? new Date(b.productId.createdAt) 
-                    : 0; 
-                    
-                return dateB - dateA; 
-            }); 
-        }
-
-        const sortedProductIds = [ 
-            ...new Set( 
-                variants .map(variant => 
-                    variant.productId?._id?.toString() 
-                ) 
-                .filter(Boolean) 
-            ) 
-        ];
-
-    
-    let products = await Product.find(productFilter)
-        .populate("categoryId")
-        .lean()
-
-    
-    if ( 
-        sort === "priceLow" ||
-        sort === "priceHigh" ||
-        sort === "newest" 
-    ) { 
-        products.sort((a, b) => { 
-            const indexA = 
-                sortedProductIds.indexOf( 
-                    a._id.toString() 
+            const productVariants = variants.filter(variant => {
+                return (
+                    variant.productId &&
+                    variant.productId._id.toString() ===
+                    product._id.toString()
                 );
-            
-            const indexB = 
-                sortedProductIds.indexOf( 
-                    b._id.toString() 
-                ); 
-                
-                // Products without matching variant 
-                // go to the end 
-                
-                if (indexA === -1) return 1; 
-                if (indexB === -1) return -1; 
-                
-                return indexA - indexB; 
-        }); 
-            
-    } else {
+            });
 
-            // Default = newest products first 
-            
-        products.sort((a, b) => {
-            return (
-                    new Date(b.createdAt) - 
-                    new Date(a.createdAt) 
-                ); 
-            }); 
-        }
+            if (productVariants.length === 0) {
+                return null;
+            }
 
+            // Find lowest priced variant
+            const firstVariant = productVariants.reduce(
+                (lowest, current) => {
 
-        products = 
-            products.slice( skip, skip + limit );
+                    const lowestPrice =
+                        lowest.offerPrice &&
+                        lowest.offerPrice > 0 &&
+                        lowest.offerPrice < lowest.price
+                            ? lowest.offerPrice
+                            : lowest.price;
 
-    const categories = await Category.find({
-        isActive: true
-    }).lean()
+                    const currentPrice =
+                        current.offerPrice &&
+                        current.offerPrice > 0 &&
+                        current.offerPrice < current.price
+                            ? current.offerPrice
+                            : current.price;
 
-    const colors = await Variant.distinct("color",{
-        isActive: true
-    })
-
-    const shopProducts = products.map(product => {
-
-        const productVariants = variants.filter(variant => {
-
-            return (
-                variant.productId &&
-                variant.productId._id.toString() === product._id.toString()
+                    return currentPrice < lowestPrice
+                        ? current
+                        : lowest;
+                }
             );
 
+            return {
+                ...product,
+                variant: firstVariant
+            };
+
+        }).filter(Boolean);
+
+        // -----------------------------------
+        // SORT PRODUCTS
+        // -----------------------------------
+
+        const getVariantPrice = (variant) => {
+
+            if (
+                variant.offerPrice &&
+                variant.offerPrice > 0 &&
+                variant.offerPrice < variant.price
+            ) {
+                return variant.offerPrice;
+            }
+
+            return variant.price;
+        };
+
+        if (sort === "priceLow") {
+
+            shopProducts.sort((a, b) => {
+                return (
+                    getVariantPrice(a.variant) -
+                    getVariantPrice(b.variant)
+                );
+            });
+
+        } else if (sort === "priceHigh") {
+
+            shopProducts.sort((a, b) => {
+                return (
+                    getVariantPrice(b.variant) -
+                    getVariantPrice(a.variant)
+                );
+            });
+
+        } else if (sort === "newest") {
+
+            shopProducts.sort((a, b) => {
+                return (
+                    new Date(b.createdAt) -
+                    new Date(a.createdAt)
+                );
+            });
+
+        } else {
+
+            // Default = newest products first
+
+            shopProducts.sort((a, b) => {
+                return (
+                    new Date(b.createdAt) -
+                    new Date(a.createdAt)
+                );
+            });
+        }
+
+        // -----------------------------------
+        // PAGINATION
+        // -----------------------------------
+
+        const totalProducts = shopProducts.length;
+
+        const paginatedProducts = shopProducts.slice(
+            skip,
+            skip + limit
+        );
+
+        // -----------------------------------
+        // CATEGORIES
+        // -----------------------------------
+
+        const categories = await Category.find({
+            isActive: true
+        }).lean();
+
+        // -----------------------------------
+        // COLORS
+        // -----------------------------------
+
+        const colors = await Variant.distinct("color", {
+            isActive: true,
+            stock: { $gt: 0 }
         });
 
-        return {
-            ...product,
-            variant: productVariants[0] || null
-        };
-    });
-
-    const totalPages = Math.ceil(totalProducts / limit)
-
-    const normalizedColors = [
-        ...new Set(
-            colors.map(color =>
-                color.trim().toLowerCase()
+        const normalizedColors = [
+            ...new Set(
+                colors
+                    .filter(Boolean)
+                    .map(color =>
+                        color.trim().toLowerCase()
+                    )
             )
-        )
-    ];
+        ];
 
+        // -----------------------------------
+        // TOTAL PAGES
+        // -----------------------------------
 
-    return {
-        products: shopProducts,
-        categories,
-        colors: normalizedColors,
-        
-        currentPage : page,
-        totalPages,
-        totalProducts
-    };
-}
+        const totalPages = Math.ceil(
+            totalProducts / limit
+        );
 
+        // -----------------------------------
+        // RETURN
+        // -----------------------------------
+
+        return {
+            products: paginatedProducts,
+            categories,
+            colors: normalizedColors,
+            currentPage: page,
+            totalPages,
+            totalProducts
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Load shop service error:",
+            error
+        );
+
+        return {
+            products: [],
+            categories: [],
+            colors: [],
+            currentPage: 1,
+            totalPages: 0,
+            totalProducts: 0
+        };
+    }
+};
