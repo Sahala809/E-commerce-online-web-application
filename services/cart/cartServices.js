@@ -72,19 +72,12 @@ export const addToCartService = async (
 
     if (existingItem) {
 
-         const newQuantity =
-            existingItem.quantity + requestedQuantity;
-
-        // Check total quantity against stock
-        if (newQuantity > variant.stock) {
-            return {
-                success: false,
-                message: `Only ${variant.stock} item(s) available. You already have ${existingItem.quantity} in your cart.`
-            };
-        }
-
-        existingItem.quantity = newQuantity;
-    } else {
+        return {
+            success: false,
+            message: "This item is already in your cart."
+        };
+    }
+        else {
 
         cart.items.push({
             productId,
@@ -261,45 +254,59 @@ export const updateCartService = async (
 };
 
 
+
 export const removeFromCartService = async (
     userId,
     productId,
     variantId
 ) => {
+    try {
 
-    const cart = await Cart.findOne({ userId });
+        const cart = await Cart.findOne({ userId });
 
-    if (!cart) {
+        if (!cart) {
+            return {
+                success: false,
+                message: "Cart not found"
+            };
+        }
+
+        const itemIndex = cart.items.findIndex(
+            item =>
+                item.productId &&
+                item.variantId &&
+                item.productId.toString() === productId &&
+                item.variantId.toString() === variantId
+        );
+
+        if (itemIndex === -1) {
+            return {
+                success: false,
+                message: "Item not found in cart"
+            };
+        }
+
+        cart.items.splice(itemIndex, 1);
+
+        await cart.save();
+
+        return {
+            success: true,
+            message: "Item removed from cart"
+        };
+
+    } catch (error) {
+
+        console.log("REMOVE FROM CART SERVICE ERROR:", error);
+
         return {
             success: false,
-            message: "Cart not found"
+            message: "Unable to remove item from cart."
         };
     }
-
-    const itemIndex = cart.items.findIndex(
-        item =>
-            item.productId &&
-            item.variantId &&
-            item.productId.toString() === productId &&
-            item.variantId.toString() === variantId
-    );
-
-    if (itemIndex === -1) {
-        return {
-            success: false,
-            message: "Item not found in cart"
-        };
-    }
-
-    cart.items.splice(itemIndex, 1);
-
-    await cart.save();
-
-    return {
-        success: true,
-        message: "Item removed from cart"
-    };
 };
+
+
 
 
 

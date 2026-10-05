@@ -155,7 +155,7 @@ router.get("/product/:id", loadProductDetail);
 router.post("/cart", addToCart);
 router.get("/cart", loadCart);
 router.patch("/cart", updateCart);
-router.delete(
+router.post(
     "/cart/remove/:productId/:variantId",
     removeFromCart
 );

@@ -5,7 +5,7 @@
 
 <!-- ================= WISHLIST POPUP ================= -->
 
-<% if (successMessage) { %>
+<% if (successMessage || errorMessage) { %>
 
     <div class="wishlist-popup-overlay" id="wishlistPopup">
 
@@ -24,11 +24,11 @@
             </div>
 
             <h3>
-                Added to Wishlist
+                <%= successMessage ? "Added to Wishlist" : "Wishlist" %>
             </h3>
 
             <p>
-                <%= successMessage %>
+                <%= successMessage || errorMessage %>
             </p>
 
             <button
@@ -44,7 +44,6 @@
     </div>
 
 <% } %>
-
 <main class="shop-container">
 
     <!-- Breadcrumb -->
@@ -556,6 +555,17 @@
 
 
 <script>
+
+    // ========================================================= 
+    // // WISHLIST POPUP 
+    // // ========================================================= 
+    function closeWishlistPopup() {
+         const popup = 
+            document.getElementById("wishlistPopup"); 
+        if (popup) {
+            popup.remove(); 
+        } 
+    }
 
     // =========================================================
     // PRICE SLIDER

@@ -255,14 +255,22 @@
                                 <div class="cart-quantity">
 
                                     <button
-                                        type="button"
-                                        class="quantity-btn"
-                                        data-action="decrease"
-                                        data-variant-id="<%= item.variantId._id %>"
-                                        data-stock="<%= item.variantId.stock %>"
-                                    >
-                                        −
-                                    </button>
+    type="button"
+    class="quantity-btn"
+    data-action="decrease"
+    data-variant-id="<%= item.variantId._id %>"
+    data-stock="<%= item.variantId.stock %>"
+    data-price="<%= (
+        item.variantId.offerPrice &&
+        item.variantId.offerPrice > 0 &&
+        item.variantId.offerPrice < item.variantId.price
+    )
+        ? item.variantId.offerPrice
+        : item.variantId.price
+    %>"
+>
+    −
+</button>
 
 
                                     <span class="quantity-value">
@@ -271,14 +279,22 @@
 
 
                                     <button
-                                        type="button"
-                                        class="quantity-btn"
-                                        data-action="increase"
-                                        data-variant-id="<%= item.variantId._id %>"
-                                        data-stock="<%= item.variantId.stock %>"
-                                    >
-                                        +
-                                    </button>
+    type="button"
+    class="quantity-btn"
+    data-action="increase"
+    data-variant-id="<%= item.variantId._id %>"
+    data-stock="<%= item.variantId.stock %>"
+    data-price="<%= (
+        item.variantId.offerPrice &&
+        item.variantId.offerPrice > 0 &&
+        item.variantId.offerPrice < item.variantId.price
+    )
+        ? item.variantId.offerPrice
+        : item.variantId.price
+    %>"
+>
+    +
+</button>
 
                                 </div>
 
@@ -298,50 +314,47 @@
                         </div>
 
 
-                        <!-- Remove -->
+                        
 
-                        <div class="cart-item-remove">
+<!-- Remove -->
+<div class="cart-item-remove">
 
+    <% if (item.productId && item.variantId) { %>
 
-                            <% if (item.productId && item.variantId) { %>
+        <!-- Normal cart item -->
+        <form
+            method="POST"
+            action="/user/cart/remove/<%= item.productId._id %>/<%= item.variantId._id %>?method=DELETE"
+            class="remove-cart-form"
+        >
 
+             <button
+        type="button"
+        class="remove-cart-btn"
+        data-product-id="<%= item.productId._id %>"
+        data-variant-id="<%= item.variantId._id %>"
+        title="Remove item"
+    >
+                <i class="bi bi-trash3"></i>
+            </button>
 
-                                <!-- Normal item -->
+        </form>
 
-                                <button
-                                    type="button"
-                                    class="remove-cart-btn"
-                                    data-product-id="<%= item.productId._id %>"
-                                    data-variant-id="<%= item.variantId._id %>"
-                                    title="Remove item"
-                                >
+    <% } else { %>
 
-                                    <i class="bi bi-trash3"></i>
+        <!-- Unavailable product / variant -->
+        <button
+            type="button"
+            class="remove-cart-btn"
+            data-cart-item-id="<%= item._id %>"
+            title="Remove unavailable item"
+        >
+            <i class="bi bi-trash3"></i>
+        </button>
 
-                                </button>
+    <% } %>
 
-
-                            <% } else { %>
-
-
-                                <!-- Deleted product / variant -->
-
-                                <button
-                                    type="button"
-                                    class="remove-cart-btn"
-                                    data-cart-item-id="<%= item._id %>"
-                                    title="Remove unavailable item"
-                                >
-
-                                    <i class="bi bi-trash3"></i>
-
-                                </button>
-
-
-                            <% } %>
-
-
-                        </div>
+</div>
 
 
                     </div>
@@ -367,15 +380,13 @@
                 <!-- Subtotal -->
 
                 <div class="summary-row">
-
                     <span>
                         Subtotal
                     </span>
 
-                    <span>
+                    <span id="cartSubtotal">
                         ₹<%= subtotal %>
                     </span>
-
                 </div>
 
 
@@ -440,15 +451,13 @@
                 <!-- Total -->
 
                 <div class="summary-total">
-
                     <span>
                         Total
                     </span>
 
-                    <strong>
+                    <strong id="cartTotal">
                         ₹<%= total %>
                     </strong>
-
                 </div>
 
 

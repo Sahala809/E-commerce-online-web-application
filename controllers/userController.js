@@ -875,16 +875,25 @@ export const loadProductDetail = async (req, res) => {
 
         const result = await loadProductDetailService(productId)
 
+        
         if(!result || !result.product){
             req.session.errorMessage = "Product not found";
             return res.redirect("/user/shop")
         }
 
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        delete req.session.successMessage;
+        delete req.session.errorMessage;
+
         res.render("user/product/productDetail", {
             activePage:"shop",
             product: result.product,
             variants: result.variants || [],
-            relatedProducts: result.relatedProducts || []
+            relatedProducts: result.relatedProducts || [],
+            successMessage,
+            errorMessage
         })
     } catch (error) {
 
@@ -946,6 +955,13 @@ export const loadCart = async (req, res) => {
 
         const result = await loadCartService(userId);
 
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        // Clear messages after reading them
+        delete req.session.successMessage;
+        delete req.session.errorMessage;
+
         res.render("user/cart/cart", {
             activePage: "cart",
             cart: result.cart,
@@ -956,7 +972,10 @@ export const loadCart = async (req, res) => {
 
             tax: result.tax,
 
-            total: result.total
+            total: result.total,
+
+            successMessage,
+            errorMessage
         });
 
     } catch (error) {
@@ -1046,12 +1065,13 @@ export const removeUnavailableCartItem = async (req, res) => {
                 itemId
             );
 
-        return res.status(
-            result.success ? 200 : 400
-        ).json({
-            success: result.success,
-            message: result.message
-        });
+        if (!result.success) { 
+            return res.render("user/cart", { 
+                message: result.message, 
+                messageType: "error" 
+            }); 
+        } 
+        return res.redirect(301, "/user/cart");
 
     } catch (error) {
 
@@ -1060,13 +1080,12 @@ export const removeUnavailableCartItem = async (req, res) => {
             error
         );
 
-        return res.status(500).json({
-            success: false,
-            message:
-                error.message ||
-                "Unable to remove item from cart."
-        });
-    }
+        return res.render("user/cart", { 
+                message: "Unable to remove this item from your cart.", 
+                messageType: "error" 
+            }); 
+        }
+    
 };
 
     ///// wishlist //////
@@ -1152,25 +1171,26 @@ export const removeFromWishlist = async (req, res) => {
         );
 
         if (!result.success) {
-            return res.status(400).json({
-                success: false,
-                message: result.message
-            });
+             req.session.errorMessage =
+                result.message;
+
+            return res.redirect("/user/wishlist");
         }
 
-        return res.status(200).json({
-            success: true,
-            message: result.message
-        });
+         req.session.successMessage =
+            result.message;
+
+        return res.redirect("/user/wishlist");
 
     } catch (error) {
 
         console.error("Remove wishlist error:", error);
 
-        return res.status(500).json({
-            success: false,
-            message: "Unable to remove product from wishlist."
-        });
+        req.session.errorMessage =
+            "Unable to remove product from wishlist.";
+
+
+        return res.redirect("/user/wishlist");
     }
 };
 

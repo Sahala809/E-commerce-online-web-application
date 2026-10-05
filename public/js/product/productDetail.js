@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
 
     // =========================================================
@@ -27,6 +28,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // =========================================================
+    // WISHLIST ELEMENTS
+    // =========================================================
+
+    const wishlistButton =
+        document.getElementById("wishlistButton");
+
+    const wishlistForm =
+        document.getElementById("wishlistForm");
+
+    const confirmWishlistBtn =
+        document.getElementById("confirmWishlistBtn");
+
+    const wishlistConfirmModalElement =
+        document.getElementById("wishlistConfirmModal");
+
+    const wishlistMessageModalElement =
+        document.getElementById("wishlistMessageModal");
+
+    
+    // =========================================================
+// STOCK LIMIT MODAL
+// =========================================================
+
+const stockLimitModalElement =
+    document.getElementById("stockLimitModal");
+
+const stockLimitMessage =
+    document.getElementById("stockLimitMessage");
+
+    // =========================================================
     // INITIAL VARIANT
     // =========================================================
 
@@ -34,6 +65,32 @@ document.addEventListener("DOMContentLoaded", () => {
         variants && variants.length > 0
             ? variants[0]
             : null;
+
+
+
+    // =========================================================
+// SHOW STOCK LIMIT MODAL
+// =========================================================
+
+function showStockLimitMessage(message) {
+
+    if (
+        !stockLimitModalElement ||
+        !stockLimitMessage
+    ) {
+        console.log("Stock limit modal not found.");
+        return;
+    }
+
+    stockLimitMessage.textContent = message;
+
+    const stockLimitModal =
+        bootstrap.Modal.getOrCreateInstance(
+            stockLimitModalElement
+        );
+
+    stockLimitModal.show();
+}
 
 
     // =========================================================
@@ -118,30 +175,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (increaseQuantity) {
 
-        increaseQuantity.addEventListener("click", () => {
+    increaseQuantity.addEventListener("click", () => {
 
-            if (!selectedVariant) {
-                return;
-            }
+        if (!selectedVariant) {
+            return;
+        }
 
 
-            if (quantity < selectedVariant.stock) {
+        // =========================================
+        // OUT OF STOCK
+        // =========================================
 
-                quantity++;
+        if (selectedVariant.stock <= 0) {
 
-                quantityElement.textContent =
+            showStockLimitMessage(
+                "This product is currently out of stock."
+            );
+
+            return;
+        }
+
+
+        // =========================================
+        // INCREASE QUANTITY
+        // =========================================
+
+        if (quantity < selectedVariant.stock) {
+
+            quantity++;
+
+            quantityElement.textContent =
+                quantity;
+
+            if (cartQuantity) {
+
+                cartQuantity.value =
                     quantity;
 
-                if (cartQuantity) {
-                    cartQuantity.value =
-                        quantity;
-                }
-
             }
 
-        });
+            return;
+        }
 
-    }
+
+        // =========================================
+        // STOCK LIMIT REACHED
+        // =========================================
+
+        showStockLimitMessage(
+            `Only ${selectedVariant.stock} items are available in stock.`
+        );
+
+    });
+
+}
 
 
     // -----------------------------------------
@@ -160,8 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     quantity;
 
                 if (cartQuantity) {
+
                     cartQuantity.value =
                         quantity;
+
                 }
 
             }
@@ -184,14 +273,21 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             if (thumbnailList) {
+
                 thumbnailList.innerHTML = "";
+
             }
 
+
             if (mainImage) {
-                mainImage.style.display = "none";
+
+                mainImage.style.display =
+                    "none";
+
             }
 
             return;
+
         }
 
 
@@ -201,7 +297,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (mainImage) {
 
-            mainImage.style.display = "block";
+            mainImage.style.display =
+                "block";
 
             mainImage.src =
                 `/uploads/variants/${variant.images[0]}`;
@@ -209,7 +306,9 @@ document.addEventListener("DOMContentLoaded", () => {
             mainImage.alt =
                 "Product Image";
 
+
             // Reset zoom position
+
             mainImage.style.transformOrigin =
                 "center center";
 
@@ -222,7 +321,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (zoomContainer) {
 
-            zoomContainer.classList.remove("zoomed");
+            zoomContainer.classList.remove(
+                "zoomed"
+            );
 
         }
 
@@ -252,12 +353,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.createElement("div");
 
 
-                thumbnail.classList.add("thumbnail");
+                thumbnail.classList.add(
+                    "thumbnail"
+                );
 
 
                 if (index === 0) {
 
-                    thumbnail.classList.add("active");
+                    thumbnail.classList.add(
+                        "active"
+                    );
 
                 }
 
@@ -284,53 +389,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 thumbnail.appendChild(img);
 
-                thumbnailList.appendChild(thumbnail);
+                thumbnailList.appendChild(
+                    thumbnail
+                );
 
 
                 // ---------------------------------
                 // THUMBNAIL CLICK
                 // ---------------------------------
 
-                thumbnail.addEventListener("click", () => {
+                thumbnail.addEventListener(
+                    "click",
+                    () => {
 
-                    if (mainImage) {
+                        if (mainImage) {
 
-                        mainImage.src =
-                            `/uploads/variants/${image}`;
+                            mainImage.src =
+                                `/uploads/variants/${image}`;
 
-                        mainImage.style.transformOrigin =
-                            "center center";
+                            mainImage.style.transformOrigin =
+                                "center center";
 
-                    }
+                        }
 
 
-                    // Reset zoom
+                        // Reset zoom
 
-                    if (zoomContainer) {
+                        if (zoomContainer) {
 
-                        zoomContainer.classList.remove(
-                            "zoomed"
+                            zoomContainer.classList.remove(
+                                "zoomed"
+                            );
+
+                        }
+
+
+                        // Remove active class
+
+                        thumbnailList
+                            .querySelectorAll(
+                                ".thumbnail"
+                            )
+                            .forEach(item => {
+
+                                item.classList.remove(
+                                    "active"
+                                );
+
+                            });
+
+
+                        // Add active class
+
+                        thumbnail.classList.add(
+                            "active"
                         );
 
                     }
-
-
-                    // Remove active class
-
-                    thumbnailList
-                        .querySelectorAll(".thumbnail")
-                        .forEach(item => {
-
-                            item.classList.remove("active");
-
-                        });
-
-
-                    // Add active class
-
-                    thumbnail.classList.add("active");
-
-                });
+                );
 
             });
 
@@ -478,12 +594,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             colorOptions.forEach(item => {
 
-                item.classList.remove("selected");
+                item.classList.remove(
+                    "selected"
+                );
 
             });
 
 
-            button.classList.add("selected");
+            button.classList.add(
+                "selected"
+            );
 
 
             // -----------------------------------------
@@ -553,9 +673,100 @@ document.addEventListener("DOMContentLoaded", () => {
 
             }
 
+
+            // -----------------------------------------
+            // UPDATE WISHLIST VARIANT ID
+            // -----------------------------------------
+
+            if (wishlistForm) {
+
+                wishlistForm.action =
+                    `/user/wishlist/add/${productId}/${selectedVariant._id}`;
+
+            }
+
         });
 
     });
+
+
+// =========================================================
+// WISHLIST
+// =========================================================
+
+if (
+    wishlistButton &&
+    wishlistForm &&
+    wishlistConfirmModalElement
+) {
+
+    const wishlistConfirmModal =
+        new bootstrap.Modal(
+            wishlistConfirmModalElement
+        );
+
+
+    // -----------------------------------------
+    // HEART BUTTON CLICK
+    // -----------------------------------------
+
+    wishlistButton.addEventListener(
+        "click",
+        () => {
+
+            if (!selectedVariant) {
+                return;
+            }
+
+
+            // Update form action
+            // using selected product and variant
+
+            wishlistForm.action =
+                `/user/wishlist/add/${productId}/${selectedVariant._id}`;
+
+
+            // Show confirmation modal
+
+            wishlistConfirmModal.show();
+
+        }
+    );
+
+
+    // -----------------------------------------
+    // CONFIRM WISHLIST
+    // -----------------------------------------
+
+    if (confirmWishlistBtn) {
+
+        confirmWishlistBtn.addEventListener(
+            "click",
+            () => {
+
+                wishlistForm.submit();
+
+            }
+        );
+
+    }
+
+}
+    // =========================================================
+    // SUCCESS / ERROR MESSAGE MODAL
+    // =========================================================
+
+    if (wishlistMessageModalElement) {
+
+        const wishlistMessageModal =
+            new bootstrap.Modal(
+                wishlistMessageModalElement
+            );
+
+
+        wishlistMessageModal.show();
+
+    }
 
 
     // =========================================================
@@ -578,6 +789,19 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedVariant
         );
 
+
+        // -----------------------------------------
+        // INITIAL WISHLIST ACTION
+        // -----------------------------------------
+
+        if (wishlistForm) {
+
+            wishlistForm.action =
+                `/user/wishlist/add/${productId}/${selectedVariant._id}`;
+
+        }
+
     }
 
 });
+

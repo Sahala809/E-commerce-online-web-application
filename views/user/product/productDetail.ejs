@@ -7,6 +7,7 @@
 
 <main class="product-detail-container">
 
+
     <!-- =================================================
          BREADCRUMB
     ================================================== -->
@@ -26,7 +27,6 @@
         </span>
 
     </div>
-
 
 
     <!-- =================================================
@@ -81,7 +81,6 @@
             </div>
 
 
-
             <!-- =================================================
                  MAIN IMAGE
             ================================================== -->
@@ -117,22 +116,32 @@
                 <% } %>
 
 
-                <!-- WISHLIST -->
+                <!-- =================================================
+                     WISHLIST
+                ================================================== -->
 
-                <button
-                    type="button"
-                    class="detail-wishlist-btn"
-                    title="Add to Wishlist"
+                <form
+                    id="wishlistForm"
+                    action="/user/wishlist/add/<%= product._id %>/<%= variants.length > 0 ? variants[0]._id : '' %>"
+                    method="POST"
                 >
 
-                    <i class="bi bi-heart"></i>
+                    <button
+                        type="button"
+                        class="detail-wishlist-btn"
+                        id="wishlistButton"
+                        title="Add to Wishlist"
+                    >
 
-                </button>
+                        <i class="bi bi-heart"></i>
+
+                    </button>
+
+                </form>
 
             </div>
 
         </section>
-
 
 
         <!-- =================================================
@@ -151,7 +160,6 @@
             </h1>
 
 
-
             <!-- CATEGORY -->
 
             <% if (product.categoryId) { %>
@@ -163,7 +171,6 @@
                 </p>
 
             <% } %>
-
 
 
             <!-- RATING -->
@@ -179,7 +186,6 @@
                 </span>
 
             </div>
-
 
 
             <!-- =================================================
@@ -199,17 +205,23 @@
                     ) { %>
 
                         <span class="detail-offer-price">
+
                             ₹<%= variant.offerPrice %>
+
                         </span>
 
                         <del class="detail-original-price">
+
                             ₹<%= variant.price %>
+
                         </del>
 
                     <% } else { %>
 
                         <span class="detail-offer-price">
+
                             ₹<%= variant.price %>
+
                         </span>
 
                     <% } %>
@@ -217,8 +229,9 @@
                 </div>
 
 
-
-                <!-- COLOR -->
+                <!-- =================================================
+                     COLOR
+                ================================================== -->
 
                 <div class="detail-section">
 
@@ -247,8 +260,9 @@
                 </div>
 
 
-
-                <!-- STOCK -->
+                <!-- =================================================
+                     STOCK
+                ================================================== -->
 
                 <div class="stock-info">
 
@@ -277,7 +291,6 @@
             <% } %>
 
 
-
             <!-- =================================================
                  DESCRIPTION
             ================================================== -->
@@ -289,11 +302,12 @@
                 </h3>
 
                 <p>
+
                     <%= product.description %>
+
                 </p>
 
             </div>
-
 
 
             <!-- =================================================
@@ -329,7 +343,6 @@
                 </div>
 
             </div>
-
 
 
             <!-- =================================================
@@ -379,28 +392,9 @@
             </div>
 
 
-
-            <!-- =================================================
-                 WISHLIST
-            ================================================== -->
-
-            <div class="detail-wishlist-link">
-
-                <button type="button">
-
-                    <i class="bi bi-heart"></i>
-
-                    Add to Wishlist
-
-                </button>
-
-            </div>
-
-
         </section>
 
     </div>
-
 
 
     <!-- =================================================
@@ -428,7 +422,6 @@
                 </p>
 
             </div>
-
 
 
             <!-- PRODUCTS GRID -->
@@ -463,13 +456,14 @@
                             <% } else { %>
 
                                 <div class="no-related-image">
+
                                     No Image
+
                                 </div>
 
                             <% } %>
 
                         </a>
-
 
 
                         <!-- =================================================
@@ -492,7 +486,6 @@
                             <% } %>
 
 
-
                             <!-- PRODUCT NAME -->
 
                             <h3>
@@ -506,7 +499,6 @@
                                 </a>
 
                             </h3>
-
 
 
                             <!-- =================================================
@@ -550,7 +542,6 @@
                             <% } %>
 
 
-
                             <!-- VIEW PRODUCT -->
 
                             <a
@@ -575,9 +566,268 @@
     <% } %>
 
 
-
 </main>
 
+
+<!-- =================================================
+     WISHLIST CONFIRMATION MODAL
+================================================== -->
+
+<div
+    class="modal fade"
+    id="wishlistConfirmModal"
+    tabindex="-1"
+    aria-labelledby="wishlistConfirmModalLabel"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title"
+                    id="wishlistConfirmModalLabel"
+                >
+
+                    Add to Wishlist
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+
+            </div>
+
+
+            <div class="modal-body text-center">
+
+                <i
+                    class="bi bi-heart-fill"
+                    style="font-size: 45px;"
+                ></i>
+
+                <p class="mt-3 mb-0">
+
+                    Do you want to add this product to your wishlist?
+
+                </p>
+
+            </div>
+
+
+            <div class="modal-footer justify-content-center">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    id="confirmWishlistBtn"
+                >
+
+                    Yes, Add to Wishlist
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     STOCK LIMIT MODAL
+     
+     IMPORTANT:
+     Keep this modal ONLY ONCE.
+================================================== -->
+
+<div
+    class="modal fade"
+    id="stockLimitModal"
+    tabindex="-1"
+    aria-labelledby="stockLimitModalLabel"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title"
+                    id="stockLimitModalLabel"
+                >
+
+                    Stock Limit
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+
+            </div>
+
+
+            <div class="modal-body text-center">
+
+                <i
+                    class="bi bi-exclamation-circle-fill text-warning"
+                    style="font-size: 50px;"
+                ></i>
+
+                <p
+                    id="stockLimitMessage"
+                    class="mt-3 mb-0"
+                ></p>
+
+            </div>
+
+
+            <div class="modal-footer justify-content-center">
+
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    data-bs-dismiss="modal"
+                >
+
+                    OK
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     WISHLIST SUCCESS / ERROR MESSAGE MODAL
+================================================== -->
+
+<% if (successMessage || errorMessage) { %>
+
+    <div
+        class="modal fade"
+        id="wishlistMessageModal"
+        tabindex="-1"
+        aria-labelledby="wishlistMessageModalLabel"
+        aria-hidden="true"
+    >
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+
+                <div class="modal-header">
+
+                    <h5
+                        class="modal-title"
+                        id="wishlistMessageModalLabel"
+                    >
+
+                        Wishlist
+
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+
+                </div>
+
+
+                <div class="modal-body text-center">
+
+                    <% if (successMessage) { %>
+
+                        <i
+                            class="bi bi-check-circle-fill text-success"
+                            style="font-size: 50px;"
+                        ></i>
+
+                        <p class="mt-3 mb-0">
+
+                            <%= successMessage %>
+
+                        </p>
+
+                    <% } else { %>
+
+                        <i
+                            class="bi bi-exclamation-circle-fill text-warning"
+                            style="font-size: 50px;"
+                        ></i>
+
+                        <p class="mt-3 mb-0">
+
+                            <%= errorMessage %>
+
+                        </p>
+
+                    <% } %>
+
+                </div>
+
+
+                <div class="modal-footer justify-content-center">
+
+                    <button
+                        type="button"
+                        class="btn btn-dark"
+                        data-bs-dismiss="modal"
+                    >
+
+                        OK
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+<% } %>
 
 
 <!-- =================================================
@@ -585,6 +835,8 @@
 ================================================== -->
 
 <script>
+
+    const productId = "<%= product._id %>";
 
     const variants = <%- JSON.stringify(variants || []) %>;
 
