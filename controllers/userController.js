@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 
 import User from "../models/userModel.js";
 import Address from "../models/addressModel.js";
-
+import Order from "../models/ordermodel.js";
 //import { checkUserExists } from "../services/userService.js";
 
 import generateOtp from "../utils/generateOtp.js";
@@ -75,6 +75,11 @@ import {
     cancelOrderItemService,
     requestReturnService
 } from "../services/orderManagement/orderService.js"
+
+import {
+    getInvoiceOrderService
+} from "../services/admin/invoiceService.js"
+
 
 export const loadHome = (req, res) => {
     
@@ -521,6 +526,7 @@ export const changePassword = async (req, res) => {
             success: null,
             formData:req.body,
             activePage: "changePassword"
+
         });
 
     }
@@ -1680,6 +1686,44 @@ export const requestReturn = async (req, res) => {
 
         req.session.errorMessage =
             "Something went wrong while submitting return request";
+
+        return res.redirect(
+            `/user/orders/${req.params.orderId}`
+        );
+    }
+};
+export const getUserInvoice = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        const order = await Order.findOne({
+            _id: orderId,
+            userId: userId
+        });
+
+        if (!order) {
+            return res.redirect("/user/orders");
+        }
+
+        if (order.status !== "DELIVERED") {
+            return res.redirect(
+                `/user/orders/${orderId}`
+            );
+        }
+
+        await getInvoiceOrderService(
+            orderId,
+            res
+        );
+
+    } catch (error) {
+
+        console.log(
+            "GET USER INVOICE ERROR:",
+            error
+        );
 
         return res.redirect(
             `/user/orders/${req.params.orderId}`

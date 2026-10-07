@@ -1242,9 +1242,9 @@ export const deleteBrand = async (req, res) => {
 export const generateInvoice = async (req, res) => {
     try {
         const { orderId } = req.params;
-console.log("INVOICE ORDER ID:", orderId);
+
         const result = await getInvoiceOrderService(orderId, res);
-console.log("INVOICE SERVICE RESULT:", result);
+
         if (!result.success) {
             req.session.errorMessage = result.message;
             return res.redirect(`/admin/orders/${orderId}`);

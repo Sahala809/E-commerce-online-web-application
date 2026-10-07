@@ -16,6 +16,7 @@ export const changePasswordService = async (req, res) => {
         return res.redirect("/user/profile");
     }
 
+    // Validate form fields
     const error = validateChangePassword(req, res);
 
     if (Object.keys(error).length > 0) {
@@ -28,9 +29,14 @@ export const changePasswordService = async (req, res) => {
         });
 
     }
+
     const { currentPassword, newPassword } = req.body;
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    // Check current password
+    const isMatch = await bcrypt.compare(
+        currentPassword,
+        user.password
+    );
 
     if (!isMatch) {
 
@@ -45,13 +51,18 @@ export const changePasswordService = async (req, res) => {
 
     }
 
-    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    // Check if new password is same as current password
+    const isSamePassword = await bcrypt.compare(
+        newPassword,
+        user.password
+    );
 
     if (isSamePassword) {
 
         return res.render("user/profile/changePassword", {
             error: {
-                newPassword: "New password cannot be the same as the current password."
+                newPassword:
+                    "New password cannot be the same as the current password."
             },
             formData: req.body,
             success: null,
@@ -60,14 +71,15 @@ export const changePasswordService = async (req, res) => {
 
     }
 
+    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
 
     await user.save();
 
+    // Success message
     req.session.success = "Password changed successfully.";
 
-    return res.redirect("/user/profile")
-
+    return res.redirect("/user/profile");
 };

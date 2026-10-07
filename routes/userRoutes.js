@@ -76,6 +76,11 @@ import {
     requestReturn
 } from "../controllers/userController.js"
 
+import {
+    getUserInvoice
+} from "../controllers/userController.js"
+
+
 const router = express.Router();
 
 
@@ -128,7 +133,15 @@ router.patch("/reset-password", resetPassword)
 router.get("/profile", isLogin, noCache, loadProfile);
 router.patch("/profile/edit", isLogin, editProfile);
 
-router.get("/profile/edit-password", isLogin, nocache, loadChangePassword);
+router.get(
+    "/profile/edit-password",
+    (req, res, next) => {
+        console.log("EDIT PASSWORD ROUTE REACHED");
+        next();
+    },
+    isLogin,
+    loadChangePassword
+);
 router.post("/profile/edit-password", isLogin, changePassword);
 
 router.get("/profile/edit-email", isLogin, noCache, loadChangeEmail);
@@ -197,4 +210,12 @@ router.post(
     isLogin,
     requestReturn
 );
+
+
+router.get(
+    "/orders/:orderId/invoice",
+    getUserInvoice
+);
+
+
 export default router;
