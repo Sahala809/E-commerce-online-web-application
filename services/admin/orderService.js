@@ -61,7 +61,7 @@ export const loadOrdersService = async (
                 // Order ID match
                 const orderId = order._id
                     .toString()
-                    .slice(-8)
+        
                     .toLowerCase();
 
 

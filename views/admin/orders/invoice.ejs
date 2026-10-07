@@ -1,0 +1,215 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/invoice.css">
+
+<main class="invoice-page">
+
+    <div class="invoice-container">
+
+        <!-- Header -->
+        <div class="invoice-header">
+
+            <div>
+                <h1>CHRONIX</h1>
+                <p>Watch Store</p>
+            </div>
+
+            <div class="invoice-title">
+                <h2>INVOICE</h2>
+                <p>
+                    Invoice ID:
+                    <strong><%= order._id %></strong>
+                </p>
+                <p>
+                    Date:
+                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                </p>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- Customer & Shipping -->
+        <div class="invoice-info">
+
+            <div class="info-section">
+                <h3>Customer Details</h3>
+
+                <p>
+                    <strong>Name:</strong>
+                    <%= order.userId?.name || order.shippingAddress?.fullName || "-" %>
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    <%= order.userId?.email || "-" %>
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    <%= order.shippingAddress?.phone || "-" %>
+                </p>
+            </div>
+
+            <div class="info-section">
+                <h3>Shipping Address</h3>
+
+                <p>
+                    <%= order.shippingAddress?.fullName || "" %>
+                </p>
+
+                <p>
+                    <%= order.shippingAddress?.houseName || "" %>
+                </p>
+
+                <p>
+                    <%= order.shippingAddress?.street || "" %>
+                </p>
+
+                <p>
+                    <%= order.shippingAddress?.city || "" %>,
+                    <%= order.shippingAddress?.district || "" %>
+                </p>
+
+                <p>
+                    <%= order.shippingAddress?.state || "" %>,
+                    <%= order.shippingAddress?.country || "" %>
+                </p>
+
+                <p>
+                    Pincode:
+                    <%= order.shippingAddress?.pincode || "-" %>
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Order Information -->
+        <div class="order-info">
+
+            <p>
+                <strong>Order Status:</strong>
+                <%= order.status %>
+            </p>
+
+            <p>
+                <strong>Payment Method:</strong>
+                <%= order.paymentMethod %>
+            </p>
+
+            <p>
+                <strong>Payment Status:</strong>
+                <%= order.paymentStatus %>
+            </p>
+
+        </div>
+
+        <!-- Items -->
+        <div class="items-section">
+
+            <h3>Order Items</h3>
+
+            <table class="invoice-table">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Variant</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <% order.orderItemId.forEach((item, index) => { %>
+
+                        <tr>
+
+                            <td>
+                                <%= index + 1 %>
+                            </td>
+
+                            <td>
+                                <%= item.productId?.productName || "Product" %>
+                            </td>
+
+                            <td>
+                                <%= item.variantId?.color || "-" %>
+                            </td>
+
+                            <td>
+                                ₹<%= Number(item.price || 0).toFixed(2) %>
+                            </td>
+
+                            <td>
+                                <%= item.quantity %>
+                            </td>
+
+                            <td>
+                                ₹<%= (
+                                    Number(item.price || 0) *
+                                    Number(item.quantity || 0)
+                                ).toFixed(2) %>
+                            </td>
+
+                        </tr>
+
+                    <% }) %>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Summary -->
+        <div class="invoice-summary">
+
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>
+                    ₹<%= Number(order.subTotal || 0).toFixed(2) %>
+                </span>
+            </div>
+
+            <div class="summary-row">
+                <span>Discount</span>
+                <span>
+                    ₹<%= Number(order.discountAmount || 0).toFixed(2) %>
+                </span>
+            </div>
+
+            <div class="summary-row">
+                <span>Delivery Charge</span>
+                <span>
+                    ₹<%= Number(order.deliveryCharge || 0).toFixed(2) %>
+                </span>
+            </div>
+
+            <div class="summary-row total-row">
+                <span>Total Amount</span>
+                <span>
+                    ₹<%= Number(order.totalAmount || 0).toFixed(2) %>
+                </span>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+
+            <p>Thank you for shopping with Chronix!</p>
+
+            <p>
+                This is a computer-generated invoice.
+            </p>
+
+        </div>
+
+    </div>
+
+</main>

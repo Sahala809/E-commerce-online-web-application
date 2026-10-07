@@ -119,6 +119,19 @@
 
                 </div>
 
+
+                <% if (order.status === "DELIVERED") { %>
+    <div class="invoice-action">
+        <a
+            href="/admin/orders/<%= order._id %>/invoice"
+            class="invoice-btn"
+        >
+            <i class="bi bi-file-earmark-pdf"></i>
+            Generate Invoice
+        </a>
+    </div>
+<% } %>
+
             </div>
 
         </div>
@@ -557,7 +570,6 @@
     </div>
 
 </div>
-```
 
 </div>
 

@@ -1,0 +1,314 @@
+/* =========================================
+   CHRONIX INVOICE PAGE
+   ========================================= */
+
+.invoice-page {
+    min-height: 100vh;
+    background: #f3f3f3;
+    padding: 40px 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+}
+
+.invoice-container {
+    max-width: 950px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 45px 50px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.invoice-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #111;
+}
+
+.invoice-header p {
+    margin: 6px 0 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.invoice-title {
+    text-align: right;
+}
+
+.invoice-title h2 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #c49b28;
+}
+
+.invoice-title p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.invoice-title strong {
+    color: #222;
+}
+
+/* =========================================
+   DIVIDER
+   ========================================= */
+
+.invoice-container hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 30px 0;
+}
+
+/* =========================================
+   CUSTOMER / SHIPPING INFORMATION
+   ========================================= */
+
+.invoice-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 30px;
+}
+
+.info-section h3,
+.items-section h3 {
+    margin: 0 0 15px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    border-left: 4px solid #c49b28;
+    padding-left: 10px;
+}
+
+.info-section p {
+    margin: 6px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.info-section strong {
+    color: #222;
+}
+
+/* =========================================
+   ORDER INFORMATION
+   ========================================= */
+
+.order-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    padding: 15px 18px;
+    margin-bottom: 35px;
+}
+
+.order-info p {
+    margin: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.order-info strong {
+    color: #222;
+}
+
+/* =========================================
+   ORDER ITEMS TABLE
+   ========================================= */
+
+.items-section {
+    margin-top: 10px;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.invoice-table thead {
+    background: #111;
+    color: #ffffff;
+}
+
+.invoice-table th {
+    padding: 13px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.3px;
+}
+
+.invoice-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 13px;
+    color: #444;
+}
+
+.invoice-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.invoice-table th:first-child,
+.invoice-table td:first-child {
+    width: 45px;
+    text-align: center;
+}
+
+.invoice-table th:nth-child(4),
+.invoice-table td:nth-child(4),
+.invoice-table th:nth-child(5),
+.invoice-table td:nth-child(5),
+.invoice-table th:nth-child(6),
+.invoice-table td:nth-child(6) {
+    text-align: right;
+}
+
+/* =========================================
+   SUMMARY
+   ========================================= */
+
+.invoice-summary {
+    width: 350px;
+    margin-left: auto;
+    margin-top: 30px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.summary-row span:last-child {
+    font-weight: 500;
+    color: #222;
+}
+
+.total-row {
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 2px solid #111;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.total-row span:last-child {
+    color: #c49b28;
+    font-size: 19px;
+}
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
+.invoice-footer {
+    margin-top: 55px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+}
+
+.invoice-footer p {
+    margin: 5px 0;
+    font-size: 12px;
+    color: #888;
+}
+
+.invoice-footer p:first-child {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    .invoice-page {
+        padding: 20px 10px;
+    }
+
+    .invoice-container {
+        padding: 30px 20px;
+    }
+
+    .invoice-header {
+        flex-direction: column;
+    }
+
+    .invoice-title {
+        text-align: left;
+    }
+
+    .invoice-info {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .order-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .invoice-table {
+        min-width: 700px;
+    }
+
+    .items-section {
+        overflow-x: auto;
+    }
+
+    .invoice-summary {
+        width: 100%;
+    }
+}
+
+/* =========================================
+   PRINT
+   ========================================= */
+
+@media print {
+
+    .invoice-page {
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .invoice-container {
+        max-width: none;
+        box-shadow: none;
+        padding: 20px;
+    }
+
+    .invoice-table tbody tr:hover {
+        background: transparent;
+    }
+}

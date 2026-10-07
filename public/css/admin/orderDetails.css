@@ -441,6 +441,51 @@
 }
 
 
+/* =========================
+   INVOICE BUTTON
+========================= */
+
+.invoice-action {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.invoice-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    background: #111;
+    color: #d4af37;
+
+    border: 1px solid #d4af37;
+    border-radius: 6px;
+
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: all 0.3s ease;
+}
+
+.invoice-btn i {
+    font-size: 16px;
+}
+
+.invoice-btn:hover {
+    background: #d4af37;
+    color: #111;
+}
+
+.invoice-btn:active {
+    transform: scale(0.97);
+}
+
+
 /* ================= Responsive ================= */
 
 @media(max-width:992px){

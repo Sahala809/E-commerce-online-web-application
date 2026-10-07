@@ -98,6 +98,19 @@
 
             </div>
 
+            <% if (order.status === "DELIVERED") { %>
+    <div class="info-item invoice-action">
+        <span>Invoice</span>
+        <a
+            href="/user/orders/<%= order._id %>/invoice"
+            class="invoice-btn"
+        >
+            <i class="bi bi-file-earmark-pdf"></i>
+            View Invoice
+        </a>
+    </div>
+<% } %>
+
         </div>
 
 

@@ -62,6 +62,10 @@ import {
     deleteBrand
 } from "../controllers/adminController.js"
 
+import {
+    generateInvoice
+} from "../controllers/adminController.js"
+
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
  
@@ -151,5 +155,12 @@ router.delete(
     "/brands/delete/:brandId",
     isAdminLogin,
     deleteBrand
+);
+
+
+router.get(
+    "/orders/:orderId/invoice",
+    isAdminLogin,
+    generateInvoice
 );
 export default router;
