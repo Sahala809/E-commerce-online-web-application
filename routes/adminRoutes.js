@@ -66,6 +66,14 @@ import {
     generateInvoice
 } from "../controllers/adminController.js"
 
+import {
+    getCoupons,
+    createCoupon,
+    editCoupon,
+    toggleCouponStatus,
+    deleteCoupon
+} from "../controllers/adminController.js"
+
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
  
@@ -163,4 +171,40 @@ router.get(
     isAdminLogin,
     generateInvoice
 );
+
+
+
+ // Coupon Management Routes
+
+router.get(
+    "/coupons",
+    isAdminLogin,
+    noCache,
+    getCoupons
+);
+
+router.post(
+    "/coupons/create",
+    isAdminLogin,
+    createCoupon
+);
+
+router.patch(
+    "/coupons/edit/:couponId",
+    isAdminLogin,
+    editCoupon
+);
+
+router.post(
+    "/coupons/toggle-status/:couponId",
+    isAdminLogin,
+    toggleCouponStatus
+);
+
+router.delete(
+    "/coupons/delete/:couponId",
+    isAdminLogin,
+    deleteCoupon
+);
+
 export default router;

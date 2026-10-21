@@ -53,6 +53,16 @@ import {
 import { 
     getInvoiceOrderService
 } from "../services/admin/invoiceService.js"
+
+
+import {
+    createCouponService,
+    getCouponsService,
+    editCouponService,
+    toggleCouponStatusService,
+    deleteCouponService
+} from "../services/admin/couponService.js";
+
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -1257,5 +1267,172 @@ console.log("INVOICE SERVICE RESULT:", result);
             "Something went wrong while generating invoice";
 
         return res.redirect(`/admin/orders/${req.params.orderId}`);
+    }
+};
+
+
+
+export const createCoupon = async (req, res) => {
+    try {
+        const result = await createCouponService(req.body);
+
+        if (!result.success) {
+            req.session.couponValidation = {
+                modal: "add",
+                formData: req.body,
+                errors: result.errors || {}
+            };
+
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/coupons?modal=add");
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/coupons");
+
+    } catch (error) {
+        console.log("CREATE COUPON CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to create coupon";
+        return res.redirect("/admin/coupons?modal=add");
+    }
+};
+
+
+export const getCoupons = async (req, res) => {
+    try {
+        const {
+            search = "",
+            page = 1,
+            couponType = ""
+        } = req.query;
+
+        const result = await getCouponsService(
+            search,
+            page,
+            couponType
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin");
+        }
+
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+        const validationData = req.session.couponValidation || {};
+
+        delete req.session.successMessage;
+        delete req.session.errorMessage;
+        delete req.session.couponValidation;
+
+        const openModal =
+            validationData.modal || req.query.modal || "";
+
+        const editCouponId =
+            validationData.couponId || req.query.couponId || "";
+
+        return res.render("admin/coupon/coupon", {
+            pageTitle: "Coupon Management",
+            activePage: "coupon",
+            coupons: result.coupons,
+            totalCoupons: result.totalCoupons,
+            activeCoupons: result.activeCoupons,
+            expiredCoupons: result.expiredCoupons,
+            currentPage: result.currentPage,
+            totalPages: result.totalPages,
+            search: result.search,
+            couponType,
+            skip: (result.currentPage - 1) * 5,
+            successMessage,
+            errorMessage,
+            openModal,
+            editCouponId,
+            formData: validationData.formData || {},
+            errors: validationData.errors || {}
+        });
+
+    } catch (error) {
+        console.log("GET COUPONS CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to load coupons";
+        return res.redirect("/admin/coupons");
+    }
+};
+
+
+export const editCoupon = async (req, res) => {
+    try {
+        const { couponId } = req.params;
+
+        const result = await editCouponService(couponId, req.body);
+
+        if (!result.success) {
+            req.session.couponValidation = {
+                modal: "edit",
+                couponId,
+                formData: req.body,
+                errors: result.errors || {}
+            };
+
+            req.session.errorMessage = result.message;
+
+            return res.redirect(
+                `/admin/coupons?modal=edit&couponId=${couponId}`
+            );
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/coupons");
+
+    } catch (error) {
+        console.log("EDIT COUPON CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to update coupon";
+
+        return res.redirect(
+            `/admin/coupons?modal=edit&couponId=${req.params.couponId}`
+        );
+    }
+};
+
+
+export const toggleCouponStatus = async (req, res) => {
+    try {
+        const { couponId } = req.params;
+
+        const result = await toggleCouponStatusService(couponId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/coupons");
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/coupons");
+
+    } catch (error) {
+        console.log("TOGGLE COUPON STATUS CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to update coupon status";
+        return res.redirect("/admin/coupons");
+    }
+};
+
+
+export const deleteCoupon = async (req, res) => {
+    try {
+        const { couponId } = req.params;
+
+        const result = await deleteCouponService(couponId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/coupons");
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/coupons");
+
+    } catch (error) {
+        console.log("DELETE COUPON CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to delete coupon";
+        return res.redirect("/admin/coupons");
     }
 };

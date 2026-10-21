@@ -76,6 +76,11 @@ import {
     requestReturnService
 } from "../services/orderManagement/orderService.js"
 
+import {
+    getAvailableCouponsService,
+    validateCouponService
+} from "../services/coupon/couponService.js";
+
 export const loadHome = (req, res) => {
     
     res.render("user/home", {
@@ -1241,6 +1246,17 @@ export const loadCheckout = async (req, res) => {
 
         const carResult = await loadCartService(userId);
 
+        const appliedCoupon = req.session.appliedCoupon || null;
+
+const couponDiscount = appliedCoupon
+    ? Number(appliedCoupon.couponDiscount) || 0
+    : 0;
+
+const finalTotal = Math.max(
+    0,
+    carResult.total - couponDiscount
+);
+
         if (
             !carResult.cart ||
             !carResult.cart.items ||
@@ -1290,8 +1306,12 @@ export const loadCheckout = async (req, res) => {
             discount: carResult.discount,
             shippingCharge: carResult.shippingCharge,
             tax: carResult.tax,
-            total: carResult.total,
+            total: finalTotal,
+            appliedCoupon,
+            couponDiscount,
 
+            successMessage: req.session.successMessage,
+errorMessage: req.session.errorMessage,
             userAddresses:userAddresses
                 ? userAddresses.addresses
                 : [],
@@ -1686,3 +1706,140 @@ export const requestReturn = async (req, res) => {
         );
     }
 };
+
+
+
+export const loadMyCoupons = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+        const result = await getAvailableCouponsService(userId);
+
+        res.render("user/coupon/myCoupons", {
+            activePage: "coupons",
+            coupons: result.coupons || []
+        });
+    } catch (error) {
+        console.log("LOAD MY COUPONS ERROR:", error);
+        req.session.errorMessage = "Unable to load coupons";
+        return res.redirect("/user/shop");
+    }
+};
+
+
+
+export const applyCoupon = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+        const { couponCode } = req.body;
+
+        if (!couponCode || !couponCode.trim()) {
+            req.session.errorMessage = "Please enter a coupon code";
+            req.session.couponSuccess = false;
+            return res.redirect("/user/checkout");
+        }
+
+        const cartResult = await loadCartService(userId);
+
+        if (
+            !cartResult.cart ||
+            !cartResult.cart.items ||
+            cartResult.cart.items.length === 0
+        ) {
+            req.session.errorMessage = "Your cart is empty";
+            req.session.couponSuccess = false;
+            return res.redirect("/user/cart");
+        }
+
+        
+const eligibleSubtotal = cartResult.cart.items.reduce((sum, item) => {
+    const variant = item.variantId;
+
+    if (!variant || !item.productId) {
+        return sum;
+    }
+
+    const hasOffer =
+        variant.offerPrice &&
+        variant.offerPrice > 0 &&
+        variant.offerPrice < variant.price;
+
+    if (hasOffer) {
+        return sum;
+    }
+
+    return sum + (variant.price * item.quantity);
+}, 0);
+
+
+if (eligibleSubtotal <= 0) {
+    req.session.errorMessage =
+        "Coupon cannot be applied to products with offers";
+    req.session.couponSuccess = false;
+    return res.redirect("/user/checkout");
+}
+
+
+
+        const result = await validateCouponService(
+            couponCode.trim(),
+            userId,
+            eligibleSubtotal
+        );
+
+        if (!result.success) {
+            req.session.errorMessage =
+                result.message || "Unable to apply coupon";
+            req.session.couponSuccess = false;
+            return res.redirect("/user/checkout");
+        }
+
+        req.session.appliedCoupon = {
+            couponId: result.coupon._id,
+            couponCode: result.coupon.couponCode,
+            couponDiscount: result.couponDiscount
+        };
+
+        req.session.successMessage =
+            result.message || "Coupon applied successfully";
+        req.session.couponSuccess = true;
+
+        return res.redirect("/user/checkout");
+
+    } catch (error) {
+        console.log("APPLY COUPON ERROR:", error);
+        req.session.errorMessage = "Unable to apply coupon";
+        req.session.couponSuccess = false;
+        return res.redirect("/user/checkout");
+    }
+};
+
+
+export const removeCoupon = async (req, res) => {
+    try {
+        delete req.session.appliedCoupon;
+
+        req.session.successMessage = "Coupon removed successfully";
+        req.session.couponSuccess = false;
+
+        return res.redirect("/user/checkout");
+    } catch (error) {
+        console.log("REMOVE COUPON ERROR:", error);
+
+        req.session.errorMessage = "Unable to remove coupon";
+        return res.redirect("/user/checkout");
+    }
+};
+
+

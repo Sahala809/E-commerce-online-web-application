@@ -344,9 +344,21 @@
                     Apply Coupon
                 </h2>
 
+                <% if (successMessage) { %>
+    <div class="coupon-message coupon-success">
+        <%= successMessage %>
+    </div>
+<% } %>
+
+<% if (errorMessage) { %>
+    <div class="coupon-message coupon-error">
+        <%= errorMessage %>
+    </div>
+<% } %>
+
 
                 <form
-                    action="/user/cart/apply-coupon"
+                    action="/user/checkout/apply-coupon"
                     method="POST"
                     class="coupon-form"
                 >
@@ -535,6 +547,27 @@
 
                 </div>
 
+
+<% if (appliedCoupon && couponDiscount > 0) { %>
+    <div class="summary-row coupon-discount-row">
+        <span>
+            Coupon (<%= appliedCoupon.couponCode %>)
+        </span>
+
+        <span class="discount-amount">
+            - ₹<%= Number(couponDiscount).toLocaleString("en-IN") %>
+        </span>
+    </div>
+<% } %>
+
+
+<% if (appliedCoupon && couponDiscount > 0) { %>
+    <form action="/user/checkout/remove-coupon" method="POST" class="remove-coupon-form">
+        <button type="submit" class="remove-coupon-btn">
+            Remove Coupon
+        </button>
+    </form>
+<% } %>
 
 
                 <!-- Shipping -->

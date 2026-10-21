@@ -1,0 +1,153 @@
+
+<%- include("../partials/header") %>
+<%- include("../partials/navbar") %>
+
+<link rel="stylesheet" href="/css/profile/sidebar.css">
+<link rel="stylesheet" href="/css/coupon/myCoupons.css">
+
+<div class="coupon-wallet-page">
+    <div class="coupon-wallet-container">
+
+        <%- include("../partials/profileSidebar", {
+            user: user,
+            activePage: "coupons"
+        }) %>
+
+        <main class="coupon-wallet-content">
+
+            <div class="coupon-wallet-heading">
+                <div>
+                    <h1>My Coupon Wallet</h1>
+                    <p>Discover offers and save on your next purchase.</p>
+                </div>
+
+                <span class="coupon-count">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <%= coupons.length %> Coupons
+                </span>
+            </div>
+
+            <% if (coupons && coupons.length > 0) { %>
+
+                <div class="coupon-wallet-grid">
+
+                    <% coupons.forEach(coupon => { %>
+
+                        <article class="wallet-coupon-card">
+
+                            <div class="wallet-coupon-top">
+                                <div class="coupon-icon">
+                                    <i class="bi bi-tag-fill"></i>
+                                </div>
+
+                                <span class="coupon-type">
+                                    <%= coupon.couponType === "PERCENTAGE"
+                                        ? "Percentage Off"
+                                        : "Flat Discount" %>
+                                </span>
+                            </div>
+
+                            <div class="wallet-coupon-discount">
+                                <% if (coupon.couponType === "PERCENTAGE") { %>
+                                    <h2><%= coupon.discount %>% OFF</h2>
+
+                                    <% if (coupon.maxDiscountAmount != null) { %>
+                                        <p>
+                                            Maximum discount ₹<%=
+                                                coupon.maxDiscountAmount.toLocaleString("en-IN")
+                                            %>
+                                        </p>
+                                    <% } %>
+                                <% } else { %>
+                                    <h2>₹<%=
+                                        coupon.discount.toLocaleString("en-IN")
+                                    %> OFF</h2>
+                                <% } %>
+                            </div>
+
+                            <div class="wallet-coupon-code">
+                                <div>
+                                    <small>COUPON CODE</small>
+                                    <strong><%= coupon.couponCode %></strong>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="copy-coupon-btn"
+                                    data-coupon-code="<%= coupon.couponCode %>">
+                                    <i class="bi bi-copy"></i>
+                                    Copy Code
+                                </button>
+                            </div>
+
+                            <div class="wallet-coupon-details">
+                                <p>
+                                    <i class="bi bi-cart-check"></i>
+                                    Minimum purchase:
+                                    ₹<%= coupon.minimumPurchase.toLocaleString("en-IN") %>
+                                </p>
+
+                                <p>
+                                    <i class="bi bi-calendar-event"></i>
+                                    Valid until:
+                                    <%= new Date(coupon.expDate).toLocaleDateString("en-IN") %>
+                                </p>
+                            </div>
+
+                            <a href="/user/checkout" class="use-coupon-link">
+                                Shop Now <i class="bi bi-arrow-right"></i>
+                            </a>
+
+                        </article>
+
+                    <% }); %>
+
+                </div>
+
+            <% } else { %>
+
+                <div class="empty-coupon-wallet">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <h2>No Coupons Available</h2>
+                    <p>
+                        There are no available coupons right now.
+                        Please check again later.
+                    </p>
+                    <a href="/user/shop">Explore Watches</a>
+                </div>
+
+            <% } %>
+
+        </main>
+
+    </div>
+</div>
+
+
+<script>
+document.addEventListener("click", async (event) => {
+    const copyButton = event.target.closest(".copy-coupon-btn");
+
+    if (!copyButton) return;
+
+    const couponCode = copyButton.dataset.couponCode;
+
+    try {
+        await navigator.clipboard.writeText(couponCode);
+
+        copyButton.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+        
+        setTimeout(() => {
+            copyButton.innerHTML = '<i class="bi bi-copy"></i> Copy Code';
+        }, 1500);
+
+    } catch (error) {
+        console.error("Copy failed:", error);
+        alert("Unable to copy the coupon code. Please try again.");
+    }
+});
+
+</script>
+
+
+

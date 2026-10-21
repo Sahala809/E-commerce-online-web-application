@@ -76,6 +76,12 @@ import {
     requestReturn
 } from "../controllers/userController.js"
 
+import {
+    loadMyCoupons,
+    applyCoupon,
+    removeCoupon
+} from "../controllers/userController.js";
+
 const router = express.Router();
 
 
@@ -197,4 +203,11 @@ router.post(
     isLogin,
     requestReturn
 );
+
+
+router.get("/coupons", isLogin, noCache, loadMyCoupons);
+router.post("/checkout/apply-coupon", isLogin, applyCoupon);
+router.post("/checkout/remove-coupon", isLogin, removeCoupon);
+
+
 export default router;
