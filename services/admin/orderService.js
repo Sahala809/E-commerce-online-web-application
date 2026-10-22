@@ -411,3 +411,80 @@ export const updateOrderItemStatusService = async (orderItemId, status) => {
         };
     }
 };
+
+
+
+export const loadReturnRequestsService = async () => {
+    try {
+        const returnRequests = await OrderItem.find({
+            returnStatus: {
+                $in: ["REQUESTED", "APPROVED", "REJECTED"]
+            }
+        })
+            .populate({
+                path: "orderId",
+                populate: {
+                    path: "userId",
+                    select: "name email phone"
+                }
+            })
+            .populate("productId", "productName")
+            .populate("variantId", "color images")
+            .sort({ updatedAt: -1 });
+
+        return {
+            success: true,
+            returnRequests
+        };
+    } catch (error) {
+        console.log("LOAD RETURN REQUESTS SERVICE ERROR:", error);
+
+        return {
+            success: false,
+            message: "Failed to load return requests",
+            returnRequests: []
+        };
+    }
+};
+
+export const updateReturnRequestService = async (orderItemId, returnStatus) => {
+    try {
+        if (!["APPROVED", "REJECTED"].includes(returnStatus)) {
+            return {
+                success: false,
+                message: "Invalid return status"
+            };
+        }
+
+        const orderItem = await OrderItem.findById(orderItemId);
+
+        if (!orderItem) {
+            return {
+                success: false,
+                message: "Return request not found"
+            };
+        }
+
+        if (orderItem.returnStatus !== "REQUESTED") {
+            return {
+                success: false,
+                message: "This return request has already been processed"
+            };
+        }
+
+        orderItem.returnStatus = returnStatus;
+        await orderItem.save();
+
+        return {
+            success: true,
+            message: `Return request ${returnStatus.toLowerCase()} successfully`
+        };
+    } catch (error) {
+        console.log("UPDATE RETURN REQUEST SERVICE ERROR:", error);
+
+        return {
+            success: false,
+            message: "Failed to update return request"
+        };
+    }
+};

@@ -82,11 +82,11 @@ import {
 } from "../services/coupon/couponService.js";
 
 export const loadHome = (req, res) => {
-    
     res.render("user/home", {
-        user: req.session.user || null
+        user: req.session.user || null,
+        activePage: "home",
+        pageTitle: "Home"
     });
-
 };
 
 
@@ -276,18 +276,19 @@ export const login = async (req, res) => {
 
 };
 
-export const logout = (req, res) => {
+export const logout = (req, res, next) => {
+    req.logout((err) => {
+        if (err) return next(err);
 
-    delete req.session.user;
+        req.session.destroy((err) => {
+            if (err) return next(err);
 
-    req.logout(function (err) {
-        if (err) {
-            return next(err);
-        }
+            res.clearCookie("connect.sid");
+            res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
-    res.redirect("/user/login");
-    })
-    
+            return res.redirect(303, "/user/login");
+        });
+    });
 };
 
 

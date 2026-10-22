@@ -36,7 +36,9 @@ import {
 import { 
     loadOrdersService,
     loadOrderDetailsService,
-    updateOrderItemStatusService
+    updateOrderItemStatusService,
+    loadReturnRequestsService,
+    updateReturnRequestService
  } from "../services/admin/orderService.js";
 
 
@@ -1020,6 +1022,85 @@ export const updateOrderItemStatus = async (req, res) => {
         return res.redirect(`/admin/orders/${req.body.orderId}`);
     }
 };
+
+
+
+export const loadReturnRequests = async (req, res) => {
+    try {
+        const result = await loadReturnRequestsService();
+
+        if (!result.success) {
+            req.session.errorMessage = "Failed to load return requests";
+            return res.redirect("/admin/orders");
+        }
+
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+
+        return res.render("admin/orders/returnRequests", {
+            activePage: "orders",
+            pageTitle: "Return Requests",
+            returnRequests: result.returnRequests,
+            successMessage,
+            errorMessage
+        });
+    } catch (error) {
+        console.log("LOAD RETURN REQUESTS CONTROLLER ERROR:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while loading return requests";
+
+        return res.redirect("/admin/orders");
+    }
+};
+
+export const approveReturnRequest = async (req, res) => {
+    try {
+        const result = await updateReturnRequestService(
+            req.params.orderItemId,
+            "APPROVED"
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/orders/return-requests");
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/orders/return-requests");
+    } catch (error) {
+        console.log("APPROVE RETURN REQUEST CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to approve return request";
+        return res.redirect("/admin/orders/return-requests");
+    }
+};
+
+export const rejectReturnRequest = async (req, res) => {
+    try {
+        const result = await updateReturnRequestService(
+            req.params.orderItemId,
+            "REJECTED"
+        );
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+            return res.redirect("/admin/orders/return-requests");
+        }
+
+        req.session.successMessage = result.message;
+        return res.redirect("/admin/orders/return-requests");
+    } catch (error) {
+        console.log("REJECT RETURN REQUEST CONTROLLER ERROR:", error);
+
+        req.session.errorMessage = "Failed to reject return request";
+        return res.redirect("/admin/orders/return-requests");
+    }
+};
+
 
 
 export const loadBrands = async (req, res) => {

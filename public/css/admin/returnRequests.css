@@ -1,0 +1,318 @@
+/* ================= Return Requests Page ================= */
+
+.return-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 25px 0;
+}
+
+.return-page-title h1 {
+    margin: 0 0 6px;
+    color: #111827;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.return-page-title p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ================= Back Button ================= */
+
+.return-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 17px;
+    background: #030812;
+    color: #d4af37;
+    border: 1px solid #d4af37;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: .2s ease;
+}
+
+.return-back-btn:hover {
+    background: #d4af37;
+    color: #030812;
+}
+
+/* ================= Main Card ================= */
+
+.return-table-card {
+    width: 100%;
+    min-width: 0;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+}
+
+/* ================= Card Header ================= */
+
+.return-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.return-card-header h3 {
+    margin: 0 0 6px;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.return-card-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ================= Pending Count ================= */
+
+.return-pending-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ================= Table Wrapper ================= */
+
+.return-table-responsive {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* ================= Return Table ================= */
+
+.return-requests-table {
+    width: 100%;
+    min-width: 1100px;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.return-requests-table thead th {
+    padding: 15px 12px;
+    background: #f8fafc;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.return-requests-table tbody td {
+    padding: 16px 12px;
+    color: #374151;
+    font-size: 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f1f4;
+}
+
+.return-requests-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.return-requests-table tbody tr:hover {
+    background: #fafafa;
+}
+
+/* ================= Customer ================= */
+
+.return-customer-name {
+    display: block;
+    min-width: 100px;
+    color: #111827;
+    font-weight: 600;
+}
+
+.return-customer-email {
+    display: block;
+    min-width: 180px;
+    max-width: 220px;
+    color: #6b7280;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* ================= Product ================= */
+
+.return-product-name {
+    display: block;
+    min-width: 120px;
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ================= Quantity ================= */
+
+.return-quantity {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 30px;
+    padding: 0 8px;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ================= Return Reason ================= */
+
+.return-reason {
+    min-width: 160px;
+    max-width: 250px;
+    color: #4b5563;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* ================= Status ================= */
+
+.return-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ================= Empty State ================= */
+
+.return-empty-state {
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.return-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    background: #f3f4f6;
+    color: #6b7280;
+    border-radius: 50%;
+}
+
+.return-empty-icon i {
+    font-size: 28px;
+}
+
+.return-empty-state h4 {
+    margin: 0 0 8px;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.return-empty-state p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.return-status-btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.return-status-btn:hover {
+    background: #f5e8c5;
+}
+
+.return-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.return-detail-row strong {
+    color: #333;
+    flex-shrink: 0;
+}
+
+.return-detail-row span {
+    color: #666;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+#modalReason {
+    padding: 12px;
+    background: #f7f7f7;
+    border-radius: 6px;
+    color: #555;
+    overflow-wrap: anywhere;
+}
+/* ================= Responsive ================= */
+
+@media (max-width: 768px) {
+    .return-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .return-page-title h1 {
+        font-size: 23px;
+    }
+
+    .return-table-card {
+        padding: 16px;
+    }
+
+    .return-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .return-table-card {
+        padding: 12px;
+    }
+
+    .return-page-header {
+        margin: 18px 0;
+    }
+}

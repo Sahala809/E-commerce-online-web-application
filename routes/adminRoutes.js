@@ -49,7 +49,10 @@ import { noCache } from "../middleware/noCache.js";
 import {
     loadOrders,
     loadOrderDetails,
-    updateOrderItemStatus
+    updateOrderItemStatus,
+    loadReturnRequests,
+    approveReturnRequest,
+    rejectReturnRequest
 } from "../controllers/adminController.js"
 
 import {
@@ -135,6 +138,25 @@ router.post(
 
 
 router.get("/orders", isAdminLogin, noCache, loadOrders);
+
+router.get(
+    "/orders/return-requests",
+    isAdminLogin,
+    noCache,
+    loadReturnRequests
+);
+
+router.post(
+    "/orders/return-requests/:orderItemId/approve",
+    isAdminLogin,
+    approveReturnRequest
+);
+
+router.post(
+    "/orders/return-requests/:orderItemId/reject",
+    isAdminLogin,
+    rejectReturnRequest
+);
 
 router.get("/orders/:orderId", isAdminLogin, noCache, loadOrderDetails);
 

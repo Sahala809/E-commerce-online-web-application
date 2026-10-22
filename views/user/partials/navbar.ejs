@@ -47,25 +47,39 @@
         <div class="collapse navbar-collapse" id="navbar">
 
             <!-- Menu -->
-            <ul class="navbar-nav mx-auto">
+            
+<!-- Menu -->
+<ul class="navbar-nav mx-auto">
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/user">Home</a>
-                </li>
+    <li class="nav-item">
+        <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>"
+           href="/user">
+            Home
+        </a>
+    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/user/shop">Shop</a>
-                </li>
+    <li class="nav-item">
+        <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'shop' ? 'active' : '' %>"
+           href="/user/shop">
+            Shop
+        </a>
+    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/user/new-arrivals">New Arrivals</a>
-                </li>
+    <li class="nav-item">
+        <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'new-arrivals' ? 'active' : '' %>"
+           href="/user/new-arrivals">
+            New Arrivals
+        </a>
+    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/user/contact">Contact</a>
-                </li>
+    <li class="nav-item">
+        <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'contact' ? 'active' : '' %>"
+           href="/user/contact">
+            Contact
+        </a>
+    </li>
 
-            </ul>
+</ul>
 
             
             

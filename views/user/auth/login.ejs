@@ -80,11 +80,11 @@
 
                             
 
-                            <% if(successMessage){ %>
-                                <div class="alert alert-success">
-                                    <%= successMessage %>
-                                </div>
-                            <% } %>
+                            <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+    <div class="alert alert-success">
+        <%= successMessage %>
+    </div>
+<% } %>
 
                             <% if(errorMessage){ %>
                                 <div class="alert alert-danger">

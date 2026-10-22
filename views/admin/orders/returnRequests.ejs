@@ -1,0 +1,354 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/returnRequests.css">
+
+<body>
+
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-grow-1">
+
+        <%- include("../partials/navbar", { pageTitle: "Return Requests" }) %>
+
+        <div class="container-fluid">
+
+            <!-- Page Header -->
+            <div class="return-page-header">
+
+                <div class="return-page-title">
+                    <h1>Return Requests</h1>
+                    <p>Review and manage customer return requests.</p>
+                </div>
+
+                <a href="/admin/orders" class="return-back-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Orders
+                </a>
+
+            </div>
+
+            <!-- Success Message -->
+            <% if (successMessage) { %>
+                <div class="alert alert-success">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+
+            <!-- Error Message -->
+            <% if (errorMessage) { %>
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+
+            <!-- Return Requests Card -->
+            <div class="return-table-card">
+
+                <div class="return-card-header">
+
+                    <div>
+                        <h3>Customer Return Requests</h3>
+                        <p>Review the details of customer-submitted return requests.</p>
+                    </div>
+
+                    <span class="return-pending-count">
+                        <i class="bi bi-clock-history"></i>
+                        <%= returnRequests.length %> Pending
+                    </span>
+
+                </div>
+
+                <% if (returnRequests && returnRequests.length > 0) { %>
+
+                    <!-- Return Requests Table -->
+                    <div class="return-table-responsive">
+
+                        <table class="table return-requests-table">
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Customer</th>
+                                    <th>Email</th>
+                                    <th>Product</th>
+                                    <th>Color</th>
+                                    <th>Quantity</th>
+                                    <th>Return Reason</th>
+                                    <th>Requested On</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <% returnRequests.forEach((request, index) => { %>
+
+                                    <tr>
+
+                                        <!-- Row Number -->
+                                        <td>
+                                            <%= index + 1 %>
+                                        </td>
+
+                                        <!-- Customer -->
+                                        <td>
+                                            <span class="return-customer-name">
+                                                <%= request.orderId?.userId?.name || "N/A" %>
+                                            </span>
+                                        </td>
+
+                                        <!-- Email -->
+                                        <td>
+                                            <span class="return-customer-email">
+                                                <%= request.orderId?.userId?.email || "N/A" %>
+                                            </span>
+                                        </td>
+
+                                        <!-- Product -->
+                                        <td>
+                                            <span class="return-product-name">
+                                                <%= request.productId?.productName || "Product unavailable" %>
+                                            </span>
+                                        </td>
+
+                                        <!-- Color -->
+                                        <td>
+                                            <%= request.variantId?.color || "N/A" %>
+                                        </td>
+
+                                        <!-- Quantity -->
+                                        <td>
+                                            <span class="return-quantity">
+                                                <%= request.quantity %>
+                                            </span>
+                                        </td>
+
+                                        <!-- Reason -->
+                                        <td>
+                                            <div class="return-reason">
+                                                <%= request.returnReason || "No reason provided" %>
+                                            </div>
+                                        </td>
+
+                                        <!-- Request Date -->
+                                        <td>
+                                            <%= request.createdAt
+                                                ? new Date(request.createdAt).toLocaleDateString("en-IN")
+                                                : "N/A" %>
+                                        </td>
+
+                                        <!-- Status -->
+                                    <td>
+    <% if (request.returnStatus === "REQUESTED") { %>
+
+        <button
+    type="button"
+    class="return-status return-status-btn"
+    data-bs-toggle="modal"
+    data-bs-target="#returnRequestModal"
+    data-order-item-id="<%= request._id %>"
+    data-customer="<%= request.orderId?.userId?.name || 'N/A' %>"
+    data-email="<%= request.orderId?.userId?.email || 'N/A' %>"
+    data-product="<%= request.productId?.productName || 'Product unavailable' %>"
+    data-color="<%= request.variantId?.color || 'N/A' %>"
+    data-quantity="<%= request.quantity %>"
+    data-reason="<%= request.returnReason || 'No reason provided' %>"
+>
+    Pending
+</button>
+    <% } else if (request.returnStatus === "APPROVED") { %>
+
+        <span class="return-status return-approved">
+            Approved
+        </span>
+
+    <% } else if (request.returnStatus === "REJECTED") { %>
+
+        <span class="return-status return-rejected">
+            Rejected
+        </span>
+
+    <% } %>
+</td>
+                                    </tr>
+
+                                <% }) %>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                <% } else { %>
+
+                    <!-- Empty State -->
+                    <div class="return-empty-state">
+
+                        <div class="return-empty-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+
+                        <h4>No Return Requests</h4>
+
+                        <p>
+                            There are no pending customer return requests right now.
+                        </p>
+
+                    </div>
+
+                <% } %>
+
+            </div>
+
+            <!-- Return Request Details Modal -->
+<div
+    class="modal fade"
+    id="returnRequestModal"
+    tabindex="-1"
+    aria-labelledby="returnRequestModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="returnRequestModalLabel">
+                    Return Request Details
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="return-detail-row">
+                    <strong>Customer:</strong>
+                    <span id="modalCustomer"></span>
+                </div>
+
+                <div class="return-detail-row">
+                    <strong>Email:</strong>
+                    <span id="modalEmail"></span>
+                </div>
+
+                <div class="return-detail-row">
+                    <strong>Product:</strong>
+                    <span id="modalProduct"></span>
+                </div>
+
+                <div class="return-detail-row">
+                    <strong>Color:</strong>
+                    <span id="modalColor"></span>
+                </div>
+
+                <div class="return-detail-row">
+                    <strong>Quantity:</strong>
+                    <span id="modalQuantity"></span>
+                </div>
+
+                <div class="return-detail-row">
+                    <strong>Requested on:</strong>
+                    <span id="modalDate"></span>
+                </div>
+
+                <div class="mt-3">
+                    <strong>Return reason:</strong>
+                    <p id="modalReason" class="mt-2 mb-0"></p>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Close
+                </button>
+
+              <form
+    id="approveReturnForm"
+    action=""
+    method="POST"
+>
+    <button type="submit" class="btn btn-success">
+        Approve
+    </button>
+</form>
+
+<form
+    id="rejectReturnForm"
+    action=""
+    method="POST"
+>
+    <button type="submit" class="btn btn-danger">
+        Reject
+    </button>
+</form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("returnRequestModal");
+    const approveForm = document.getElementById("approveReturnForm");
+    const rejectForm = document.getElementById("rejectReturnForm");
+
+    if (!modal || !approveForm || !rejectForm) {
+        console.error("Return request modal or forms not found");
+        return;
+    }
+
+    modal.addEventListener("show.bs.modal", (event) => {
+        const button = event.relatedTarget;
+
+        if (!button) return;
+
+        const orderItemId = button.dataset.orderItemId;
+
+        if (!orderItemId) {
+            console.error("Missing data-order-item-id on modal trigger button");
+            approveForm.action = "";
+            rejectForm.action = "";
+            return;
+        }
+
+        approveForm.action =
+            `/admin/orders/return-requests/${orderItemId}/approve`;
+
+        rejectForm.action =
+            `/admin/orders/return-requests/${orderItemId}/reject`;
+    });
+
+    [approveForm, rejectForm].forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            if (!form.action || form.action.endsWith("/return-requests")) {
+                event.preventDefault();
+                console.error("Invalid return request form action:", form.action);
+            }
+        });
+    });
+});
+
+</script>
+
+<%- include("../partials/footer") %>

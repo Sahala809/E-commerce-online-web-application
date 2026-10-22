@@ -265,6 +265,166 @@
     line-height: 1;
 }
 
+/* ===========================
+   CHRONIX DARK NAVBAR
+=========================== */
+
+.navbar {
+    background: #333232 !important;
+}
+
+/* Logo */
+.navbar .logo {
+    color: #d4af37 !important;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+
+.navbar .logo:hover {
+    color: #e6c65c !important;
+}
+
+/* Navbar Menu */
+.navbar .navbar-nav .nav-link {
+    position: relative;
+    color: #fff !important;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: color 0.3s ease;
+}
+
+.navbar .navbar-nav .nav-link:hover,
+.navbar .navbar-nav .nav-link.active {
+    color: #d4af37 !important;
+}
+
+.navbar .navbar-nav .nav-link.active {
+   color: #d4af37 !important;
+    font-weight: 600;
+}
+
+.navbar .navbar-nav .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 2px;
+    height: 2px;
+    background: #d4af37;
+    border-radius: 2px;
+}
+
+/* Search */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    width: 300px;
+    border: 1px solid #555;
+    border-radius: 30px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.search-box {
+    flex: 1;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 10px 15px;
+}
+
+.search-box:focus {
+    box-shadow: none;
+}
+
+.search-btn {
+    width: 50px;
+    height: 44px;
+    border: none;
+    background: #fff;
+    color: #171616;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-btn:hover {
+    background: #d4af37;
+    color: #111;
+}
+
+/* Profile Button */
+.navbar .profile-btn {
+    color: #fff;
+    font-size: 24px;
+    padding: 0;
+}
+
+.navbar .profile-btn:hover {
+    color: #d4af37;
+}
+
+/* Wishlist and Cart Icons */
+.nav-icon {
+    color: #fff !important;
+    transition: color 0.3s ease;
+}
+
+.nav-icon:hover {
+    color: #d4af37 !important;
+}
+
+/* Cart / Wishlist Count */
+.nav-count {
+    background: #d4af37;
+    color: #111;
+}
+
+/* Login Button */
+.navbar .btn-dark {
+    background: #d4af37 !important;
+    border-color: #d4af37 !important;
+    color: #111 !important;
+    font-weight: 600;
+}
+
+.navbar .btn-dark:hover {
+    background: #e6c65c !important;
+    border-color: #e6c65c !important;
+}
+
+/* Sign Up */
+.navbar .text-decoration-none {
+    color: #fff !important;
+    transition: color 0.3s ease;
+}
+
+.navbar .text-decoration-none:hover {
+    color: #d4af37 !important;
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+    .search-wrapper {
+        width: 200px;
+    }
+
+    .navbar .navbar-nav {
+        margin-top: 15px;
+    }
+
+    .navbar .navbar-nav .nav-link {
+        padding: 10px 0;
+    }
+
+    .navbar .navbar-nav .nav-link.active::after {
+        left: 0;
+        right: auto;
+        width: 40px;
+    }
+}
+
 /* Mobile */
 
 @media (max-width:991px){

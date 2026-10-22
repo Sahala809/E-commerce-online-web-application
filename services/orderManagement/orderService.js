@@ -536,11 +536,7 @@ export const requestReturnService = async (
             };
         }
 
-        orderItem.orderItemStatus = "REQUESTED";
-
-         orderItem.orderItemStatus = "DELIVERED";
-
-
+        orderItem.returnStatus = "REQUESTED";
         orderItem.returnReason = returnReason.trim();
 
         await orderItem.save();

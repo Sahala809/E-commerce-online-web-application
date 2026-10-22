@@ -365,7 +365,34 @@
     border-color: #030812;
 }
 
+/* Return Requests Button */
+.page-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
 
+.return-requests-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: #171717;
+    color: #d4af37;
+    text-decoration: none;
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.return-requests-btn:hover {
+    background: #d4af37;
+    color: #171717;
+}
 
 /* ================= Responsive ================= */
 
