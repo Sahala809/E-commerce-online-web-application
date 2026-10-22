@@ -63,6 +63,17 @@ import {
     deleteCouponService
 } from "../services/admin/couponService.js";
 
+
+import {
+    loadOfferService,
+    loadOfferFormDataService,
+    createOfferService,
+    editOfferService,
+    toggleOfferStatusService,
+    deleteOfferService
+} from "../services/admin/offerService.js";
+
+
 export const loadAdminLogin = (req, res) => {
 
     return res.render("admin/auth/login", {
@@ -1434,5 +1445,145 @@ export const deleteCoupon = async (req, res) => {
         console.log("DELETE COUPON CONTROLLER ERROR:", error);
         req.session.errorMessage = "Failed to delete coupon";
         return res.redirect("/admin/coupons");
+    }
+};
+
+
+
+
+
+export const getOffers = async (req, res) => {
+    try {
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = 5;
+        const search = req.query.search || "";
+const type = req.query.type || "";
+
+        const result = await loadOfferService(page, limit, search, type);
+
+        const formData = req.session.offerFormData || {};
+        const validationErrors = req.session.offerValidationErrors || {};
+        const successMessage = req.session.successMessage;
+        const errorMessage = req.session.errorMessage;
+
+        delete req.session.offerFormData;
+        delete req.session.offerValidationErrors;
+        delete req.session.successMessage;
+        delete req.session.errorMessage;
+
+        const formOptions = await loadOfferFormDataService();
+
+        return res.render("admin/offer/offer", {
+            ...result,
+            ...formOptions,
+            formData,
+            validationErrors,
+            successMessage,
+            errorMessage,
+            openModal: req.query.modal || "",
+            activePage: "offers",
+            pageTitle: "Offer Management",
+            search,
+            type
+        });
+    } catch (error) {
+        console.log("GET OFFERS CONTROLLER ERROR:", error);
+        req.session.errorMessage = "Failed to load offers.";
+        return res.redirect("/admin/dashboard");
+    }
+};
+
+export const createOffer = async (req, res) => {
+    try {
+        const result = await createOfferService(req.body);
+
+        if (!result.success) {
+            req.session.offerFormData = req.body;
+            req.session.offerValidationErrors = result.errors || {};
+            req.session.errorMessage = "Please correct the offer details.";
+            return res.redirect("/admin/offers?modal=add");
+        }
+
+        req.session.successMessage = "Offer created successfully.";
+        return res.redirect("/admin/offers");
+    } catch (error) {
+        console.log("CREATE OFFER CONTROLLER ERROR:", error);
+        req.session.offerFormData = req.body;
+        req.session.errorMessage = "Failed to create offer.";
+        return res.redirect("/admin/offers?modal=add");
+    }
+};
+
+
+
+
+export const editOffer = async (req, res) => {
+    try {
+        const result = await editOfferService(
+            req.params.offerId,
+            req.body
+        );
+
+        if (!result.success) {
+            req.session.offerFormData = req.body;
+            req.session.offerValidationErrors = result.errors || {};
+            req.session.errorMessage = "Please correct the offer details.";
+
+            return res.redirect(
+                `/admin/offers?modal=edit&offerId=${req.params.offerId}`
+            );
+        }
+
+        req.session.successMessage = "Offer updated successfully.";
+        return res.redirect("/admin/offers");
+    } catch (error) {
+        console.log("EDIT OFFER CONTROLLER ERROR:", error);
+
+        req.session.offerFormData = req.body;
+        req.session.errorMessage = "Failed to update offer.";
+
+        return res.redirect(
+            `/admin/offers?modal=edit&offerId=${req.params.offerId}`
+        );
+    }
+};
+
+
+
+export const toggleOfferStatus = async (req, res) => {
+    try {
+        const result = await toggleOfferStatusService(req.params.offerId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+        } else {
+            req.session.successMessage = result.offer.isActive
+                ? "Offer activated successfully."
+                : "Offer deactivated successfully.";
+        }
+
+        return res.redirect("/admin/offers");
+    } catch (error) {
+        console.log("TOGGLE OFFER STATUS ERROR:", error);
+        req.session.errorMessage = "Failed to update offer status.";
+        return res.redirect("/admin/offers");
+    }
+};
+
+export const deleteOffer = async (req, res) => {
+    try {
+        const result = await deleteOfferService(req.params.offerId);
+
+        if (!result.success) {
+            req.session.errorMessage = result.message;
+        } else {
+            req.session.successMessage = result.message;
+        }
+
+        return res.redirect("/admin/offers");
+    } catch (error) {
+        console.log("DELETE OFFER ERROR:", error);
+        req.session.errorMessage = "Failed to delete offer.";
+        return res.redirect("/admin/offers");
     }
 };

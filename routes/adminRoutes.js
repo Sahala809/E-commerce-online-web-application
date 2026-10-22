@@ -74,6 +74,15 @@ import {
     deleteCoupon
 } from "../controllers/adminController.js"
 
+import {
+    getOffers,
+    createOffer,
+    editOffer,
+    toggleOfferStatus,
+    deleteOffer
+} from "../controllers/adminController.js"
+
+
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
  
@@ -205,6 +214,45 @@ router.delete(
     "/coupons/delete/:couponId",
     isAdminLogin,
     deleteCoupon
+);
+
+
+// Offer Management Routes
+
+router.get(
+    "/offers",
+    isAdminLogin,
+    noCache,
+    getOffers
+);
+
+router.post(
+    "/offers/create",
+    isAdminLogin,
+    noCache,
+    createOffer
+);
+
+router.post(
+    "/offers/:offerId/edit", 
+    isAdminLogin,
+    noCache,
+    editOffer
+
+);
+
+router.post(
+    "/offers/:offerId/toggle-status", 
+    isAdminLogin,
+    nocache,
+    toggleOfferStatus
+);
+
+router.post(
+    "/offers/:offerId/delete", 
+    isAdminLogin,
+    noCache,
+    deleteOffer
 );
 
 export default router;

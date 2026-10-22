@@ -7,11 +7,12 @@ import session from "express-session"
 import passport from "passport";
 import nocache from "nocache";
 import methodOverride from "method-override";
+import cron from "node-cron";
 
 import connectDB from "./config/db.js";
 import "./config/passport.js";
 
-
+import { testRefreshVariantOfferPrices } from "./services/admin/offerService.js";
 import userRoutes from "./routes/userRoutes.js"
 import sendOtp from "./utils/sendOtp.js";
 import adminRouter from "./routes/adminRoutes.js"
@@ -20,8 +21,20 @@ import { navbarCount } from "./middleware/navbarCount.js";
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
 
+
+
 // Connect Database
 connectDB();
+
+
+cron.schedule("* * * * *", async () => {
+    try {
+        await testRefreshVariantOfferPrices();
+        console.log("Offer prices refreshed successfully");
+    } catch (error) {
+        console.error("Offer price refresh failed:", error);
+    }
+});
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
