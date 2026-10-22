@@ -248,6 +248,97 @@ export const validateEditVariant = (data) => {
 
 
 
+export const validateCoupon = (data) => {
+    const errors = {};
+
+    const {
+        couponCode,
+        discount,
+        couponType,
+        maxDiscountAmount,
+        expDate,
+        minimumPurchase,
+        usageLimit,
+        perUserUsageLimit,
+        isPublic,
+        userId
+    } = data;
+
+    if (!couponCode || !couponCode.trim()) {
+        errors.couponCode = "Coupon code is required";
+    } else if (!/^[A-Za-z0-9_-]+$/.test(couponCode.trim())) {
+        errors.couponCode = "Use only letters, numbers, hyphens or underscores";
+    }
+
+    if (discount === "" || discount === undefined || Number.isNaN(Number(discount))) {
+        errors.discount = "Valid discount is required";
+    } else if (Number(discount) <= 0) {
+        errors.discount = "Discount must be greater than zero";
+    } else if (
+        couponType === "PERCENTAGE" &&
+        Number(discount) > 100
+    ) {
+        errors.discount = "Percentage discount cannot exceed 100";
+    }
+
+    if (!["FIXED", "PERCENTAGE"].includes(couponType)) {
+        errors.couponType = "Select a valid coupon type";
+    }
+
+    if (!expDate || Number.isNaN(new Date(expDate).getTime())) {
+        errors.expDate = "A valid expiry date is required";
+    }
+
+    if (
+        minimumPurchase !== "" &&
+        minimumPurchase !== undefined &&
+        (!Number.isFinite(Number(minimumPurchase)) ||
+            Number(minimumPurchase) < 0)
+    ) {
+        errors.minimumPurchase = "Minimum purchase cannot be negative";
+    }
+
+    if (
+        usageLimit === "" ||
+        usageLimit === undefined ||
+        !Number.isInteger(Number(usageLimit)) ||
+        Number(usageLimit) <= 0
+    ) {
+        errors.usageLimit = "Usage limit must be a positive whole number";
+    }
+
+    if (
+        perUserUsageLimit === "" ||
+        perUserUsageLimit === undefined ||
+        !Number.isInteger(Number(perUserUsageLimit)) ||
+        Number(perUserUsageLimit) <= 0
+    ) {
+        errors.perUserUsageLimit = "Per-user usage limit must be a positive whole number";
+    }
+
+    if (
+        maxDiscountAmount !== "" &&
+        maxDiscountAmount !== undefined &&
+        maxDiscountAmount !== null &&
+        (!Number.isFinite(Number(maxDiscountAmount)) ||
+            Number(maxDiscountAmount) <= 0)
+    ) {
+        errors.maxDiscountAmount = "Maximum discount must be greater than zero";
+    }
+
+    if (
+        (isPublic === false || isPublic === "false") &&
+        !userId
+    ) {
+        errors.userId = "Select a user for a private coupon";
+    }
+
+    return {
+        isValid: Object.keys(errors).length === 0,
+        errors
+    };
+};
+
 
 
 

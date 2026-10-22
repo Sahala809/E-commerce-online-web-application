@@ -1,0 +1,897 @@
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/coupon.css">
+
+<div class="wrapper">
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-grow-1">
+        <%- include("../partials/navbar", { pageTitle: "Coupon" }) %>
+
+        <div class="container-fluid mt-4">
+
+            <!-- Page Heading -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="page-title">
+                    <h1>Coupon Management</h1>
+                    <p>Create, edit, and manage coupons.</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn add-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addCouponModal">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Add Coupon
+                </button>
+            </div>
+
+            <!-- Flash Messages -->
+            <% if (successMessage) { %>
+                <div class="alert alert-success">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+
+            <% if (errorMessage) { %>
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+
+            <!-- Summary Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="coupon-stat-card">
+                        <p>Total Coupons</p>
+                        <h3><%= totalCoupons %></h3>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="coupon-stat-card">
+                        <p>Active Coupons</p>
+                        <h3 class="text-success"><%= activeCoupons %></h3>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="coupon-stat-card">
+                        <p>Expired Coupons</p>
+                        <h3 class="text-danger"><%= expiredCoupons %></h3>
+                    </div>
+                </div>
+            </div>
+
+        
+            <!-- Search and Coupon Type Filter -->
+<div class="toolbar">
+
+    <form action="/admin/coupons" method="GET"
+      id="couponFilterForm"
+      class="d-flex align-items-center gap-2 flex-wrap">
+
+    <input
+        type="text"
+        name="search"
+        id="couponSearch"
+        class="form-control"
+        placeholder="Search coupon code..."
+        value="<%= search || '' %>"
+    >
+
+    <select name="couponType"
+            id="couponTypeFilter"
+            class="form-select">
+
+        <option value="">All Coupon Types</option>
+
+        <option value="FIXED"
+            <%= couponType === "FIXED" ? "selected" : "" %>>
+            Fixed Amount
+        </option>
+
+        <option value="PERCENTAGE"
+            <%= couponType === "PERCENTAGE" ? "selected" : "" %>>
+            Percentage
+        </option>
+    </select>
+
+    <% if (search || couponType) { %>
+        <a href="/admin/coupons"
+           class="btn btn-outline-secondary">
+            Clear
+        </a>
+    <% } %>
+
+</form>
+
+</div>
+
+            <!-- Coupon Table -->
+            <div class="table-card">
+                <table class="table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Coupon Code</th>
+                            <th>Discount</th>
+                            <th>Type</th>
+                            <th>Usage</th>
+                            <th>Validity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if (coupons && coupons.length > 0) { %>
+
+                            <% coupons.forEach((coupon, index) => {
+                                const isExpired =
+                                    new Date(coupon.expDate) <= new Date();
+
+                                const status = isExpired
+                                    ? "Expired"
+                                    : coupon.isActive
+                                        ? "Active"
+                                        : "Inactive";
+                            %>
+
+                                <tr>
+                                    <td><%= skip + index + 1 %></td>
+
+                                    <td>
+                                        <strong><%= coupon.couponCode %></strong>
+                                    </td>
+
+                                    <td>
+                                        <%= coupon.couponType === "PERCENTAGE"
+                                            ? coupon.discount + "%"
+                                            : "₹" + coupon.discount %>
+                                    </td>
+
+                                    <td><%= coupon.couponType %></td>
+
+                                    <td>
+                                        <%= coupon.usedCount %> /
+                                        <%= coupon.usageLimit %>
+                                    </td>
+
+                                    <td>
+                                        <%= new Date(coupon.expDate)
+                                            .toLocaleDateString("en-GB") %>
+                                    </td>
+
+                                    <td>
+                                        <% if (status === "Active") { %>
+                                            <span class="status-active">
+                                                Active
+                                            </span>
+                                        <% } else { %>
+                                            <span class="status-inactive">
+                                                <%= status %>
+                                            </span>
+                                        <% } %>
+                                    </td>
+
+                                    <td>
+                                        <div class="dropdown">
+                                            <button
+                                                class="btn action-btn"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                                aria-label="Coupon actions">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        class="dropdown-item"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editCouponModal<%= coupon._id %>">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                        Edit
+                                                    </button>
+                                                </li>
+
+                                                <li>
+                                                    <form
+                                                        action="/admin/coupons/toggle-status/<%= coupon._id %>"
+                                                        method="POST">
+                                                        <button
+                                                            type="submit"
+                                                            class="dropdown-item">
+                                                            <i class="bi bi-power"></i>
+                                                            <%= coupon.isActive
+                                                                ? "Deactivate"
+                                                                : "Activate" %>
+                                                        </button>
+                                                    </form>
+                                                </li>
+
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        class="dropdown-item text-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteCouponModal<%= coupon._id %>">
+                                                        <i class="bi bi-trash"></i>
+                                                        Delete
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            <% }) %>
+
+                        <% } else { %>
+                            <tr>
+                                <td colspan="8" class="no-result">
+                                    <div class="py-4">
+                                        <i class="bi bi-ticket-perforated fs-1"></i>
+                                        <h5 class="mt-2">
+                                            No coupons are created yet.
+                                        </h5>
+                                        <p>
+                                            Click Add Coupon to create your first coupon.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="/admin/coupons?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search || '') %>">
+                                Previous
+                            </a>
+                        <% } %>
+
+                        <span>
+                            Page <%= currentPage %> of <%= totalPages %>
+                        </span>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/admin/coupons?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search || '') %>">
+                                Next
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD COUPON MODAL -->
+<div class="modal fade" id="addCouponModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <form action="/admin/coupons/create" method="POST" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Coupon</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <!-- Coupon Code -->
+                        <div class="col-md-6">
+                            <label class="form-label">Coupon Code</label>
+                            <input
+                                type="text"
+                                name="couponCode"
+                                class="form-control <%= openModal === 'add' && errors?.couponCode ? 'is-invalid' : '' %>"
+                                placeholder="CHRONIX10"
+                                value="<%= openModal === 'add' ? (formData?.couponCode ?? '') : '' %>">
+
+                            <% if (openModal === 'add' && errors?.couponCode) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.couponCode %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Coupon Type -->
+                        <div class="col-md-6">
+                            <label class="form-label">Coupon Type</label>
+                            <select
+                                name="couponType"
+                                class="form-select <%= openModal === 'add' && errors?.couponType ? 'is-invalid' : '' %>">
+
+                                <option value="">Select type</option>
+                                <option
+                                    value="FIXED"
+                                    <%= openModal === 'add' && formData?.couponType === 'FIXED' ? 'selected' : '' %>>
+                                    Fixed Amount
+                                </option>
+                                <option
+                                    value="PERCENTAGE"
+                                    <%= openModal === 'add' && formData?.couponType === 'PERCENTAGE' ? 'selected' : '' %>>
+                                    Percentage
+                                </option>
+                            </select>
+
+                            <% if (openModal === 'add' && errors?.couponType) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.couponType %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Maximum Discount Amount -->
+                        <div
+                            class="col-md-6 max-discount-field"
+                            style="<%= openModal === 'add' && formData?.couponType === 'PERCENTAGE' ? '' : 'display: none;' %>">
+
+                            <label class="form-label">
+                                Maximum Discount Amount (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                name="maxDiscountAmount"
+                                class="form-control <%= openModal === 'add' && errors?.maxDiscountAmount ? 'is-invalid' : '' %>"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="e.g. 500"
+                                value="<%= openModal === 'add' ? (formData?.maxDiscountAmount ?? '') : '' %>">
+
+                            <small class="text-muted">
+                                Only for percentage coupons. Leave empty for no limit.
+                            </small>
+
+                            <% if (openModal === 'add' && errors?.maxDiscountAmount) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.maxDiscountAmount %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="col-md-6">
+                            <label class="form-label">Discount</label>
+                            <input
+                                type="number"
+                                name="discount"
+                                class="form-control <%= openModal === 'add' && errors?.discount ? 'is-invalid' : '' %>"
+                                min="0.01"
+                                step="0.01"
+                                value="<%= openModal === 'add' ? (formData?.discount ?? '') : '' %>">
+
+                            <% if (openModal === 'add' && errors?.discount) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.discount %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Expiry Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">Expiry Date</label>
+                            <input
+                                type="date"
+                                name="expDate"
+                                class="form-control <%= openModal === 'add' && errors?.expDate ? 'is-invalid' : '' %>"
+                                min="<%= new Date(Date.now() + 86400000).toISOString().split('T')[0] %>"
+                                value="<%= openModal === 'add' ? (formData?.expDate ?? '') : '' %>">
+
+                            <% if (openModal === 'add' && errors?.expDate) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.expDate %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Minimum Purchase -->
+                        <div class="col-md-6">
+                            <label class="form-label">Minimum Purchase</label>
+                            <input
+                                type="number"
+                                name="minimumPurchase"
+                                class="form-control <%= openModal === 'add' && errors?.minimumPurchase ? 'is-invalid' : '' %>"
+                                min="0"
+                                value="<%= openModal === 'add' ? (formData?.minimumPurchase ?? '0') : '0' %>">
+
+                            <% if (openModal === 'add' && errors?.minimumPurchase) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.minimumPurchase %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Total Usage Limit -->
+                        <div class="col-md-6">
+                            <label class="form-label">Total Usage Limit</label>
+                            <input
+                                type="number"
+                                name="usageLimit"
+                                class="form-control <%= openModal === 'add' && errors?.usageLimit ? 'is-invalid' : '' %>"
+                                min="1"
+                                value="<%= openModal === 'add' ? (formData?.usageLimit ?? '100') : '100' %>">
+
+                            <% if (openModal === 'add' && errors?.usageLimit) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.usageLimit %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Per-user Usage Limit -->
+                        <div class="col-md-6">
+                            <label class="form-label">Per-user Usage Limit</label>
+                            <input
+                                type="number"
+                                name="perUserUsageLimit"
+                                class="form-control <%= openModal === 'add' && errors?.perUserUsageLimit ? 'is-invalid' : '' %>"
+                                min="1"
+                                value="<%= openModal === 'add' ? (formData?.perUserUsageLimit ?? '1') : '1' %>">
+
+                            <% if (openModal === 'add' && errors?.perUserUsageLimit) { %>
+                                <small class="text-danger coupon-field-error">
+                                    <%= errors.perUserUsageLimit %>
+                                </small>
+                            <% } %>
+                        </div>
+
+                        <!-- Visibility -->
+                        <div class="col-md-6">
+                            <label class="form-label">Visibility</label>
+                            <select name="isPublic" class="form-select">
+                                <option
+                                    value="true"
+                                    <%= openModal === 'add' && String(formData?.isPublic ?? 'true') === 'true' ? 'selected' : '' %>>
+                                    Public
+                                </option>
+                                <option
+                                    value="false"
+                                    <%= openModal === 'add' && String(formData?.isPublic) === 'false' ? 'selected' : '' %>>
+                                    Private
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-dark">
+                        Create Coupon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT COUPON MODALS -->
+<% if (coupons && coupons.length > 0) { %>
+    <% coupons.forEach(coupon => { %>
+
+        <%
+            const isCurrentEdit =
+                openModal === 'edit' &&
+                String(editCouponId) === String(coupon._id);
+
+            const editData = isCurrentEdit ? formData : coupon;
+        %>
+
+        <div
+            class="modal fade"
+            id="editCouponModal<%= coupon._id %>"
+            tabindex="-1">
+
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+
+                    <form
+                        action="/admin/coupons/edit/<%= coupon._id %>?_method=PATCH"
+                        method="POST"
+                        novalidate>
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Coupon</h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="row g-3">
+
+                                <!-- Coupon Code -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Coupon Code</label>
+                                    <input
+                                        type="text"
+                                        name="couponCode"
+                                        class="form-control <%= isCurrentEdit && errors?.couponCode ? 'is-invalid' : '' %>"
+                                        value="<%= editData?.couponCode ?? '' %>">
+
+                                    <% if (isCurrentEdit && errors?.couponCode) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.couponCode %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Coupon Type -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Coupon Type</label>
+                                    <select
+                                        name="couponType"
+                                        class="form-select <%= isCurrentEdit && errors?.couponType ? 'is-invalid' : '' %>">
+
+                                        <option
+                                            value="FIXED"
+                                            <%= editData?.couponType === 'FIXED' ? 'selected' : '' %>>
+                                            Fixed Amount
+                                        </option>
+
+                                        <option
+                                            value="PERCENTAGE"
+                                            <%= editData?.couponType === 'PERCENTAGE' ? 'selected' : '' %>>
+                                            Percentage
+                                        </option>
+                                    </select>
+
+                                    <% if (isCurrentEdit && errors?.couponType) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.couponType %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Maximum Discount Amount -->
+                                <div
+                                    class="col-md-6 max-discount-field"
+                                    style="<%= editData?.couponType === 'PERCENTAGE' ? '' : 'display: none;' %>">
+
+                                    <label class="form-label">
+                                        Maximum Discount Amount (₹)
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="maxDiscountAmount"
+                                        class="form-control <%= isCurrentEdit && errors?.maxDiscountAmount ? 'is-invalid' : '' %>"
+                                        min="0.01"
+                                        step="0.01"
+                                        value="<%= editData?.maxDiscountAmount ?? '' %>"
+                                        placeholder="e.g. 500">
+
+                                    <small class="text-muted">
+                                        Only for percentage coupons. Leave empty for no limit.
+                                    </small>
+
+                                    <% if (isCurrentEdit && errors?.maxDiscountAmount) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.maxDiscountAmount %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Discount -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Discount</label>
+                                    <input
+                                        type="number"
+                                        name="discount"
+                                        class="form-control <%= isCurrentEdit && errors?.discount ? 'is-invalid' : '' %>"
+                                        min="0.01"
+                                        step="0.01"
+                                        value="<%= editData?.discount ?? '' %>">
+
+                                    <% if (isCurrentEdit && errors?.discount) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.discount %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Expiry Date -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input
+                                        type="date"
+                                        name="expDate"
+                                        class="form-control <%= isCurrentEdit && errors?.expDate ? 'is-invalid' : '' %>"
+                                        value="<%= editData?.expDate ? String(editData.expDate).split('T')[0] : '' %>">
+
+                                    <% if (isCurrentEdit && errors?.expDate) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.expDate %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Minimum Purchase -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Minimum Purchase</label>
+                                    <input
+                                        type="number"
+                                        name="minimumPurchase"
+                                        class="form-control <%= isCurrentEdit && errors?.minimumPurchase ? 'is-invalid' : '' %>"
+                                        min="0"
+                                        value="<%= editData?.minimumPurchase ?? 0 %>">
+
+                                    <% if (isCurrentEdit && errors?.minimumPurchase) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.minimumPurchase %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Total Usage Limit -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Total Usage Limit</label>
+                                    <input
+                                        type="number"
+                                        name="usageLimit"
+                                        class="form-control <%= isCurrentEdit && errors?.usageLimit ? 'is-invalid' : '' %>"
+                                        min="1"
+                                        value="<%= editData?.usageLimit ?? '' %>">
+
+                                    <% if (isCurrentEdit && errors?.usageLimit) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.usageLimit %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Per-user Usage Limit -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Per-user Usage Limit</label>
+                                    <input
+                                        type="number"
+                                        name="perUserUsageLimit"
+                                        class="form-control <%= isCurrentEdit && errors?.perUserUsageLimit ? 'is-invalid' : '' %>"
+                                        min="1"
+                                        value="<%= editData?.perUserUsageLimit ?? '' %>">
+
+                                    <% if (isCurrentEdit && errors?.perUserUsageLimit) { %>
+                                        <small class="text-danger coupon-field-error">
+                                            <%= errors.perUserUsageLimit %>
+                                        </small>
+                                    <% } %>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Status</label>
+                                    <select name="isActive" class="form-select">
+                                        <option
+                                            value="true"
+                                            <%= String(editData?.isActive) === 'true' ? 'selected' : '' %>>
+                                            Active
+                                        </option>
+                                        <option
+                                            value="false"
+                                            <%= String(editData?.isActive) === 'false' ? 'selected' : '' %>>
+                                            Inactive
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Visibility -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Visibility</label>
+                                    <select name="isPublic" class="form-select">
+                                        <option
+                                            value="true"
+                                            <%= String(editData?.isPublic) === 'true' ? 'selected' : '' %>>
+                                            Public
+                                        </option>
+                                        <option
+                                            value="false"
+                                            <%= String(editData?.isPublic) === 'false' ? 'selected' : '' %>>
+                                            Private
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button type="submit" class="btn btn-dark">
+                                Save Changes
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <% }) %>
+<% } %>
+
+<!-- DELETE COUPON MODALS -->
+<% if (coupons && coupons.length > 0) { %>
+    <% coupons.forEach(coupon => { %>
+
+        <div
+            class="modal fade"
+            id="deleteCouponModal<%= coupon._id %>"
+            tabindex="-1"
+            aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Coupon</h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        Are you sure you want to delete coupon
+                        <strong><%= coupon.couponCode %></strong>?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <form
+                            action="/admin/coupons/delete/<%= coupon._id %>?_method=DELETE"
+                            method="POST">
+
+                            <button type="submit" class="btn btn-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    <% }) %>
+<% } %>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Coupon search and type filter
+    const filterForm = document.getElementById("couponFilterForm");
+    const couponTypeFilter = document.getElementById("couponTypeFilter");
+    const couponSearch = document.getElementById("couponSearch");
+
+    // Filter immediately when coupon type changes
+    if (filterForm && couponTypeFilter) {
+        couponTypeFilter.addEventListener("change", () => {
+            filterForm.requestSubmit();
+        });
+    }
+
+    // Search when Enter is pressed
+    if (filterForm && couponSearch) {
+        couponSearch.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                filterForm.requestSubmit();
+            }
+        });
+    }
+
+    // 2. Show or hide Maximum Discount Amount based on coupon type
+    document.querySelectorAll(".modal form").forEach((form) => {
+        const typeSelect = form.querySelector('[name="couponType"]');
+        const maxDiscountField = form.querySelector(".max-discount-field");
+        const maxDiscountInput = maxDiscountField?.querySelector(
+            '[name="maxDiscountAmount"]'
+        );
+
+        if (!typeSelect || !maxDiscountField || !maxDiscountInput) {
+            return;
+        }
+
+        const updateMaxDiscountField = () => {
+            const isPercentage = typeSelect.value === "PERCENTAGE";
+
+            maxDiscountField.style.display = isPercentage ? "" : "none";
+            maxDiscountInput.disabled = !isPercentage;
+
+            if (!isPercentage && typeSelect.value === "FIXED") {
+                maxDiscountInput.value = "";
+            }
+        };
+
+        typeSelect.addEventListener("change", updateMaxDiscountField);
+        updateMaxDiscountField();
+    });
+
+    // 3. Clear the displayed field error when the user edits that field
+    document.querySelectorAll(".modal form").forEach((form) => {
+        form.querySelectorAll("input[name], select[name], textarea[name]")
+            .forEach((field) => {
+
+                const clearFieldError = () => {
+                    const error = field.parentElement.querySelector(
+                        ".coupon-field-error"
+                    );
+
+                    if (error) {
+                        error.remove();
+                    }
+
+                    field.classList.remove("is-invalid");
+                };
+
+                field.addEventListener("input", clearFieldError);
+                field.addEventListener("change", clearFieldError);
+            });
+    });
+
+    // 4. Reopen the correct modal after backend validation fails
+    const openModal = <%- JSON.stringify(openModal || "") %>;
+    const editCouponId = <%- JSON.stringify(editCouponId || "") %>;
+
+    if (openModal === "add") {
+        const addModal = document.getElementById("addCouponModal");
+
+        if (addModal) {
+            bootstrap.Modal.getOrCreateInstance(addModal).show();
+        }
+    }
+
+    if (openModal === "edit" && editCouponId) {
+        const editModal = document.getElementById(
+            "editCouponModal" + editCouponId
+        );
+
+        if (editModal) {
+            bootstrap.Modal.getOrCreateInstance(editModal).show();
+        }
+    }
+});
+</script>
+
+
+<%- include("../partials/footer") %>

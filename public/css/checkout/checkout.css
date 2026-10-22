@@ -423,6 +423,48 @@ body {
     background: #292929;
 }
 
+.coupon-message {
+    padding: 12px 14px;
+    margin: 12px 0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.coupon-success {
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+}
+
+.coupon-error {
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+.remove-coupon-form {
+    display: flex;
+    justify-content: flex-end;
+    margin: 8px 0 16px;
+}
+
+.remove-coupon-btn {
+    background: transparent;
+    color: #b91c1c;
+    border: 1px solid #b91c1c;
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-coupon-btn:hover {
+    background: #b91c1c;
+    color: #ffffff;
+}
+
 
 /* =========================================================
    ORDER ITEMS

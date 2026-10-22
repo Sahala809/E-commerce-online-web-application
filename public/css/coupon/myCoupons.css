@@ -1,0 +1,403 @@
+
+/* =====================================
+   MY COUPON WALLET PAGE
+===================================== */
+
+.coupon-wallet-page {
+    width: 95%;
+    max-width: 1600px;
+    margin: 35px auto;
+}
+
+.coupon-wallet-container {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+/* Keep sidebar visible on desktop */
+.coupon-wallet-container > .profile-sidebar {
+    position: sticky;
+    top: 20px;
+    width: 280px;
+    align-self: start;
+}
+
+.coupon-wallet-content {
+    min-width: 0;
+    padding: 30px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 5px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* =====================================
+   PAGE HEADING
+===================================== */
+
+.coupon-wallet-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #eee7da;
+}
+
+.coupon-wallet-heading h1 {
+    margin: 0 0 8px;
+    color: #171717;
+    font-size: 29px;
+    font-weight: 750;
+}
+
+.coupon-wallet-heading p {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.coupon-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #e7d7a8;
+    border-radius: 25px;
+    background: #fbf7eb;
+    color: #735719;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* =====================================
+   COUPON GRID
+===================================== */
+
+.coupon-wallet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+    align-items: stretch;
+}
+
+/* =====================================
+   INDIVIDUAL COUPON CARD
+===================================== */
+
+.wallet-coupon-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e8dfcc;
+    border-radius: 16px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
+    transition: transform 0.25s ease,
+                box-shadow 0.25s ease;
+}
+
+.wallet-coupon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* Black card header */
+
+.wallet-coupon-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background: linear-gradient(135deg, #111, #303030);
+    border-bottom: 3px solid #c8a44d;
+}
+
+.coupon-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    width: 43px;
+    height: 43px;
+    border: 1px solid rgba(218, 185, 104, 0.6);
+    border-radius: 12px;
+    background: rgba(200, 164, 77, 0.12);
+    color: #e2c16c;
+    font-size: 21px;
+}
+
+.wallet-coupon-top .coupon-type {
+    color: #f0d58b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+/* Discount section */
+
+.wallet-coupon-discount {
+    padding: 24px 20px 18px;
+    text-align: center;
+    background: #fffdf8;
+}
+
+.wallet-coupon-discount h2 {
+    margin: 0;
+    color: #171717;
+    font-size: 34px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.wallet-coupon-discount p {
+    margin: 9px 0 0;
+    color: #927333;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Dashed coupon code area */
+
+.wallet-coupon-code {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 0 18px;
+    padding: 13px;
+    border: 1px dashed #c8a44d;
+    border-radius: 10px;
+    background: #fbf7ed;
+}
+
+.wallet-coupon-code > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.wallet-coupon-code small {
+    color: #88754b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.wallet-coupon-code strong {
+    color: #191919;
+    font-size: 15px;
+    letter-spacing: 1px;
+    overflow-wrap: anywhere;
+}
+
+.copy-coupon-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 9px 10px;
+    border: 1px solid #d5c18e;
+    border-radius: 8px;
+    background: #fff;
+    color: #292318;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.copy-coupon-btn:hover {
+    background: #c8a44d;
+    border-color: #c8a44d;
+}
+
+/* Minimum purchase and expiry details */
+
+.wallet-coupon-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+}
+
+.wallet-coupon-details p {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 0;
+    color: #555;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.wallet-coupon-details i {
+    flex-shrink: 0;
+    color: #ad8735;
+    font-size: 16px;
+}
+
+/* Shop button */
+
+.use-coupon-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    margin: auto 18px 18px;
+    padding: 13px 15px;
+    border: 1px solid #171717;
+    border-radius: 9px;
+    background: #171717;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.use-coupon-link:hover {
+    background: #c8a44d;
+    border-color: #c8a44d;
+    color: #171717;
+}
+
+/* =====================================
+   EMPTY COUPON WALLET
+===================================== */
+
+.empty-coupon-wallet {
+    padding: 60px 20px;
+    text-align: center;
+    border: 1px dashed #ddd1b4;
+    border-radius: 15px;
+    background: #fdfbf6;
+}
+
+.empty-coupon-wallet > i {
+    color: #c8a44d;
+    font-size: 48px;
+}
+
+.empty-coupon-wallet h2 {
+    margin: 18px 0 10px;
+    color: #222;
+    font-size: 22px;
+}
+
+.empty-coupon-wallet p {
+    color: #777;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.empty-coupon-wallet a {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #171717;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* =====================================
+   RESPONSIVE LAYOUT
+===================================== */
+
+/* Three cards on wider desktop screens */
+@media (min-width: 1500px) {
+    .coupon-wallet-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Keep two cards when there is not enough room for three */
+@media (max-width: 1200px) {
+    .coupon-wallet-container {
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .coupon-wallet-container > .profile-sidebar {
+        width: 240px;
+    }
+
+    .coupon-wallet-content {
+        padding: 22px;
+    }
+
+    .coupon-wallet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .wallet-coupon-discount h2 {
+        font-size: 28px;
+    }
+}
+
+/* Stack sidebar above coupons on small screens */
+@media (max-width: 800px) {
+    .coupon-wallet-container {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .coupon-wallet-container > .profile-sidebar {
+        position: static;
+        width: 100%;
+    }
+
+    .coupon-wallet-content {
+        padding: 20px;
+    }
+
+    .coupon-wallet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .coupon-wallet-page {
+        width: 94%;
+        margin: 20px auto;
+    }
+
+    .coupon-wallet-content {
+        padding: 15px;
+    }
+
+    .coupon-wallet-heading h1 {
+        font-size: 24px;
+    }
+
+    .coupon-wallet-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wallet-coupon-code {
+        margin: 0 12px;
+        padding: 10px;
+    }
+
+    .wallet-coupon-details {
+        padding: 16px 13px;
+    }
+
+    .copy-coupon-btn {
+        padding: 8px;
+    }
+}

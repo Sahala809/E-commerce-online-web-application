@@ -66,6 +66,23 @@ import {
     generateInvoice
 } from "../controllers/adminController.js"
 
+import {
+    getCoupons,
+    createCoupon,
+    editCoupon,
+    toggleCouponStatus,
+    deleteCoupon
+} from "../controllers/adminController.js"
+
+import {
+    getOffers,
+    createOffer,
+    editOffer,
+    toggleOfferStatus,
+    deleteOffer
+} from "../controllers/adminController.js"
+
+
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
  
@@ -163,4 +180,79 @@ router.get(
     isAdminLogin,
     generateInvoice
 );
+
+
+
+ // Coupon Management Routes
+
+router.get(
+    "/coupons",
+    isAdminLogin,
+    noCache,
+    getCoupons
+);
+
+router.post(
+    "/coupons/create",
+    isAdminLogin,
+    createCoupon
+);
+
+router.patch(
+    "/coupons/edit/:couponId",
+    isAdminLogin,
+    editCoupon
+);
+
+router.post(
+    "/coupons/toggle-status/:couponId",
+    isAdminLogin,
+    toggleCouponStatus
+);
+
+router.delete(
+    "/coupons/delete/:couponId",
+    isAdminLogin,
+    deleteCoupon
+);
+
+
+// Offer Management Routes
+
+router.get(
+    "/offers",
+    isAdminLogin,
+    noCache,
+    getOffers
+);
+
+router.post(
+    "/offers/create",
+    isAdminLogin,
+    noCache,
+    createOffer
+);
+
+router.post(
+    "/offers/:offerId/edit", 
+    isAdminLogin,
+    noCache,
+    editOffer
+
+);
+
+router.post(
+    "/offers/:offerId/toggle-status", 
+    isAdminLogin,
+    nocache,
+    toggleOfferStatus
+);
+
+router.post(
+    "/offers/:offerId/delete", 
+    isAdminLogin,
+    noCache,
+    deleteOffer
+);
+
 export default router;
