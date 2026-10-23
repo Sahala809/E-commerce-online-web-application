@@ -86,11 +86,11 @@
     </div>
 <% } %>
 
-                            <% if(errorMessage){ %>
-                                <div class="alert alert-danger">
-                                    <%= errorMessage %>
-                                </div>
-                            <% } %>
+                            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+    <div class="alert alert-danger">
+        <%= errorMessage %>
+    </div>
+<% } %>
 
                             <form action="/user/login" method="POST" autocomplete="off" novalidate>
 
@@ -103,9 +103,9 @@
                                     name="email"
                                     autocomplete="email"
                                     placeholder="Email"
-                                    value="<%= formData?.email || '' %>"
+                                    value="<%= typeof formData !== 'undefined' ? (formData?.email || '') : '' %>"
                                     >
-                                    <% if (errors && errors.email) { %>
+                                    <% if (typeof errors !== 'undefined' && errors && errors.email) { %>
                                         <small class="text-danger" id="emailError">
                                             <%= errors.email %>
                                         </small>

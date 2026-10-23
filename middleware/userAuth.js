@@ -1,11 +1,17 @@
-import User from "../models/userModel.js";
+
+import User from "../models/usermodel.js";
 
 export const isLogin = async (req, res, next) => {
+    // Prevent browser from caching protected pages
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     try {
         const userId = req.session?.user;
 
         if (!userId) {
-            return res.redirect("/user/login");
+            return res.redirect(303, "/user/login");
         }
 
         const user = await User.findById(userId).select("isBlocked");
@@ -17,14 +23,14 @@ export const isLogin = async (req, res, next) => {
                 }
 
                 res.clearCookie("connect.sid");
-                res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
                 return res.redirect(303, "/user/login");
             });
         }
 
-        next();
+        return next();
+
     } catch (error) {
-        next(error);
+        return next(error);
     }
 };

@@ -24,7 +24,7 @@ import {
 
 import { isLogin } from "../middleware/userAuth.js";
 import { noCache } from "../middleware/noCache.js";
-import { checkBlockedUser } from "../middleware/checkBlochedUser.js";
+
 import {
     loadProfile,
     editProfile,
@@ -96,7 +96,7 @@ router.get(
 router.get(
     "/auth/google/callback",
     passport.authenticate("google", {
-        failureRedirect: "/login",
+        failureRedirect: "/user/login",
         session: true
     }),
     googleCallback
@@ -106,12 +106,18 @@ router.get(
 router.get("/signup", noCache, loadSignup);
 router.post("/signup", signup);
 
-router.get("/login" , noCache, loadLogin)
-router.post("/login", noCache, login);
+router.get("/login" , noCache,(req, res, next) => {
+    if (req.session?.user) {
+        return res.redirect("/user/home");
+    }
+
+    next();
+},  loadLogin)
+router.post("/login", login);
 
 
 router.get("/home",isLogin, noCache, loadHome)
-router.get("/", loadHome);
+router.get("/", noCache, loadHome);
 
 
 

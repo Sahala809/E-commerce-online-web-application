@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 
-import User from "../models/userModel.js";
+import User from "../models/usermodel.js";
+
 import Address from "../models/addressModel.js";
 
 //import { checkUserExists } from "../services/userService.js";
@@ -260,7 +261,7 @@ export const login = async (req, res) => {
             })
         }
 
-        return res.redirect("/user/home")
+        return res.redirect(303, "/user/home")
 
     } catch (error) {
 
@@ -286,16 +287,15 @@ export const logout = (req, res, next) => {
             res.clearCookie("connect.sid");
             res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
-            return res.redirect(303, "/user/login");
+            return res.redirect(303, "/user/home");
         });
     });
 };
 
 
+
 export const googleCallback = async (req, res) => {
-
     try {
-
         const user = req.user;
 
         if (!user) {
@@ -304,9 +304,10 @@ export const googleCallback = async (req, res) => {
 
         if (user.isBlocked) {
             return res.render("user/auth/login", {
-                error: {
-                general: "Your account has been blocked."
-                }
+                successMessage: "",
+                errorMessage: "Your account has been blocked.",
+                formData: {},
+                errors: {}
             });
         }
 
@@ -316,17 +317,15 @@ export const googleCallback = async (req, res) => {
         return res.redirect("/user/home");
 
     } catch (err) {
-
         console.log("GOOGLE LOGIN ERROR:", err);
 
         return res.render("user/auth/login", {
-            error: {
-                general: "Google login failed. Please try again."
-            }
+            successMessage: "",
+            errorMessage: "Google login failed. Please try again.",
+            formData: {},
+            errors: {}
         });
-
     }
-
 };
 
 

@@ -17,7 +17,9 @@ import userRoutes from "./routes/userRoutes.js"
 import sendOtp from "./utils/sendOtp.js";
 import adminRouter from "./routes/adminRoutes.js"
 import { navbarCount } from "./middleware/navbarCount.js";
-
+import { 
+    checkBlockedUser
+} from "./middleware/checkBlockedUser.js"
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
 
@@ -85,6 +87,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use("/user", checkBlockedUser)
 
 app.use("/user", userRoutes);
 app.use("/admin", adminRouter)
