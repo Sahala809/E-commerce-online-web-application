@@ -101,6 +101,13 @@ const orderSchema = new mongoose.Schema(
             required: true
         },
 
+        razorpayPaymentId: {
+            type: String,
+            default: null,
+            unique: true,
+            sparse: true
+        },
+
         subTotal: {
             type: Number,
             required: true

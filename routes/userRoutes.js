@@ -69,6 +69,8 @@ import {
     loadCheckoutAddresses,
     selectCheckoutAddress,
     placeOrder,
+    createRazorpayOrder,
+    verifyRazorpayPayment,
     loadOrderSuccess,
     loadOrders,
     loadOrderDetails,
@@ -193,6 +195,12 @@ router.get("/checkout/address", isLogin, loadCheckoutAddresses);
 router.post("/checkout/address/select", isLogin, selectCheckoutAddress);
 
 router.post("/order/place", placeOrder);
+router.post("/order/razorpay/create", createRazorpayOrder);
+router.post(
+    "/order/razorpay/verify",
+    verifyRazorpayPayment
+);
+
 router.get("/order-success",loadOrderSuccess);
 
 router.get("/orders",isLogin, loadOrders)

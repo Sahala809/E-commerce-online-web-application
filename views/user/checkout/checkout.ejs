@@ -223,45 +223,51 @@
                 </div>
 
 
-                <div class="payment-options">
+               
+<div class="payment-options">
 
+    <!-- Cash On Delivery -->
+    <label class="payment-option">
+        <input
+            type="radio"
+            name="paymentMethod"
+            value="COD"
+            checked
+        >
 
-                    <!-- Cash On Delivery -->
-                    <label class="payment-option">
+        <div class="payment-content">
+            <div class="payment-icon">
+                <i class="bi bi-cash-stack"></i>
+            </div>
 
-                        <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="COD"
-                            checked
-                        >
+            <div>
+                <strong>Cash on Delivery</strong>
+                <p>Pay when your order is delivered.</p>
+            </div>
+        </div>
+    </label>
 
-                        <div class="payment-content">
+    <!-- Razorpay Online Payment -->
+    <label class="payment-option">
+        <input
+            type="radio"
+            name="paymentMethod"
+            value="ONLINE"
+        >
 
-                            <div class="payment-icon">
+        <div class="payment-content">
+            <div class="payment-icon">
+                <i class="bi bi-credit-card"></i>
+            </div>
 
-                                <i class="bi bi-cash-stack"></i>
+            <div>
+                <strong>Online Payment</strong>
+                <p>Pay securely using Razorpay.</p>
+            </div>
+        </div>
+    </label>
 
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    Cash on Delivery
-                                </strong>
-
-                                <p>
-                                    Pay when your order is delivered.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </label>
-
-
-                </div>
+</div>
 
             </div>
 
@@ -635,7 +641,7 @@
 
 </main>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="/js/checkout/checkout.js"></script>
 
 

@@ -1,312 +1,273 @@
+import crypto from "crypto";
+import mongoose from "mongoose";
 import Cart from "../../models/cartModel.js";
 import Address from "../../models/addressModel.js";
 import Variant from "../../models/variantModel.js";
 import Order from "../../models/ordermodel.js";
 import OrderItem from "../../models/orderItemModel.js";
 
+
 export const placeOrderService = async (
     userId,
     addressId,
-    paymentMethod
+    paymentMethod,
+    paymentDetails = {}
 ) => {
+    const session = await mongoose.startSession();
 
     try {
+        let result;
 
-        // ==========================================
-        // GET CART
-        // ==========================================
+        await session.withTransaction(async () => {
+            // GET CART
+            const cart = await Cart.findOne({ userId })
+                .populate("items.productId")
+                .populate("items.variantId")
+                .session(session);
 
-        const cart = await Cart.findOne({ userId })
-            .populate("items.productId")
-            .populate("items.variantId");
-
-        if (!cart || cart.items.length === 0) {
-
-            return {
-                success: false,
-                message: "Your cart is empty"
-            };
-        }
-
-
-        // ==========================================
-        // GET ADDRESS
-        // ==========================================
-
-        const userAddress =
-            await Address.findOne({ userId });
-
-        if (!userAddress) {
-
-            return {
-                success: false,
-                message: "Address not found"
-            };
-        }
-
-
-        const selectedAddress =
-            userAddress.addresses.id(addressId);
-
-        if (!selectedAddress) {
-
-            return {
-                success: false,
-                message: "Selected address not found"
-            };
-        }
-
-
-        // ==========================================
-        // CHECK STOCK + CALCULATE SUBTOTAL
-        // ==========================================
-
-        let subTotal = 0;
-
-        for (const item of cart.items) {
-
-            const variant =
-                await Variant.findById(item.variantId._id);
-
-            if (!variant) {
-
-                return {
-                    success: false,
-                    message: "Product variant not found"
-                };
+            if (!cart || cart.items.length === 0) {
+                throw new Error("Your cart is empty");
             }
 
+            // GET ADDRESS
+            const userAddress = await Address.findOne({ userId })
+                .session(session);
 
-            if (!variant.isActive) {
-
-                return {
-                    success: false,
-                    message:
-                        `${item.productId.productName} is unavailable`
-                };
+            if (!userAddress) {
+                throw new Error("Address not found");
             }
 
+            const selectedAddress =
+                userAddress.addresses.id(addressId);
 
-            if (variant.stock < item.quantity) {
-
-                return {
-                    success: false,
-                    message:
-                        `Insufficient stock for ${item.productId.productName}`
-                };
+            if (!selectedAddress) {
+                throw new Error("Selected address not found");
             }
 
+            // VALIDATE CART AND CALCULATE SUBTOTAL
+            let subTotal = 0;
+            const orderItemsData = [];
 
-            const price =
-                variant.offerPrice > 0
-                    ? variant.offerPrice
-                    : variant.price;
+            for (const item of cart.items) {
+                const variantId = item.variantId?._id;
+                const product = item.productId;
 
+                if (!variantId || !product) {
+                    throw new Error("Product or variant not found");
+                }
 
-            subTotal +=
-                price * item.quantity;
-        }
+                const variant = await Variant.findById(variantId)
+                    .session(session);
 
+                if (!variant) {
+                    throw new Error("Product variant not found");
+                }
 
-        // ==========================================
-        // DELIVERY
-        // ==========================================
+                if (!variant.isActive) {
+                    throw new Error(
+                        `${product.productName} is unavailable`
+                    );
+                }
 
-        const deliveryCharge = 0;
+                if (variant.stock < item.quantity) {
+                    throw new Error(
+                        `Insufficient stock for ${product.productName}`
+                    );
+                }
 
+                const price =
+                    variant.offerPrice > 0
+                        ? variant.offerPrice
+                        : variant.price;
 
-        // ==========================================
-        // DISCOUNT
-        // ==========================================
+                subTotal += price * item.quantity;
 
-        const discountAmount = 0;
+                orderItemsData.push({
+                    productId: product._id,
+                    variantId: variant._id,
+                    quantity: item.quantity,
+                    price
+                });
+            }
 
+            const deliveryCharge = 0;
 
-        // ==========================================
-        // TOTAL
-        // ==========================================
+            const discountAmount = Math.min(
+                subTotal,
+                Math.max(
+                    0,
+                    Number(paymentDetails.discountAmount) || 0
+                )
+            );
 
-        const totalAmount =
-            subTotal +
-            deliveryCharge -
-            discountAmount;
+            const totalAmount =
+                subTotal + deliveryCharge - discountAmount;
 
+            // PREVENT REUSING A PAYMENT
+            if (paymentDetails.razorpayPaymentId) {
+                const existingOrder = await Order.findOne({
+                    razorpayPaymentId:
+                        paymentDetails.razorpayPaymentId
+                }).session(session);
 
-        // ==========================================
-        // CREATE ORDER
-        // ==========================================
+                if (existingOrder) {
+                    throw new Error(
+                        "This payment has already been used for an order."
+                    );
+                }
+            }
 
-        const order = await Order.create({
+            // CREATE ORDER
+            const [order] = await Order.create([{
+                userId,
+                totalAmount,
+                status: "PLACED",
 
-            userId,
+                shippingAddress: {
+                    fullName: selectedAddress.fullName,
+                    phone: selectedAddress.phone,
+                    houseName: selectedAddress.houseName,
+                    street: selectedAddress.street,
+                    district: selectedAddress.district,
+                    city: selectedAddress.city,
+                    state: selectedAddress.state,
+                    country: selectedAddress.country,
+                    pincode: selectedAddress.pincode
+                },
 
-            totalAmount,
+                deliveryDate: null,
+                isPaid: paymentDetails.isPaid === true,
+                orderItemId: [],
+                paymentMethod,
 
-            status: "PLACED",
+                razorpayPaymentId:
+                    paymentDetails.razorpayPaymentId || null,
 
-            shippingAddress: {
+                subTotal,
+                discountAmount,
+                couponId: null,
 
-                fullName: selectedAddress.fullName,
+                paymentStatus:
+                    paymentDetails.isPaid === true
+                        ? "SUCCESS"
+                        : "PENDING",
 
-                phone: selectedAddress.phone,
+                deliveryCharge
+            }], { session });
 
-                houseName: selectedAddress.houseName,
+            // CREATE ORDER ITEMS
+            const orderItems = orderItemsData.map(item => ({
+                orderId: order._id,
+                productId: item.productId,
+                variantId: item.variantId,
+                quantity: item.quantity,
+                price: item.price,
+                orderItemStatus: "PLACED",
+                returnReason: null,
+                refundAmount: 0,
+                cancelReason: null
+            }));
 
-                street: selectedAddress.street,
+            const createdItems = await OrderItem.insertMany(
+                orderItems,
+                { session }
+            );
 
-                district: selectedAddress.district,
+            order.orderItemId = createdItems.map(item => item._id);
 
-                city: selectedAddress.city,
+            await order.save({ session });
 
-                state: selectedAddress.state,
+            // REDUCE STOCK ONLY IF ENOUGH STOCK REMAINS
+            for (const item of orderItemsData) {
+                const stockUpdate = await Variant.updateOne(
+                    {
+                        _id: item.variantId,
+                        isActive: true,
+                        stock: { $gte: item.quantity }
+                    },
+                    {
+                        $inc: { stock: -item.quantity }
+                    },
+                    { session }
+                );
 
-                country: selectedAddress.country,
+                if (stockUpdate.modifiedCount !== 1) {
+                    throw new Error(
+                        "Stock changed during checkout. Please try again."
+                    );
+                }
+            }
 
-                pincode: selectedAddress.pincode
-            },
+            // CLEAR CART WITHIN THE TRANSACTION
+            const cartUpdate = await Cart.updateOne(
+                { _id: cart._id },
+                { $set: { items: [] } },
+                { session }
+            );
 
-            deliveryDate: null,
+            if (cartUpdate.modifiedCount !== 1) {
+                throw new Error(
+                    "Unable to clear cart. Please try again."
+                );
+            }
 
-            isPaid: false,
-
-            orderItemId: [],
-
-            paymentMethod,
-
-            subTotal,
-
-            discountAmount,
-
-            couponId: null,
-
-            paymentStatus: "PENDING",
-
-            deliveryCharge
+            result = {
+                success: true,
+                message: "Order placed successfully",
+                orderId: order._id
+            };
         });
 
-
-        // ==========================================
-        // CREATE ORDER ITEMS
-        // ==========================================
-
-        const orderItemIds = [];
-
-
-        for (const item of cart.items) {
-
-            const variant =
-                item.variantId;
-
-
-            const price =
-                variant.offerPrice > 0
-                    ? variant.offerPrice
-                    : variant.price;
-
-
-            const orderItem =
-                await OrderItem.create({
-
-                    orderId: order._id,
-
-                    productId:
-                        item.productId._id,
-
-                    variantId:
-                        variant._id,
-
-                    quantity:
-                        item.quantity,
-
-                    price,
-
-                    orderItemStatus:
-                        "PLACED",
-
-                    returnReason: null,
-
-                    refundAmount: 0,
-
-                    cancelReason: null
-                });
-
-
-            orderItemIds.push(
-                orderItem._id
-            );
-
-
-            // Reduce stock
-
-            await Variant.findByIdAndUpdate(
-                variant._id,
-                {
-                    $inc: {
-                        stock: -item.quantity
-                    }
-                }
-            );
-        }
-
-
-        // ==========================================
-        // UPDATE ORDER
-        // ==========================================
-
-        order.orderItemId =
-            orderItemIds;
-
-        await order.save();
-
-
-        // ==========================================
-        // CLEAR CART
-        // ==========================================
-
-        await Cart.findOneAndUpdate(
-            { userId },
-            {
-                $set: {
-                    items: []
-                }
-            }
-        );
-
-
-        // ==========================================
-        // SUCCESS
-        // ==========================================
-
-        return {
-
-            success: true,
-
-            message:
-                "Order placed successfully",
-
-            orderId:
-                order._id
-        };
-
+        return result;
 
     } catch (error) {
+        console.error("Place Order Service Error:", error);
 
-        console.error(
-            "Place Order Service Error:",
-            error
-        );
+        if (
+            error.code === 11000 &&
+            error.keyPattern?.razorpayPaymentId
+        ) {
+            return {
+                success: false,
+                message: "This payment has already been used for an order."
+            };
+        }
 
         return {
-
             success: false,
-
-            message:
-                "Failed to place order"
+            message: error.message || "Failed to place order"
         };
+
+    } finally {
+        await session.endSession();
     }
 };
 
+export const verifyRazorpaySignature = (
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
+) => {
+    const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest("hex");
 
+    const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    const receivedBuffer = Buffer.from(
+        razorpaySignature || "",
+        "hex"
+    );
+
+    if (
+        expectedBuffer.length !== receivedBuffer.length ||
+        !crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
+    ) {
+        return false;
+    }
+
+    return true;
+};
 
 
 export const getUserOrdersService = async (userId) => {
