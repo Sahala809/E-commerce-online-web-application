@@ -19,6 +19,20 @@
             </a>
         </div>
 
+        
+<% if (successMessage) { %>
+    <div class="order-flash-message order-flash-success" role="status">
+        <%= successMessage %>
+    </div>
+<% } %>
+
+<% if (errorMessage) { %>
+    <div class="order-flash-message order-flash-error" role="alert">
+        <%= errorMessage %>
+    </div>
+<% } %>
+
+
 
         <% if (!orders || orders.length === 0) { %>
 
@@ -244,22 +258,82 @@
                             </a>
 
 
-                            <% if (order.status === "PLACED") { %>
+                            
+<% if (order.status === "PLACED") { %>
 
-                                <form
-                                    action="/user/orders/<%= order._id %>/cancel"
-                                    method="POST"
-                                    onsubmit="return confirm('Are you sure you want to cancel this order?');">
+    <!-- CANCEL ORDER BUTTON -->
+    <button
+        type="button"
+        class="cancel-order-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#cancelOrderModal<%= order._id %>">
+        Cancel Order
+    </button>
 
-                                    <button
-                                        type="submit"
-                                        class="cancel-order-btn">
-                                        Cancel Order
-                                    </button>
+    <!-- CANCEL ORDER CONFIRMATION MODAL -->
+    <div
+        class="modal fade"
+        id="cancelOrderModal<%= order._id %>"
+        tabindex="-1"
+        aria-labelledby="cancelOrderModalLabel<%= order._id %>"
+        aria-hidden="true">
 
-                                </form>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-                            <% } %>
+                <div class="modal-header">
+                    <h5
+                        class="modal-title"
+                        id="cancelOrderModalLabel<%= order._id %>">
+                        Cancel Order
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this order?</p>
+                    <p class="text-muted">
+                        This action may not be available after the order
+                        has been processed.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Keep Order
+                    </button>
+
+                    <form
+                        action="/user/orders/<%= order._id %>/cancel"
+                        method="POST">
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger">
+                            Confirm Cancellation
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+<% } %>
+
 
                         </div>
 
@@ -274,3 +348,7 @@
     </div>
 
 </main>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>

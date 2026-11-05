@@ -468,6 +468,27 @@
 }
 
 
+.order-flash-message {
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.order-flash-success {
+    background: #e8f6ec;
+    color: #216e39;
+    border: 1px solid #b7e4c7;
+}
+
+.order-flash-error {
+    background: #fff0f0;
+    color: #b42318;
+    border: 1px solid #f5c2c7;
+}
+
+
 /* =========================================
    RESPONSIVE - TABLET
 ========================================= */

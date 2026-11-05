@@ -73,6 +73,7 @@ import {
     verifyRazorpayPayment,
     loadOrderSuccess,
     loadOrders,
+    cancelOrder,
     loadOrderDetails,
     cancelOrderItem,
     requestReturn
@@ -204,6 +205,11 @@ router.post(
 router.get("/order-success",loadOrderSuccess);
 
 router.get("/orders",isLogin, loadOrders)
+
+router.post(
+    "/orders/:orderId/cancel",
+    cancelOrder
+);
 router.get("/orders/:orderId", isLogin, loadOrderDetails);
 router.post(
     "/orders/:orderId/items/:itemId/cancel",

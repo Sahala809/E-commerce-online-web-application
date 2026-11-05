@@ -73,6 +73,7 @@ import {
     placeOrderService,
     verifyRazorpaySignature,
     getUserOrdersService,
+    cancelOrderService,
     getOrderDetailsService,
     cancelOrderItemService,
     requestReturnService
@@ -82,6 +83,7 @@ import {
     getAvailableCouponsService,
     validateCouponService
 } from "../services/coupon/couponService.js";
+import OrderItem from "../models/orderItemModel.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -1853,19 +1855,60 @@ export const loadOrders = async (req, res) => {
             return res.redirect("/user/shop");
         }
 
+        // Get messages from the session
+        const successMessage = req.session.successMessage || null;
+        const errorMessage = req.session.errorMessage || null;
+
+        // Clear messages so they appear only once
+        delete req.session.successMessage;
+        delete req.session.errorMessage;
+
         return res.render("user/orders/viewOrders", {
             pageTitle: "My Orders",
-            orders: result.orders
+            orders: result.orders,
+            successMessage,
+            errorMessage
         });
 
     } catch (error) {
         console.error("Load Orders Error:", error);
 
-        req.session.errorMessage = "Something went wrong while loading orders";
+        req.session.errorMessage =
+            "Something went wrong while loading orders";
+
         return res.redirect("/user/shop");
     }
 };
 
+
+export const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+
+        if (!userId) {
+            return res.redirect("/user/login");
+        }
+
+        const result = await cancelOrderService(userId, orderId);
+
+        if (result.success) {
+            req.session.successMessage = result.message;
+        } else {
+            req.session.errorMessage = result.message;
+        }
+
+        return res.redirect("/user/orders");
+
+    } catch (error) {
+        console.error("Cancel Order Controller Error:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while cancelling the order.";
+
+        return res.redirect("/user/orders");
+    }
+};
 
 export const loadOrderDetails = async (req, res) => {
     try {
@@ -2149,5 +2192,4 @@ export const removeCoupon = async (req, res) => {
         return res.redirect("/user/checkout");
     }
 };
-
 
