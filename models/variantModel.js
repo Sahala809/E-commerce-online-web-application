@@ -28,6 +28,12 @@ const variantSchema = new mongoose.Schema(
             default:0,
             min:0
         },
+        currentOfferPrice: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        
         offerPrice:{
             type: Number,
             default:0,

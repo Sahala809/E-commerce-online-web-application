@@ -1,4 +1,5 @@
 
+import mongoose from "mongoose";
 import Offer from "../../models/offerModel.js";
 import Product from "../../models/productModel.js";
 import Variant from "../../models/variantModel.js";
@@ -72,84 +73,110 @@ export const loadOfferFormDataService = async () => {
 };
 
 const refreshVariantOfferPrices = async () => {
-    const now = new Date();
+    try {
+        const now = new Date();
 
-    // Find variants targeted by Offer Management offers,
-    // including expired or inactive offers.
-    const allOffers = await Offer.find({
-        $or: [
-            { offerType: "VARIANT" },
-            { offerType: "PRODUCT" },
-            { offerType: "CATEGORY" }
-        ]
-    }).lean();
+        const allOffers = await Offer.find({
+            offerType: { $in: ["VARIANT", "PRODUCT", "CATEGORY"] }
+        }).lean();
 
-    if (allOffers.length === 0) return;
+        const variants = await Variant.find({
+            isActive: true
+        }).populate("productId");
 
-    const products = await Product.find().select("_id categoryId isActive").lean();
+        for (const variant of variants) {
 
-    const variants = await Variant.find({
-        isActive: true
-    }).populate("productId");
+            const product = variant.productId;
 
-    for (const variant of variants) {
-        const product = variant.productId;
+            if (!product) continue;
 
-        if (!product) continue;
+            const variantId = String(variant._id);
+            const productId = String(product._id);
+            const categoryId = String(product.categoryId);
 
-        const variantId = String(variant._id);
-        const productId = String(product._id);
-        const categoryId = String(product.categoryId);
-
-        const targetedOffers = allOffers.filter((offer) =>
-            (offer.offerType === "VARIANT" &&
-                String(offer.variantId) === variantId) ||
-            (offer.offerType === "PRODUCT" &&
-                String(offer.productId) === productId) ||
-            (offer.offerType === "CATEGORY" &&
-                String(offer.categoryId) === categoryId)
-        );
-
-        // Leave variants that were never targeted by Offer Management unchanged.
-        if (targetedOffers.length === 0) continue;
-
-        const activeOffers = targetedOffers.filter((offer) =>
-            offer.isActive &&
-            new Date(offer.startDate) <= now &&
-            new Date(offer.endDate) >= now
-        );
-
-        // Priority: Variant > Product > Category.
-        const applicableOffer =
-            activeOffers.find((offer) =>
-                offer.offerType === "VARIANT"
-            ) ||
-            activeOffers.find((offer) =>
-                offer.offerType === "PRODUCT"
-            ) ||
-            activeOffers.find((offer) =>
-                offer.offerType === "CATEGORY"
+            // Find all offers targeting this variant
+            const targetedOffers = allOffers.filter((offer) =>
+                (
+                    offer.offerType === "VARIANT" &&
+                    String(offer.variantId) === variantId
+                ) ||
+                (
+                    offer.offerType === "PRODUCT" &&
+                    String(offer.productId) === productId
+                ) ||
+                (
+                    offer.offerType === "CATEGORY" &&
+                    String(offer.categoryId) === categoryId
+                )
             );
 
-            console.log("Applicable offer:", applicableOffer);
+            // Only active offers within the date range
+            const activeOffers = targetedOffers.filter((offer) =>
+                offer.isActive &&
+                new Date(offer.startDate) <= now &&
+                new Date(offer.endDate) >= now
+            );
 
-        const newOfferPrice = applicableOffer
-            ? Number(
-                (
-                    variant.price *
-                    (1 - applicableOffer.discountPercentage / 100)
-                ).toFixed(2)
-            )
-            : 0;
+            // Calculate discounted prices
+            const calculatedOffers = activeOffers.map((offer) => ({
+                offerType: offer.offerType,
+                finalPrice: Number(
+                    (
+                        variant.price *
+                        (1 - offer.discountPercentage / 100)
+                    ).toFixed(2)
+                )
+            }));
 
-        if (Number(variant.offerPrice) !== newOfferPrice) {
-    variant.offerPrice = newOfferPrice;
-    await variant.save();
+            // Lowest price means highest discount
+            calculatedOffers.sort(
+                (a, b) => a.finalPrice - b.finalPrice
+            );
 
-    console.log("UPDATED OFFER PRICE:", variant.offerPrice);
-}
+            const bestOffer = calculatedOffers[0];
+
+            // Original variant prices
+            const originalPrice = Number(variant.price);
+            const currentOfferPrice = Number(variant.currentOfferPrice);
+
+            // Variant's own offer price
+            const basePrice =
+                currentOfferPrice > 0 && currentOfferPrice < originalPrice
+                    ? currentOfferPrice
+                    : originalPrice;
+
+            // Select the lowest price
+            const newOfferPrice = bestOffer
+                ? Math.min(bestOffer.finalPrice, basePrice)
+                : basePrice;
+
+            // Update offerPrice only
+            // Never modify currentOfferPrice or price
+            if (Number(variant.offerPrice) !== newOfferPrice) {
+
+                variant.offerPrice = newOfferPrice;
+
+                await variant.save();
+
+                console.log(
+                    "UPDATED VARIANT:",
+                    variant._id,
+                    "OLD OFFER PRICE:",
+                    variant.offerPrice,
+                    "NEW OFFER PRICE:",
+                    newOfferPrice
+                );
+            }
+        }
+
+        console.log("Variant offer prices refreshed successfully.");
+
+    } catch (error) {
+        console.error("REFRESH VARIANT OFFER PRICE ERROR:", error);
+        throw error;
     }
 };
+
 
 export const createOfferService = async (body) => {
     const {
@@ -401,31 +428,55 @@ export const editOfferService = async (offerId, body) => {
     return { success: true, offer };
 };
 
-
 export const toggleOfferStatusService = async (offerId) => {
-    const offer = await Offer.findById(offerId);
+    try {
+        // Check whether the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(offerId)) {
+            return {
+                success: false,
+                message: "Invalid offer ID."
+            };
+        }
 
-    if (!offer) {
+        // Find the offer
+        const offer = await Offer.findById(offerId);
+
+        if (!offer) {
+            console.log("OFFER NOT FOUND:", offerId);
+
+            return {
+                success: false,
+                message: "Offer not found."
+            };
+        }
+
+        console.log("BEFORE TOGGLE:", offer.isActive);
+
+        // Change the offer status
+        const newStatus = !offer.isActive;
+
+        // Update MongoDB
+        const updatedOffer = await Offer.findByIdAndUpdate(
+            offerId,
+            { $set: { isActive: newStatus } },
+            { new: true, runValidators: true }
+        );
+
+        console.log("AFTER DATABASE UPDATE:", updatedOffer.isActive);
+
+        // Refresh variant offer prices
+        await refreshVariantOfferPrices();
+
         return {
-            success: false,
-            message: "Offer not found."
+            success: true,
+            offer: updatedOffer
         };
+
+    } catch (error) {
+        console.error("TOGGLE OFFER SERVICE ERROR:", error);
+        throw error;
     }
-
-    offer.isActive = !offer.isActive;
-
-    await offer.save();
-
-    // Refresh variant offer prices after activation/deactivation
-    await refreshVariantOfferPrices();
-
-    return {
-        success: true,
-        offer
-    };
 };
-
-
 
 export const deleteOfferService = async (offerId) => {
     const offer = await Offer.findById(offerId);

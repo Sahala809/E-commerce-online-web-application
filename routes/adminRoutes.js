@@ -266,7 +266,7 @@ router.post(
 router.post(
     "/offers/:offerId/toggle-status", 
     isAdminLogin,
-    nocache,
+    noCache,
     toggleOfferStatus
 );
 
