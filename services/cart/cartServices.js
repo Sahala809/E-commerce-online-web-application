@@ -9,13 +9,21 @@ export const addToCartService = async (
     quantity
 ) => {
 
-
     const requestedQuantity = Number(quantity);
+    const MAX_QUANTITY = 5;
 
     if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
         return {
             success: false,
             message: "Invalid quantity"
+        };
+    }
+
+    // Maximum quantity validation
+    if (requestedQuantity > MAX_QUANTITY) {
+        return {
+            success: false,
+            message: "Cart limit exceeded"
         };
     }
 
@@ -43,6 +51,7 @@ export const addToCartService = async (
         };
     }
 
+    // Find existing cart
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
@@ -66,25 +75,38 @@ export const addToCartService = async (
         };
     }
 
+    // Check duplicate variant
     const existingItem = cart.items.find(
         item => item.variantId.toString() === variantId.toString()
     );
 
     if (existingItem) {
-
         return {
             success: false,
             message: "This item is already in your cart."
         };
     }
-        else {
 
-        cart.items.push({
-            productId,
-            variantId,
-            quantity: requestedQuantity
-        });
+    // Calculate total quantity in existing cart
+    const totalItems = cart.items.reduce(
+        (total, item) => total + Number(item.quantity),
+        0
+    );
+
+    // Check maximum cart quantity
+    if (totalItems + requestedQuantity > MAX_QUANTITY) {
+        return {
+            success: false,
+            message: "Cart limit exceeded"
+        };
     }
+
+    // Add new item
+    cart.items.push({
+        productId,
+        variantId,
+        quantity: requestedQuantity
+    });
 
     await cart.save();
 
@@ -93,7 +115,6 @@ export const addToCartService = async (
         message: "Product added to cart"
     };
 };
-
 
 
 export const loadCartService = async (userId) => {

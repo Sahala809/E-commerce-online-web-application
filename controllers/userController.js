@@ -1,7 +1,12 @@
 import bcrypt from "bcrypt";
+<<<<<<< HEAD
 
 import User from "../models/usermodel.js";
 
+=======
+import Wishlist from "../models/wishlistModel.js"
+import User from "../models/userModel.js";
+>>>>>>> 57a1c4d (Fix wishlist and cart functionality)
 import Address from "../models/addressModel.js";
 
 //import { checkUserExists } from "../services/userService.js";
@@ -840,11 +845,21 @@ delete queryParams.page;
         req.session.successMessage = null;
         req.session.errorMessage = null;
 
+        let wishlist = null;
+
+        if (req.session.user) {
+            wishlist = await Wishlist.findOne({
+                userId: req.session.user
+            }).lean();
+        }
+
         res.render("user/product/shop", {
             activePage:"shop",
             products: result.products,
             categories: result.categories,
             colors: result.colors,
+
+            wishlist,
 
             selectedCategories,
             selectedColors,
@@ -872,19 +887,29 @@ delete queryParams.page;
 }
 
 
-
 export const loadProductDetail = async (req, res) => {
     try {
 
-        const productId = req.params.id
+        const productId = req.params.id;
 
-        const result = await loadProductDetailService(productId)
+        const result = await loadProductDetailService(productId);
 
-        
-        if(!result || !result.product){
+        if (!result || !result.product) {
             req.session.errorMessage = "Product not found";
-            return res.redirect("/user/shop")
+            return res.redirect("/user/shop");
         }
+
+        // Get selected variant from URL
+        const requestedVariantId = req.query.variantId;
+
+        // Check whether the requested variant belongs to this product
+        const selectedVariant = result.variants?.find(
+            variant => variant._id.toString() === requestedVariantId
+        );
+
+        const selectedVariantId = selectedVariant
+            ? selectedVariant._id.toString()
+            : result.variants?.[0]?._id.toString() || "";
 
         const successMessage = req.session.successMessage;
         const errorMessage = req.session.errorMessage;
@@ -893,13 +918,15 @@ export const loadProductDetail = async (req, res) => {
         delete req.session.errorMessage;
 
         res.render("user/product/productDetail", {
-            activePage:"shop",
+            activePage: "shop",
             product: result.product,
             variants: result.variants || [],
             relatedProducts: result.relatedProducts || [],
+            selectedVariantId,
             successMessage,
             errorMessage
-        })
+        });
+
     } catch (error) {
 
         console.log("LOAD PRODUCT DETAIL ERROR:", error);
@@ -907,24 +934,22 @@ export const loadProductDetail = async (req, res) => {
         req.session.errorMessage = "Something went wrong";
 
         return res.redirect("/user/shop");
-        
+
     }
 };
-
 export const addToCart = async (req, res) => {
     try {
-console.log("SESSION:", req.session);
         const { productId, variantId, quantity } = req.body;
 
         const userId = req.session.user;
 
         // User not logged in
         if (!userId) {
-            req.session.errorMessage = "Please login to add products to cart";
+            req.session.errorMessage =
+                "Please login to add products to cart";
 
             return res.redirect("/user/login");
         }
-
 
         const result = await addToCartService(
             userId,
@@ -933,25 +958,40 @@ console.log("SESSION:", req.session);
             quantity
         );
 
+        // If adding to cart fails, keep wishlist item
         if (!result.success) {
             req.session.errorMessage = result.message;
             return res.redirect(`/user/product/${productId}`);
         }
 
+        // Remove the same product and variant from wishlist
+        try {
+            await removeFromWishlistService(
+                userId,
+                productId,
+                variantId
+            );
+        } catch (wishlistError) {
+            console.log(
+                "WISHLIST REMOVAL ERROR:",
+                wishlistError
+            );
+        }
+
         req.session.successMessage = result.message;
-console.log("REDIRECTING TO CART");
-        return res.redirect(`/user/cart`);
+
+        return res.redirect("/user/cart");
 
     } catch (error) {
-
         console.log("ADD TO CART ERROR:", error);
 
         req.session.errorMessage = "Something went wrong";
 
-        return res.redirect(`/user/product/${req.body.productId}`);
+        return res.redirect(
+            `/user/product/${req.body.productId}`
+        );
     }
 };
-
 
 export const loadCart = async (req, res) => {
     try {
@@ -1102,8 +1142,17 @@ export const loadWishlist = async (req, res) => {
 
         const wishlist = await loadWishlistService(userId);
 
+        const successMessage = req.session.wishlistSuccessMessage;
+        const errorMessage = req.session.wishlistErrorMessage;
+
+        // Clear messages after reading
+        req.session.wishlistSuccessMessage = null;
+        req.session.wishlistErrorMessage = null;
+
         res.render("user/wishlist/wishlist", {
-            wishlist
+            wishlist,
+            successMessage,
+            errorMessage
         });
 
     } catch (error) {
@@ -1115,7 +1164,6 @@ export const loadWishlist = async (req, res) => {
     }
 };
 
-
 export const addToWishlist = async (req, res) => {
     try {
 
@@ -1123,42 +1171,33 @@ export const addToWishlist = async (req, res) => {
 
         const { productId, variantId } = req.params;
 
-        console.log("User ID:", userId);
-        console.log("Product ID:", productId);
-        console.log("Variant ID:", variantId);
-
-
         const result = await addToWishlistService(
             userId,
             productId,
             variantId
         );
 
-
         if (!result.success) {
-
-            req.session.errorMessage = result.message;
-
-            return res.redirect("/user/shop");
+            return res.status(400).json({
+                success: false,
+                message: result.message
+            });
         }
 
-
-        req.session.successMessage = result.message;
-
-        return res.redirect("/user/shop");
+        return res.status(200).json({
+            success: true,
+            action: result.action,
+            message: result.message
+        });
 
     } catch (error) {
 
-        console.error(
-            "Add wishlist error:",
-            error
-        );
+        console.error("Add wishlist error:", error);
 
-        req.session.errorMessage =
-            error.message ||
-            "Unable to add product to wishlist.";
-
-        return res.redirect("/user/shop");
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update wishlist."
+        });
     }
 };
 
@@ -1182,7 +1221,7 @@ export const removeFromWishlist = async (req, res) => {
             return res.redirect("/user/wishlist");
         }
 
-         req.session.successMessage =
+         req.session.wishlistSuccessMessage =
             result.message;
 
         return res.redirect("/user/wishlist");
@@ -1215,7 +1254,7 @@ export const removeWishlistItem = async (req, res) => {
             return res.redirect("/user/wishlist");
         }
 
-        req.session.successMessage = "Item removed from wishlist.";
+        req.session.wishlistSuccessMessage = "Item removed from wishlist.";
 
         return res.redirect("/user/wishlist");
 
