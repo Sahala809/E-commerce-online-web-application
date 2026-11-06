@@ -68,7 +68,7 @@
                         variant.images.length > 0
                     ) { %>
 
-                        <a href="/user/product/<%= product._id %>">
+                        <a href="/user/product/<%= product._id %>?variantId=<%= variant._id %>">
     <img
         src="/uploads/variants/<%= variant.images[0] %>"
         alt="<%= product ? product.productName : 'Product unavailable' %>"

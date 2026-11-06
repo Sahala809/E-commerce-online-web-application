@@ -3,47 +3,7 @@
 
 <link rel="stylesheet" href="/css/product/shop.css">
 
-<!-- ================= WISHLIST POPUP ================= -->
 
-<% if (successMessage || errorMessage) { %>
-
-    <div class="wishlist-popup-overlay" id="wishlistPopup">
-
-        <div class="wishlist-popup">
-
-            <button
-                type="button"
-                class="wishlist-popup-close"
-                onclick="closeWishlistPopup()"
-            >
-                &times;
-            </button>
-
-            <div class="wishlist-popup-icon">
-                <i class="bi bi-heart-fill"></i>
-            </div>
-
-            <h3>
-                <%= successMessage ? "Added to Wishlist" : "Wishlist" %>
-            </h3>
-
-            <p>
-                <%= successMessage || errorMessage %>
-            </p>
-
-            <button
-                type="button"
-                class="wishlist-popup-btn"
-                onclick="closeWishlistPopup()"
-            >
-                OK
-            </button>
-
-        </div>
-
-    </div>
-
-<% } %>
 <main class="shop-container">
 
     <!-- Breadcrumb -->
@@ -377,25 +337,40 @@
 
                         <!-- ================= WISHLIST ================= -->
 
-                        <form
-                            action="/user/wishlist/add/<%= product._id %>/<%= product.variant._id %>"
-                            method="POST"
-                            class="wishlist-form"
-                        >
+<%
+    const isWishlisted = wishlist?.items?.some(item =>
+        item.productId?.toString() === product._id.toString() &&
+        item.variantId?.toString() === product.variant._id.toString()
+    );
+%>
 
-                            <button
-                                type="submit"
-                                class="wishlist-btn"
-                                data-product-id="<%= product._id %>"
-                                data-variant-id="<%= product.variant._id || "" %>" 
-                                title="Add to Wishlist"
-                            >
+<form
+    action="/user/wishlist/add/<%= product._id %>/<%= product.variant._id %>"
+    method="POST"
+    class="wishlist-form"
+>
 
-                                <i class="bi bi-heart"></i>
+    <button
+        type="submit"
+        class="wishlist-btn <%= isWishlisted ? 'active' : '' %>"
+        data-product-id="<%= product._id %>"
+        data-variant-id="<%= product.variant._id %>"
+        title="<%= isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist' %>"
+    >
 
-                            </button>
+        <% if (isWishlisted) { %>
 
-                        </form>
+            <i class="bi bi-heart-fill"></i>
+
+        <% } else { %>
+
+            <i class="bi bi-heart"></i>
+
+        <% } %>
+
+    </button>
+
+</form>
 
                     </div>
 
@@ -864,6 +839,78 @@
         });
 
     }
+
+
+    // =========================================================
+// WISHLIST TOGGLE WITHOUT PAGE REFRESH
+// =========================================================
+
+const wishlistForms =
+    document.querySelectorAll(".wishlist-form");
+
+wishlistForms.forEach(form => {
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const button =
+            form.querySelector(".wishlist-btn");
+
+        const icon =
+            button.querySelector("i");
+
+        try {
+
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                console.error(result.message);
+                return;
+            }
+
+            // PRODUCT ADDED TO WISHLIST
+            if (result.action === "added") {
+
+                button.classList.add("active");
+
+                icon.classList.remove("bi-heart");
+                icon.classList.add("bi-heart-fill");
+
+                button.title = "Remove from Wishlist";
+
+            }
+
+            // PRODUCT REMOVED FROM WISHLIST
+            else if (result.action === "removed") {
+
+                button.classList.remove("active");
+
+                icon.classList.remove("bi-heart-fill");
+                icon.classList.add("bi-heart");
+
+                button.title = "Add to Wishlist";
+
+            }
+
+            console.log(result.message);
+
+        } catch (error) {
+
+            console.error("Wishlist error:", error);
+
+        }
+
+    });
+
+});
 
 </script>
 

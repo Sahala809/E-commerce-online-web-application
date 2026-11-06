@@ -61,12 +61,19 @@ const stockLimitMessage =
     // INITIAL VARIANT
     // =========================================================
 
-    let selectedVariant =
-        variants && variants.length > 0
-            ? variants[0]
-            : null;
+   const requestedVariantId =
+    new URLSearchParams(window.location.search)
+        .get("variantId");
 
-
+let selectedVariant =
+    variants && variants.length > 0
+        ? (
+            variants.find(
+                variant =>
+                    variant._id.toString() === requestedVariantId
+            ) || variants[0]
+        )
+        : null;
 
     // =========================================================
 // SHOW STOCK LIMIT MODAL
@@ -769,39 +776,49 @@ if (
     }
 
 
-    // =========================================================
+     // =========================================================
     // INITIAL LOAD
     // =========================================================
 
     if (selectedVariant) {
 
-        updateImages(
-            selectedVariant
-        );
+        // Update images
+        updateImages(selectedVariant);
 
+        // Update price
+        updatePrice(selectedVariant);
 
-        updatePrice(
-            selectedVariant
-        );
+        // Update stock
+        updateStock(selectedVariant);
 
+        // Select the correct color button
+        colorOptions.forEach(button => {
 
-        updateStock(
-            selectedVariant
-        );
+            button.classList.remove("selected");
 
+            if (
+                button.dataset.variantId ===
+                selectedVariant._id.toString()
+            ) {
+                button.classList.add("selected");
+            }
 
-        // -----------------------------------------
-        // INITIAL WISHLIST ACTION
-        // -----------------------------------------
+        });
 
+        // Update selected variant ID
+        const selectedVariantId =
+            document.getElementById("selectedVariantId");
+
+        if (selectedVariantId) {
+            selectedVariantId.value = selectedVariant._id;
+        }
+
+        // Update wishlist action
         if (wishlistForm) {
-
             wishlistForm.action =
                 `/user/wishlist/add/${productId}/${selectedVariant._id}`;
-
         }
 
     }
 
 });
-
