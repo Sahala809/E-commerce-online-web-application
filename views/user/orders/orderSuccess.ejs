@@ -37,9 +37,8 @@
                 </span>
 
                 <strong>
-                    #<%= orderId %>
-                </strong>
-
+    #<%= orderId.toString().slice(-8).toUpperCase() %>
+</strong>
             </div>
 
 
@@ -50,8 +49,13 @@
                 </span>
 
                 <strong>
-                    Cash on Delivery
-                </strong>
+    <%= paymentMethod === "ONLINE"
+        ? "Online Payment"
+        : paymentMethod === "WALLET"
+            ? "Wallet"
+            : "Cash on Delivery"
+    %>
+</strong>
 
             </div>
 

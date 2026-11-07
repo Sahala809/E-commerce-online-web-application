@@ -1,0 +1,67 @@
+<%- include("../partials/header") %>
+
+<%- include("../partials/navbar") %>
+
+<link
+    rel="stylesheet"
+    href="/css/userOrders/orderFailure.css"
+>
+
+<main class="order-failure-page">
+
+    <div class="failure-container">
+
+        <div class="failure-icon">
+            ✕
+        </div>
+
+        <h1>
+            Payment Failed!
+        </h1>
+
+        <p class="failure-message">
+            Unfortunately, your payment could not be completed.
+            Please try again.
+        </p>
+
+        <div class="failure-info">
+
+            <strong>
+                Your order has not been confirmed.
+            </strong>
+
+            <p>
+                If money was deducted from your account,
+                please contact support or check with your bank.
+            </p>
+
+        </div>
+
+        <div class="failure-actions">
+
+            <a
+                href="/user/checkout"
+                class="btn-primary"
+            >
+                Retry Payment
+            </a>
+
+            <a
+                href="/user/orders"
+                class="btn-outline"
+            >
+                View My Orders
+            </a>
+
+            <a
+                href="/user/shop"
+                class="btn-outline"
+            >
+                Continue Shopping
+            </a>
+
+        </div>
+
+    </div>
+
+</main>

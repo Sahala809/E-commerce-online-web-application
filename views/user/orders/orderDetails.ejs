@@ -36,13 +36,12 @@
         <div class="order-info-card">
 
             <div class="info-item">
-                <span>Order ID</span>
+    <span>Order ID</span>
 
-                <strong>
-                    #<%= order._id %>
-                </strong>
-            </div>
-
+    <strong>
+        #<%= order._id.toString().slice(-8).toUpperCase() %>
+    </strong>
+</div>
 
             <div class="info-item">
 
@@ -272,19 +271,40 @@
                     </div>
 
 
-                    <div class="modal-body">
+                
+<div class="modal-body">
 
-                        <p>
-                            Are you sure you want to cancel this item?
-                        </p>
+    <p>
+        Are you sure you want to cancel this item?
+    </p>
 
-                        <p class="cancel-product-name">
-                            <strong>
-                                <%= item.productId?.productName || "Product" %>
-                            </strong>
-                        </p>
+    <p class="cancel-product-name">
+        <strong>
+            <%= item.productId?.productName || "Product" %>
+        </strong>
+    </p>
 
-                    </div>
+    <label for="cancelReason<%= item._id %>" class="form-label">
+        Reason for Cancellation
+    </label>
+
+    <select
+        name="cancelReason"
+        id="cancelReason<%= item._id %>"
+        class="form-select"
+        form="cancelItemForm<%= item._id %>"
+        required
+    >
+        <option value="">Select a reason</option>
+        <option value="Ordered by mistake">Ordered by mistake</option>
+        <option value="Found a better price">Found a better price</option>
+        <option value="Delivery is taking too long">Delivery is taking too long</option>
+        <option value="Changed my mind">Changed my mind</option>
+        <option value="Other">Other</option>
+    </select>
+
+</div>
+
 
 
                     <div class="modal-footer">
@@ -298,6 +318,7 @@
 
 
                         <form
+                            id="cancelItemForm<%= item._id %>"
                             action="/user/orders/<%= order._id %>/items/<%= item._id %>/cancel"
                             method="POST">
 

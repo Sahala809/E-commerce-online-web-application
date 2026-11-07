@@ -68,11 +68,15 @@ import {
     loadCheckout,
     loadCheckoutAddresses,
     selectCheckoutAddress,
+    createRazorpayOrder,
+    verifyRazorpayPayment,
     placeOrder,
     loadOrderSuccess,
+    loadOrderFailure,
     loadOrders,
     loadOrderDetails,
     cancelOrderItem,
+    cancelOrder,
     requestReturn
 } from "../controllers/userController.js"
 
@@ -192,11 +196,24 @@ router.get("/checkout", loadCheckout);
 router.get("/checkout/address", isLogin, loadCheckoutAddresses);
 router.post("/checkout/address/select", isLogin, selectCheckoutAddress);
 
+router.post("/order/razorpay/create", createRazorpayOrder);
+router.post("/order/razorpay/verify", verifyRazorpayPayment);
+
 router.post("/order/place", placeOrder);
 router.get("/order-success",loadOrderSuccess);
 
+router.get("/order-failure", loadOrderFailure);
+
 router.get("/orders",isLogin, loadOrders)
+
 router.get("/orders/:orderId", isLogin, loadOrderDetails);
+
+router.post(
+    "/orders/:orderId/cancel",
+    isLogin,
+    cancelOrder
+);
+
 router.post(
     "/orders/:orderId/items/:itemId/cancel",
     isLogin,

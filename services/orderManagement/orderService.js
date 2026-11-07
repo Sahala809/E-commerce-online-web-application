@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import Cart from "../../models/cartModel.js";
 import Address from "../../models/addressModel.js";
 import Variant from "../../models/variantModel.js";
@@ -7,7 +9,8 @@ import OrderItem from "../../models/orderItemModel.js";
 export const placeOrderService = async (
     userId,
     addressId,
-    paymentMethod
+    paymentMethod,
+    paymentDetails = {}
 ) => {
 
     try {
@@ -21,7 +24,6 @@ export const placeOrderService = async (
             .populate("items.variantId");
 
         if (!cart || cart.items.length === 0) {
-
             return {
                 success: false,
                 message: "Your cart is empty"
@@ -33,23 +35,18 @@ export const placeOrderService = async (
         // GET ADDRESS
         // ==========================================
 
-        const userAddress =
-            await Address.findOne({ userId });
+        const userAddress = await Address.findOne({ userId });
 
         if (!userAddress) {
-
             return {
                 success: false,
                 message: "Address not found"
             };
         }
 
-
-        const selectedAddress =
-            userAddress.addresses.id(addressId);
+        const selectedAddress = userAddress.addresses.id(addressId);
 
         if (!selectedAddress) {
-
             return {
                 success: false,
                 message: "Selected address not found"
@@ -65,46 +62,35 @@ export const placeOrderService = async (
 
         for (const item of cart.items) {
 
-            const variant =
-                await Variant.findById(item.variantId._id);
+            const variant = await Variant.findById(item.variantId._id);
 
             if (!variant) {
-
                 return {
                     success: false,
                     message: "Product variant not found"
                 };
             }
 
-
             if (!variant.isActive) {
-
                 return {
                     success: false,
-                    message:
-                        `${item.productId.productName} is unavailable`
+                    message: `${item.productId.productName} is unavailable`
                 };
             }
-
 
             if (variant.stock < item.quantity) {
-
                 return {
                     success: false,
-                    message:
-                        `Insufficient stock for ${item.productId.productName}`
+                    message: `Insufficient stock for ${item.productId.productName}`
                 };
             }
-
 
             const price =
                 variant.offerPrice > 0
                     ? variant.offerPrice
                     : variant.price;
 
-
-            subTotal +=
-                price * item.quantity;
+            subTotal += price * item.quantity;
         }
 
 
@@ -119,7 +105,10 @@ export const placeOrderService = async (
         // DISCOUNT
         // ==========================================
 
-        const discountAmount = 0;
+        const discountAmount = Math.min(
+            subTotal,
+            Math.max(0, Number(paymentDetails.discountAmount) || 0)
+        );
 
 
         // ==========================================
@@ -127,9 +116,36 @@ export const placeOrderService = async (
         // ==========================================
 
         const totalAmount =
-            subTotal +
-            deliveryCharge -
-            discountAmount;
+            subTotal + deliveryCharge - discountAmount;
+
+
+        // ==========================================
+        // PAYMENT DETAILS
+        // ==========================================
+
+        const isPaid = paymentDetails.isPaid === true;
+
+        const razorpayPaymentId =
+            paymentDetails.razorpayPaymentId || null;
+
+
+        // ==========================================
+        // PREVENT DUPLICATE PAYMENT
+        // ==========================================
+
+        if (razorpayPaymentId) {
+
+            const existingOrder = await Order.findOne({
+                razorpayPaymentId
+            });
+
+            if (existingOrder) {
+                return {
+                    success: false,
+                    message: "This payment has already been processed"
+                };
+            }
+        }
 
 
         // ==========================================
@@ -147,31 +163,25 @@ export const placeOrderService = async (
             shippingAddress: {
 
                 fullName: selectedAddress.fullName,
-
                 phone: selectedAddress.phone,
-
                 houseName: selectedAddress.houseName,
-
                 street: selectedAddress.street,
-
                 district: selectedAddress.district,
-
                 city: selectedAddress.city,
-
                 state: selectedAddress.state,
-
                 country: selectedAddress.country,
-
                 pincode: selectedAddress.pincode
             },
 
             deliveryDate: null,
 
-            isPaid: false,
+            isPaid,
 
             orderItemId: [],
 
             paymentMethod,
+
+            razorpayPaymentId,
 
             subTotal,
 
@@ -179,7 +189,7 @@ export const placeOrderService = async (
 
             couponId: null,
 
-            paymentStatus: "PENDING",
+            paymentStatus: isPaid ? "SUCCESS" : "PENDING",
 
             deliveryCharge
         });
@@ -191,50 +201,37 @@ export const placeOrderService = async (
 
         const orderItemIds = [];
 
-
         for (const item of cart.items) {
 
-            const variant =
-                item.variantId;
-
+            const variant = item.variantId;
 
             const price =
                 variant.offerPrice > 0
                     ? variant.offerPrice
                     : variant.price;
 
+            const orderItem = await OrderItem.create({
 
-            const orderItem =
-                await OrderItem.create({
+                orderId: order._id,
 
-                    orderId: order._id,
+                productId: item.productId._id,
 
-                    productId:
-                        item.productId._id,
+                variantId: variant._id,
 
-                    variantId:
-                        variant._id,
+                quantity: item.quantity,
 
-                    quantity:
-                        item.quantity,
+                price,
 
-                    price,
+                orderItemStatus: "PLACED",
 
-                    orderItemStatus:
-                        "PLACED",
+                returnReason: null,
 
-                    returnReason: null,
+                refundAmount: 0,
 
-                    refundAmount: 0,
+                cancelReason: null
+            });
 
-                    cancelReason: null
-                });
-
-
-            orderItemIds.push(
-                orderItem._id
-            );
-
+            orderItemIds.push(orderItem._id);
 
             // Reduce stock
 
@@ -253,8 +250,7 @@ export const placeOrderService = async (
         // UPDATE ORDER
         // ==========================================
 
-        order.orderItemId =
-            orderItemIds;
+        order.orderItemId = orderItemIds;
 
         await order.save();
 
@@ -281,33 +277,46 @@ export const placeOrderService = async (
 
             success: true,
 
-            message:
-                "Order placed successfully",
+            message: "Order placed successfully",
 
-            orderId:
-                order._id
+            orderId: order._id.toString()
         };
 
 
     } catch (error) {
 
-        console.error(
-            "Place Order Service Error:",
-            error
-        );
+        console.error("Place Order Service Error:", error);
 
         return {
-
             success: false,
-
-            message:
-                "Failed to place order"
+            message: "Failed to place order"
         };
     }
 };
 
+export const verifyRazorpaySignature = (
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
+) => {
 
+    const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest("hex");
 
+    const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    const receivedBuffer = Buffer.from(razorpaySignature || "", "hex");
+
+    if (
+        expectedBuffer.length !== receivedBuffer.length ||
+        !crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
+    ) {
+        return false;
+    }
+
+    return true;
+};
 
 export const getUserOrdersService = async (userId) => {
     try {
@@ -394,7 +403,8 @@ export const getOrderDetailsService = async (userId, orderId) => {
 export const cancelOrderItemService = async (
     userId,
     orderId,
-    itemId
+    itemId,
+    cancelReason
 ) => {
     try {
 
@@ -435,10 +445,25 @@ export const cancelOrderItemService = async (
         }
 
 
-        // 4. Cancel the item
-        orderItem.orderItemStatus = "CANCELLED";
+        // 4. Cancel the item and save reason
+if (!cancelReason || !cancelReason.trim()) {
+    return {
+        success: false,
+        message: "Please select a cancellation reason"
+    };
+}
 
-        await orderItem.save();
+orderItem.orderItemStatus = "CANCELLED";
+orderItem.cancelReason = cancelReason.trim();
+
+
+try {
+    await orderItem.save();
+    console.log("AFTER SAVE:", orderItem.cancelReason);
+} catch (error) {
+    console.log("SAVE ERROR:", error);
+    throw error;
+}
 
 
         // 5. Restore the cancelled quantity to stock
@@ -490,6 +515,103 @@ export const cancelOrderItemService = async (
 };
 
 
+
+export const cancelOrderService = async (
+    userId,
+    orderId,
+    cancelReason
+) => {
+    try {
+
+        // 1. Find order belonging to the user
+        const order = await Order.findOne({
+            _id: orderId,
+            userId
+        });
+
+        if (!order) {
+            return {
+                success: false,
+                message: "Order not found"
+            };
+        }
+
+        // 2. Only PLACED orders can be cancelled
+        if (order.status !== "PLACED") {
+            return {
+                success: false,
+                message: "This order cannot be cancelled"
+            };
+        }
+
+        // 3. Validate cancellation reason
+        if (!cancelReason || !cancelReason.trim()) {
+            return {
+                success: false,
+                message: "Please select a cancellation reason"
+            };
+        }
+
+        // 4. Find all order items
+        const orderItems = await OrderItem.find({
+            orderId
+        });
+
+        if (!orderItems.length) {
+            return {
+                success: false,
+                message: "No items found in this order"
+            };
+        }
+
+        // 5. Cancel all items and save reason
+        for (const item of orderItems) {
+
+            if (item.orderItemStatus !== "PLACED") {
+                return {
+                    success: false,
+                    message: "This order cannot be cancelled because some items are already processed"
+                };
+            }
+
+            item.orderItemStatus = "CANCELLED";
+            item.cancelReason = cancelReason.trim();
+
+            await item.save();
+
+            // Restore stock
+            await Variant.findByIdAndUpdate(
+                item.variantId,
+                {
+                    $inc: {
+                        stock: item.quantity
+                    }
+                }
+            );
+        }
+
+        // 6. Update main order
+        order.status = "CANCELLED";
+        order.cancelReason = cancelReason.trim();
+
+        await order.save();
+
+        return {
+            success: true,
+            message: "Order cancelled successfully"
+        };
+
+    } catch (error) {
+
+        console.error("Cancel Order Service Error:", error);
+
+        return {
+            success: false,
+            message: "Failed to cancel order"
+        };
+    }
+};
+
 export const requestReturnService = async (
     orderId,
     orderItemId,
@@ -540,7 +662,8 @@ export const requestReturnService = async (
         orderItem.returnReason = returnReason.trim();
 
         await orderItem.save();
-
+console.log("Saved Order Item:", orderItem);
+console.log("Saved Cancellation Reason:", orderItem.cancelReason);
         return {
             success: true,
             message: "Return request submitted successfully"

@@ -1630,10 +1630,16 @@ export const editOffer = async (req, res) => {
 };
 
 
-
 export const toggleOfferStatus = async (req, res) => {
     try {
-        const result = await toggleOfferStatusService(req.params.offerId);
+        const { offerId } = req.params;
+
+        console.log("TOGGLE CONTROLLER CALLED");
+        console.log("OFFER ID:", offerId);
+
+        const result = await toggleOfferStatusService(offerId);
+
+        console.log("SERVICE RESULT:", result);
 
         if (!result.success) {
             req.session.errorMessage = result.message;
@@ -1644,9 +1650,12 @@ export const toggleOfferStatus = async (req, res) => {
         }
 
         return res.redirect("/admin/offers");
+
     } catch (error) {
-        console.log("TOGGLE OFFER STATUS ERROR:", error);
+        console.error("TOGGLE OFFER STATUS ERROR:", error);
+
         req.session.errorMessage = "Failed to update offer status.";
+
         return res.redirect("/admin/offers");
     }
 };

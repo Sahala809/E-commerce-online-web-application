@@ -239,6 +239,7 @@ const errors = {};
         stock,
         price,
         offerPrice,
+        currentOfferPrice: offerPrice,
         description,
         images,
         isActive:isActive === "true"
@@ -379,6 +380,7 @@ export const editVariantService = async (req) => {
         stock,
         price,
         offerPrice,
+        currentOfferPrice: offerPrice,
         description,
         isActive: isActive === "true"
     };

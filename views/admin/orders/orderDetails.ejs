@@ -60,8 +60,8 @@
                     <span class="label">Order ID</span>
 
                     <h2>
-                        #<%= order._id %>
-                    </h2>
+    #<%= order._id.toString().slice(-8).toUpperCase() %>
+</h2>
                 </div>
 
                 <div>
@@ -119,6 +119,20 @@
 
                 </div>
 
+
+                <% if (order.cancelReason) { %>
+
+    <div class="cancel-reason-info">
+
+        <span class="label">Cancellation Reason</span>
+
+        <strong class="text-danger">
+            <%= order.cancelReason %>
+        </strong>
+
+    </div>
+
+<% } %>
 
                 <% if (order.status === "DELIVERED") { %>
     <div class="invoice-action">
@@ -362,74 +376,86 @@
                                     </td>
 
 
-                                    <!-- ITEM STATUS -->
+                                   <!-- ITEM STATUS -->
 <td>
 
-    <form
-        action="/admin/orders/item/<%= item._id %>/status"
-        method="POST"
-        class="status-form"
-    >
+    <% if (item.orderItemStatus === "CANCELLED") { %>
 
-        
+        <span class="badge bg-danger">
+            Cancelled
+        </span>
 
-        <input
-            type="hidden"
-            name="orderId"
-            value="<%= order._id %>"
+        <% if (item.cancelReason) { %>
+
+            <div class="mt-2">
+                <small class="text-muted">
+                    Cancellation Reason:
+                </small>
+
+                <p class="mb-0">
+                    <strong>
+                        <%= item.cancelReason %>
+                    </strong>
+                </p>
+            </div>
+
+        <% } %>
+
+    <% } else { %>
+
+        <form
+            action="/admin/orders/item/<%= item._id %>/status"
+            method="POST"
+            class="status-form"
         >
 
-        <select
-            name="status"
-            class="form-select status-select"
-            onchange="this.form.submit()"
-        >
-
-            <option
-                value="PLACED"
-                <%= item.orderItemStatus === "PLACED" ? "selected" : "" %>
+            <input
+                type="hidden"
+                name="orderId"
+                value="<%= order._id %>"
             >
-                Placed
-            </option>
 
-            <option
-                value="SHIPPED"
-                <%= item.orderItemStatus === "SHIPPED" ? "selected" : "" %>
+            <select
+                name="status"
+                class="form-select status-select"
+                onchange="this.form.submit()"
             >
-                Shipped
-            </option>
 
-            <option
-                value="OUT_FOR_DELIVERY"
-                <%= item.orderItemStatus === "OUT_FOR_DELIVERY" ? "selected" : "" %>
-            >
-                Out for Delivery
-            </option>
+                <option value="PLACED"
+                    <%= item.orderItemStatus === "PLACED" ? "selected" : "" %>>
+                    Placed
+                </option>
 
-            <option
-                value="DELIVERED"
-                <%= item.orderItemStatus === "DELIVERED" ? "selected" : "" %>
-            >
-                Delivered
-            </option>
+                <option value="SHIPPED"
+                    <%= item.orderItemStatus === "SHIPPED" ? "selected" : "" %>>
+                    Shipped
+                </option>
 
-            <option
-                value="CANCELLED"
-                <%= item.orderItemStatus === "CANCELLED" ? "selected" : "" %>
-            >
-                Cancelled
-            </option>
+                <option value="OUT_FOR_DELIVERY"
+                    <%= item.orderItemStatus === "OUT_FOR_DELIVERY" ? "selected" : "" %>>
+                    Out for Delivery
+                </option>
 
-            <option
-                value="RETURNED"
-                <%= item.orderItemStatus === "RETURNED" ? "selected" : "" %>
-            >
-                Returned
-            </option>
+                <option value="DELIVERED"
+                    <%= item.orderItemStatus === "DELIVERED" ? "selected" : "" %>>
+                    Delivered
+                </option>
 
-        </select>
+                <option value="CANCELLED"
+                    <%= item.orderItemStatus === "CANCELLED" ? "selected" : "" %>>
+                    Cancelled
+                </option>
 
-    </form>
+                <option value="RETURNED"
+                    <%= item.orderItemStatus === "RETURNED" ? "selected" : "" %>>
+                    Returned
+                </option>
+
+            </select>
+
+        </form>
+
+    <% } %>
 
 </td>
 

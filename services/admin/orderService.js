@@ -59,21 +59,24 @@ export const loadOrdersService = async (
 
 
                 // Order ID match
-                const orderId = order._id
-                    .toString()
-        
-                    .toLowerCase();
+const orderId = order._id
+    .toString()
+    .toLowerCase();
 
+            const shortOrderId = orderId.slice(-8);
 
-                const searchText = search.toLowerCase();
+            const searchText = search
+                .trim()
+                .toLowerCase()
+                .replace(/^#/, "");
 
-
-                const orderIdMatch =
-                    orderId.includes(searchText);
-
-
-                return customerMatch || orderIdMatch;
-            });
+            const orderIdMatch =
+                orderId.includes(searchText) ||
+                shortOrderId.includes(searchText);
+                
+            return customerMatch || orderIdMatch;
+            
+        });
 
 
         } else {

@@ -26,6 +26,11 @@ const orderSchema = new mongoose.Schema(
             default: "PLACED"
         },
 
+        cancelReason: {
+            type: String,
+            default: null
+        },
+        
         shippingAddress: {
             fullName: {
                 type: String,
@@ -101,6 +106,11 @@ const orderSchema = new mongoose.Schema(
             required: true
         },
 
+        razorpayPaymentId: {
+            type: String,
+            default: undefined
+        },
+
         subTotal: {
             type: Number,
             required: true
@@ -135,6 +145,16 @@ const orderSchema = new mongoose.Schema(
     },
     {    
         timestamps: true
+    }
+);
+
+orderSchema.index(
+    { razorpayPaymentId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            razorpayPaymentId: { $type: "string" }
+        }
     }
 );
 
