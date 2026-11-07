@@ -50,8 +50,13 @@
                 </span>
 
                 <strong>
-                    Cash on Delivery
-                </strong>
+    <%= paymentMethod === "ONLINE"
+        ? "Online Payment"
+        : paymentMethod === "WALLET"
+            ? "Wallet"
+            : "Cash on Delivery"
+    %>
+</strong>
 
             </div>
 

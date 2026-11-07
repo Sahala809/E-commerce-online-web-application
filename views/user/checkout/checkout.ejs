@@ -207,121 +207,118 @@
             </div>
 
 
+<% if (selectedAddress) { %>
 
-            <!-- =====================================
-                 PAYMENT
-            ====================================== -->
+<form action="/user/order/place" method="POST">
+            
+<!-- =====================================
+     PAYMENT
+====================================== -->
 
-            <div class="checkout-section">
+<div class="checkout-section">
 
-                <div class="section-title">
+    <div class="section-title">
+        <h2>Payment</h2>
+    </div>
 
-                    <h2>
-                        Payment
-                    </h2>
+    <div class="payment-options">
 
+        <!-- Cash On Delivery -->
+        <label class="payment-option">
+
+            <input
+                type="radio"
+                name="paymentMethod"
+                value="COD"
+                checked
+            >
+
+            <div class="payment-content">
+
+                <div class="payment-icon">
+                    <i class="bi bi-cash-stack"></i>
                 </div>
 
-
-                <div class="payment-options">
-
-
-                    <!-- Cash On Delivery -->
-                    <label class="payment-option">
-
-                        <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="COD"
-                            checked
-                        >
-
-                        <div class="payment-content">
-
-                            <div class="payment-icon">
-
-                                <i class="bi bi-cash-stack"></i>
-
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    Cash on Delivery
-                                </strong>
-
-                                <p>
-                                    Pay when your order is delivered.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </label>
-
-
+                <div>
+                    <strong>Cash on Delivery</strong>
+                    <p>Pay when your order is delivered.</p>
                 </div>
 
             </div>
 
+        </label>
 
+        <!-- Online Payment -->
+        <label class="payment-option">
 
-            <!-- =====================================
-                 PLACE ORDER
-            ====================================== -->
+            <input
+                type="radio"
+                name="paymentMethod"
+                value="ONLINE"
+            >
 
-            <div class="place-order-section">
+            <div class="payment-content">
 
-                <% if (selectedAddress) { %>
+                <div class="payment-icon">
+                    <i class="bi bi-credit-card"></i>
+                </div>
 
-                    <form
-                        action="/user/order/place"
-                        method="POST"
-                    >
-
-                        <!-- Payment method -->
-                        <input
-                            type="hidden"
-                            name="paymentMethod"
-                            value="COD"
-                        >
-
-
-                        <!-- Selected address -->
-                        <input
-                            type="hidden"
-                            name="addressId"
-                            value="<%= selectedAddress._id %>"
-                        >
-
-
-                        <button
-                            type="submit"
-                            class="place-order-btn"
-                        >
-                            Place Order
-
-                            <i class="bi bi-arrow-right"></i>
-
-                        </button>
-
-                    </form>
-
-                <% } else { %>
-
-                    <button
-                        type="button"
-                        class="place-order-btn disabled"
-                        disabled
-                    >
-                        Add Address to Continue
-                    </button>
-
-                <% } %>
+                <div>
+                    <strong>Online Payment</strong>
+                    <p>Pay securely using Razorpay.</p>
+                </div>
 
             </div>
 
+        </label>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     PLACE ORDER
+====================================== -->
+
+<input
+    type="hidden"
+    name="addressId"
+    value="<%= selectedAddress._id %>"
+>
+
+<div class="place-order-section">
+
+    <button
+        type="submit"
+        class="place-order-btn"
+    >
+        Place Order
+        <i class="bi bi-arrow-right"></i>
+    </button>
+
+</div>
+
+</form>
+
+<% } else { %>
+
+<div class="place-order-section">
+
+    <button
+        type="button"
+        class="place-order-btn disabled"
+        disabled
+    >
+        Add Address to Continue
+    </button>
+
+</div>
+
+<% } %>
+
+
+        
 
         </section>
 
@@ -334,52 +331,140 @@
         <aside class="checkout-right">
 
 
-            <!-- =====================================
-                 APPLY COUPON
-            ====================================== -->
+            
+<!-- =====================================
+     AVAILABLE COUPONS
+====================================== -->
 
-            <div class="coupon-section">
+<div class="coupon-section">
 
-                <h2>
-                    Apply Coupon
-                </h2>
+    <h2>
+        Available Coupons
+    </h2>
 
-                <% if (successMessage) { %>
-    <div class="coupon-message coupon-success">
-        <%= successMessage %>
-    </div>
-<% } %>
+    <% if (successMessage) { %>
+        <div class="coupon-message coupon-success">
+            <%= successMessage %>
+        </div>
+    <% } %>
 
-<% if (errorMessage) { %>
-    <div class="coupon-message coupon-error">
-        <%= errorMessage %>
-    </div>
-<% } %>
+    <% if (errorMessage) { %>
+        <div class="coupon-message coupon-error">
+            <%= errorMessage %>
+        </div>
+    <% } %>
 
+    <% if (appliedCoupon) { %>
 
-                <form
-                    action="/user/checkout/apply-coupon"
-                    method="POST"
-                    class="coupon-form"
-                >
+        <div class="applied-coupon-card">
 
-                    <input
-                        type="text"
-                        name="couponCode"
-                        placeholder="Discount code"
-                        autocomplete="off"
-                    >
+            <div>
+                <strong>
+                    <%= appliedCoupon.couponCode %>
+                </strong>
 
+                <p>
+                    Coupon applied successfully!
+                </p>
 
-                    <button
-                        type="submit"
-                    >
-                        Apply
-                    </button>
+                <p>
+                    Discount:
+                    ₹<%= Number(couponDiscount).toLocaleString("en-IN") %>
+                </p>
+            </div>
 
-                </form>
+        </div>
+
+    <% } else { %>
+
+        <% if (availableCoupons && availableCoupons.length > 0) { %>
+
+            <div class="available-coupons-list">
+
+                <% availableCoupons.forEach((coupon) => { %>
+
+                    <div class="available-coupon-card">
+
+                        <div class="coupon-details">
+
+                            <h3>
+                                <%= coupon.couponCode %>
+                            </h3>
+
+                            <p class="coupon-discount">
+
+                                <% if (coupon.couponType === "PERCENTAGE") { %>
+
+                                    <%= coupon.discount %>% OFF
+
+                                <% } else { %>
+
+                                    ₹<%= coupon.discount %> OFF
+
+                                <% } %>
+
+                            </p>
+
+                            <p>
+                                Minimum Purchase:
+                                ₹<%= Number(coupon.minimumPurchase || 0).toLocaleString("en-IN") %>
+                            </p>
+
+                            <% if (
+                                coupon.couponType === "PERCENTAGE" &&
+                                coupon.maxDiscountAmount
+                            ) { %>
+
+                                <p>
+                                    Maximum Discount:
+                                    ₹<%= Number(coupon.maxDiscountAmount).toLocaleString("en-IN") %>
+                                </p>
+
+                            <% } %>
+
+                            <p>
+                                Valid Until:
+                                <%= new Date(coupon.expDate).toLocaleDateString("en-IN") %>
+                            </p>
+
+                        </div>
+
+                        <form
+                            action="/user/checkout/apply-coupon"
+                            method="POST"
+                            class="coupon-apply-form"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="couponCode"
+                                value="<%= coupon.couponCode %>"
+                            >
+
+                            <button type="submit">
+                                Apply
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                <% }) %>
 
             </div>
+
+        <% } else { %>
+
+            <p class="no-coupons">
+                No available coupons at the moment.
+            </p>
+
+        <% } %>
+
+    <% } %>
+
+</div>
+
 
 
 
@@ -635,7 +720,7 @@
 
 </main>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="/js/checkout/checkout.js"></script>
 
 

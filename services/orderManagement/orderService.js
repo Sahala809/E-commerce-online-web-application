@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import Cart from "../../models/cartModel.js";
 import Address from "../../models/addressModel.js";
 import Variant from "../../models/variantModel.js";
@@ -7,7 +9,8 @@ import OrderItem from "../../models/orderItemModel.js";
 export const placeOrderService = async (
     userId,
     addressId,
-    paymentMethod
+    paymentMethod,
+    paymentDetails = {}
 ) => {
 
     try {
@@ -21,7 +24,6 @@ export const placeOrderService = async (
             .populate("items.variantId");
 
         if (!cart || cart.items.length === 0) {
-
             return {
                 success: false,
                 message: "Your cart is empty"
@@ -33,23 +35,18 @@ export const placeOrderService = async (
         // GET ADDRESS
         // ==========================================
 
-        const userAddress =
-            await Address.findOne({ userId });
+        const userAddress = await Address.findOne({ userId });
 
         if (!userAddress) {
-
             return {
                 success: false,
                 message: "Address not found"
             };
         }
 
-
-        const selectedAddress =
-            userAddress.addresses.id(addressId);
+        const selectedAddress = userAddress.addresses.id(addressId);
 
         if (!selectedAddress) {
-
             return {
                 success: false,
                 message: "Selected address not found"
@@ -65,46 +62,35 @@ export const placeOrderService = async (
 
         for (const item of cart.items) {
 
-            const variant =
-                await Variant.findById(item.variantId._id);
+            const variant = await Variant.findById(item.variantId._id);
 
             if (!variant) {
-
                 return {
                     success: false,
                     message: "Product variant not found"
                 };
             }
 
-
             if (!variant.isActive) {
-
                 return {
                     success: false,
-                    message:
-                        `${item.productId.productName} is unavailable`
+                    message: `${item.productId.productName} is unavailable`
                 };
             }
-
 
             if (variant.stock < item.quantity) {
-
                 return {
                     success: false,
-                    message:
-                        `Insufficient stock for ${item.productId.productName}`
+                    message: `Insufficient stock for ${item.productId.productName}`
                 };
             }
-
 
             const price =
                 variant.offerPrice > 0
                     ? variant.offerPrice
                     : variant.price;
 
-
-            subTotal +=
-                price * item.quantity;
+            subTotal += price * item.quantity;
         }
 
 
@@ -119,7 +105,10 @@ export const placeOrderService = async (
         // DISCOUNT
         // ==========================================
 
-        const discountAmount = 0;
+        const discountAmount = Math.min(
+            subTotal,
+            Math.max(0, Number(paymentDetails.discountAmount) || 0)
+        );
 
 
         // ==========================================
@@ -127,9 +116,36 @@ export const placeOrderService = async (
         // ==========================================
 
         const totalAmount =
-            subTotal +
-            deliveryCharge -
-            discountAmount;
+            subTotal + deliveryCharge - discountAmount;
+
+
+        // ==========================================
+        // PAYMENT DETAILS
+        // ==========================================
+
+        const isPaid = paymentDetails.isPaid === true;
+
+        const razorpayPaymentId =
+            paymentDetails.razorpayPaymentId || null;
+
+
+        // ==========================================
+        // PREVENT DUPLICATE PAYMENT
+        // ==========================================
+
+        if (razorpayPaymentId) {
+
+            const existingOrder = await Order.findOne({
+                razorpayPaymentId
+            });
+
+            if (existingOrder) {
+                return {
+                    success: false,
+                    message: "This payment has already been processed"
+                };
+            }
+        }
 
 
         // ==========================================
@@ -147,31 +163,25 @@ export const placeOrderService = async (
             shippingAddress: {
 
                 fullName: selectedAddress.fullName,
-
                 phone: selectedAddress.phone,
-
                 houseName: selectedAddress.houseName,
-
                 street: selectedAddress.street,
-
                 district: selectedAddress.district,
-
                 city: selectedAddress.city,
-
                 state: selectedAddress.state,
-
                 country: selectedAddress.country,
-
                 pincode: selectedAddress.pincode
             },
 
             deliveryDate: null,
 
-            isPaid: false,
+            isPaid,
 
             orderItemId: [],
 
             paymentMethod,
+
+            razorpayPaymentId,
 
             subTotal,
 
@@ -179,7 +189,7 @@ export const placeOrderService = async (
 
             couponId: null,
 
-            paymentStatus: "PENDING",
+            paymentStatus: isPaid ? "SUCCESS" : "PENDING",
 
             deliveryCharge
         });
@@ -191,50 +201,37 @@ export const placeOrderService = async (
 
         const orderItemIds = [];
 
-
         for (const item of cart.items) {
 
-            const variant =
-                item.variantId;
-
+            const variant = item.variantId;
 
             const price =
                 variant.offerPrice > 0
                     ? variant.offerPrice
                     : variant.price;
 
+            const orderItem = await OrderItem.create({
 
-            const orderItem =
-                await OrderItem.create({
+                orderId: order._id,
 
-                    orderId: order._id,
+                productId: item.productId._id,
 
-                    productId:
-                        item.productId._id,
+                variantId: variant._id,
 
-                    variantId:
-                        variant._id,
+                quantity: item.quantity,
 
-                    quantity:
-                        item.quantity,
+                price,
 
-                    price,
+                orderItemStatus: "PLACED",
 
-                    orderItemStatus:
-                        "PLACED",
+                returnReason: null,
 
-                    returnReason: null,
+                refundAmount: 0,
 
-                    refundAmount: 0,
+                cancelReason: null
+            });
 
-                    cancelReason: null
-                });
-
-
-            orderItemIds.push(
-                orderItem._id
-            );
-
+            orderItemIds.push(orderItem._id);
 
             // Reduce stock
 
@@ -253,8 +250,7 @@ export const placeOrderService = async (
         // UPDATE ORDER
         // ==========================================
 
-        order.orderItemId =
-            orderItemIds;
+        order.orderItemId = orderItemIds;
 
         await order.save();
 
@@ -281,33 +277,46 @@ export const placeOrderService = async (
 
             success: true,
 
-            message:
-                "Order placed successfully",
+            message: "Order placed successfully",
 
-            orderId:
-                order._id
+            orderId: order._id
         };
 
 
     } catch (error) {
 
-        console.error(
-            "Place Order Service Error:",
-            error
-        );
+        console.error("Place Order Service Error:", error);
 
         return {
-
             success: false,
-
-            message:
-                "Failed to place order"
+            message: "Failed to place order"
         };
     }
 };
 
+export const verifyRazorpaySignature = (
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
+) => {
 
+    const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest("hex");
 
+    const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    const receivedBuffer = Buffer.from(razorpaySignature || "", "hex");
+
+    if (
+        expectedBuffer.length !== receivedBuffer.length ||
+        !crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
+    ) {
+        return false;
+    }
+
+    return true;
+};
 
 export const getUserOrdersService = async (userId) => {
     try {
