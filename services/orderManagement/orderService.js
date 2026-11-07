@@ -279,7 +279,7 @@ export const placeOrderService = async (
 
             message: "Order placed successfully",
 
-            orderId: order._id
+            orderId: order._id.toString()
         };
 
 
@@ -403,7 +403,8 @@ export const getOrderDetailsService = async (userId, orderId) => {
 export const cancelOrderItemService = async (
     userId,
     orderId,
-    itemId
+    itemId,
+    cancelReason
 ) => {
     try {
 
@@ -444,10 +445,25 @@ export const cancelOrderItemService = async (
         }
 
 
-        // 4. Cancel the item
-        orderItem.orderItemStatus = "CANCELLED";
+        // 4. Cancel the item and save reason
+if (!cancelReason || !cancelReason.trim()) {
+    return {
+        success: false,
+        message: "Please select a cancellation reason"
+    };
+}
 
-        await orderItem.save();
+orderItem.orderItemStatus = "CANCELLED";
+orderItem.cancelReason = cancelReason.trim();
+
+
+try {
+    await orderItem.save();
+    console.log("AFTER SAVE:", orderItem.cancelReason);
+} catch (error) {
+    console.log("SAVE ERROR:", error);
+    throw error;
+}
 
 
         // 5. Restore the cancelled quantity to stock
@@ -499,6 +515,103 @@ export const cancelOrderItemService = async (
 };
 
 
+
+export const cancelOrderService = async (
+    userId,
+    orderId,
+    cancelReason
+) => {
+    try {
+
+        // 1. Find order belonging to the user
+        const order = await Order.findOne({
+            _id: orderId,
+            userId
+        });
+
+        if (!order) {
+            return {
+                success: false,
+                message: "Order not found"
+            };
+        }
+
+        // 2. Only PLACED orders can be cancelled
+        if (order.status !== "PLACED") {
+            return {
+                success: false,
+                message: "This order cannot be cancelled"
+            };
+        }
+
+        // 3. Validate cancellation reason
+        if (!cancelReason || !cancelReason.trim()) {
+            return {
+                success: false,
+                message: "Please select a cancellation reason"
+            };
+        }
+
+        // 4. Find all order items
+        const orderItems = await OrderItem.find({
+            orderId
+        });
+
+        if (!orderItems.length) {
+            return {
+                success: false,
+                message: "No items found in this order"
+            };
+        }
+
+        // 5. Cancel all items and save reason
+        for (const item of orderItems) {
+
+            if (item.orderItemStatus !== "PLACED") {
+                return {
+                    success: false,
+                    message: "This order cannot be cancelled because some items are already processed"
+                };
+            }
+
+            item.orderItemStatus = "CANCELLED";
+            item.cancelReason = cancelReason.trim();
+
+            await item.save();
+
+            // Restore stock
+            await Variant.findByIdAndUpdate(
+                item.variantId,
+                {
+                    $inc: {
+                        stock: item.quantity
+                    }
+                }
+            );
+        }
+
+        // 6. Update main order
+        order.status = "CANCELLED";
+        order.cancelReason = cancelReason.trim();
+
+        await order.save();
+
+        return {
+            success: true,
+            message: "Order cancelled successfully"
+        };
+
+    } catch (error) {
+
+        console.error("Cancel Order Service Error:", error);
+
+        return {
+            success: false,
+            message: "Failed to cancel order"
+        };
+    }
+};
+
 export const requestReturnService = async (
     orderId,
     orderItemId,
@@ -549,7 +662,8 @@ export const requestReturnService = async (
         orderItem.returnReason = returnReason.trim();
 
         await orderItem.save();
-
+console.log("Saved Order Item:", orderItem);
+console.log("Saved Cancellation Reason:", orderItem.cancelReason);
         return {
             success: true,
             message: "Return request submitted successfully"

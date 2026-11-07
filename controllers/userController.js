@@ -78,6 +78,7 @@ import {
     getUserOrdersService,
     getOrderDetailsService,
     cancelOrderItemService,
+    cancelOrderService,
     requestReturnService
 } from "../services/orderManagement/orderService.js"
 
@@ -1989,12 +1990,14 @@ export const cancelOrderItem = async (req, res) => {
             return res.redirect("/user/login");
         }
 
-
+        const cancelReason = req.body.cancelReason;
+        console.log("Cancellation Reason:", cancelReason);
         // Cancel item
         const result = await cancelOrderItemService(
             userId,
             orderId,
-            itemId
+            itemId,
+            cancelReason
         );
 
 
@@ -2028,6 +2031,48 @@ export const cancelOrderItem = async (req, res) => {
         return res.redirect(
             `/user/orders/${req.params.orderId}`
         );
+    }
+};
+
+
+export const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+        const cancelReason = req.body.cancelReason;
+
+        if (!userId) {
+            req.session.errorMessage = "Please login to continue";
+            return res.redirect("/user/login");
+        }
+
+        if (!cancelReason || !cancelReason.trim()) {
+            req.session.errorMessage = "Please select a cancellation reason";
+            return res.redirect(`/user/orders`);
+        }
+
+        const result = await cancelOrderService(
+    userId,
+    orderId,
+    cancelReason
+);
+
+if (!result.success) {
+    req.session.errorMessage = result.message;
+    return res.redirect(`/user/orders/${orderId}`);
+}
+
+req.session.successMessage = result.message;
+
+return res.redirect("/user/orders");
+
+    } catch (error) {
+        console.error("Cancel Order Controller Error:", error);
+
+        req.session.errorMessage =
+            "Something went wrong while cancelling the order";
+
+        return res.redirect("/user/orders");
     }
 };
 

@@ -55,16 +55,15 @@
                         <!-- ORDER HEADER -->
                         <div class="order-top">
 
-                            <div class="order-number">
+                           <div class="order-number">
 
-                                <span>Order ID</span>
+    <span>Order ID</span>
 
-                                <strong>
-                                    #<%= order._id %>
-                                </strong>
+    <strong>
+        #<%= order._id.toString().slice(-8).toUpperCase() %>
+    </strong>
 
-                            </div>
-
+</div>
 
                             <div class="order-date">
 
@@ -246,20 +245,112 @@
 
                             <% if (order.status === "PLACED") { %>
 
-                                <form
-                                    action="/user/orders/<%= order._id %>/cancel"
-                                    method="POST"
-                                    onsubmit="return confirm('Are you sure you want to cancel this order?');">
+    <button
+        type="button"
+        class="cancel-order-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#cancelOrderModal<%= order._id %>">
+        Cancel Order
+    </button>
 
-                                    <button
-                                        type="submit"
-                                        class="cancel-order-btn">
-                                        Cancel Order
-                                    </button>
+    <!-- CANCEL ORDER MODAL -->
+    <div
+        class="modal fade"
+        id="cancelOrderModal<%= order._id %>"
+        tabindex="-1"
+        aria-hidden="true">
 
-                                </form>
+        <div class="modal-dialog modal-dialog-centered">
 
-                            <% } %>
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Cancel Order
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <form
+                    action="/user/orders/<%= order._id %>/cancel"
+                    method="POST">
+
+                    <div class="modal-body">
+
+                        <p>
+                            Are you sure you want to cancel this order?
+                        </p>
+
+                        <label class="form-label">
+                            Select Cancellation Reason
+                        </label>
+
+                        <select
+                            name="cancelReason"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Choose a reason
+                            </option>
+
+                            <option value="Ordered by mistake">
+                                Ordered by mistake
+                            </option>
+
+                            <option value="Found a better price">
+                                Found a better price
+                            </option>
+
+                            <option value="Delivery is taking too long">
+                                Delivery is taking too long
+                            </option>
+
+                            <option value="Changed my mind">
+                                Changed my mind
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Close
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger">
+                            Confirm Cancellation
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<% } %>
 
                         </div>
 
@@ -274,3 +365,5 @@
     </div>
 
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

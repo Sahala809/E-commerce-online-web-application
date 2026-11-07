@@ -76,6 +76,7 @@ import {
     loadOrders,
     loadOrderDetails,
     cancelOrderItem,
+    cancelOrder,
     requestReturn
 } from "../controllers/userController.js"
 
@@ -198,7 +199,15 @@ router.get("/order-success",loadOrderSuccess);
 router.get("/order-failure", loadOrderFailure);
 
 router.get("/orders",isLogin, loadOrders)
+
 router.get("/orders/:orderId", isLogin, loadOrderDetails);
+
+router.post(
+    "/orders/:orderId/cancel",
+    isLogin,
+    cancelOrder
+);
+
 router.post(
     "/orders/:orderId/items/:itemId/cancel",
     isLogin,

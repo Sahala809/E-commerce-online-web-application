@@ -26,6 +26,11 @@ const orderSchema = new mongoose.Schema(
             default: "PLACED"
         },
 
+        cancelReason: {
+            type: String,
+            default: null
+        },
+        
         shippingAddress: {
             fullName: {
                 type: String,
