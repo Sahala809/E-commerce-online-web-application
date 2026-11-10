@@ -6,7 +6,7 @@
 
 <div class="wrapper">
 
-```
+
 <%- include("../partials/sidebar") %>
 
 <div class="flex-grow-1">
@@ -189,6 +189,7 @@
 
                 </div>
 
+                
             </div>
 
 
@@ -272,6 +273,7 @@
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Item Total</th>
+                                <th>Refund Amount</th>
                                 <th>Status</th>
                             </tr>
 
@@ -355,6 +357,12 @@
 
                                     </td>
 
+                                    <!-- REFUND AMOUNT -->
+<td>
+    <strong class="text-success">
+        ₹<%= Number(item.refundAmount || 0).toLocaleString("en-IN") %>
+    </strong>
+</td>
 
                                     <!-- QUANTITY -->
                                     <td>
@@ -531,6 +539,38 @@
                     </div>
 
                 </div>
+
+
+                <%
+    const totalRefund = (order.orderItemId || []).reduce(
+        (total, item) => total + Number(item.refundAmount || 0),
+        0
+    );
+%>
+
+<div class="info-row">
+    <span>Refund Status</span>
+
+    <strong class="<%= totalRefund > 0 ? 'text-success' : 'text-muted' %>">
+        <%= totalRefund > 0 ? "REFUNDED" : "NO REFUND" %>
+    </strong>
+</div>
+
+<div class="info-row">
+    <span>Total Refund</span>
+
+    <strong>
+        ₹<%= totalRefund.toLocaleString("en-IN") %>
+    </strong>
+</div>
+
+<% if (totalRefund > 0) { %>
+    <div class="info-row">
+        <span>Refund Destination</span>
+
+        <strong>Chronix Wallet</strong>
+    </div>
+<% } %>
 
             </div>
 

@@ -217,6 +217,27 @@
                             </div>
 
 
+
+                            <% if (
+    item.orderItemStatus === "CANCELLED" &&
+    Number(item.refundAmount) > 0
+) { %>
+
+    <div class="refund-info">
+        <span>Refund Status</span>
+        <strong class="refunded-badge">REFUNDED</strong>
+
+        <span>Refund Amount</span>
+        <strong>
+            ₹<%= Number(item.refundAmount).toLocaleString("en-IN") %>
+        </strong>
+
+        <small>Refunded to Chronix Wallet</small>
+    </div>
+
+<% } %>
+
+
                            <!-- STATUS + ACTIONS -->
 <div class="item-status">
 
@@ -487,15 +508,11 @@
 
 
     <!-- RETURN APPROVED -->
-    <% } else if (
-        item.returnStatus === "APPROVED" &&
-        item.orderItemStatus === "RETURNED"
-    ) { %>
+<% } else if (item.returnStatus === "APPROVED") { %>
 
-        <span class="return-approved-status">
-            Returned
-        </span>
-
+    <span class="return-approved-status">
+        Return Approved
+    </span>
 
     <!-- RETURN REJECTED -->
     <% } else if (item.returnStatus === "REJECTED") { %>
@@ -667,7 +684,45 @@
 
                         </div>
 
+
+                        
                     </div>
+
+                    <% if (order.status === "CANCELLED") { %>
+
+    <div class="refund-summary">
+
+        <h3>Refund Information</h3>
+
+        <% 
+            const totalRefund = order.orderItemId.reduce(
+                (total, item) => total + Number(item.refundAmount || 0),
+                0
+            );
+        %>
+
+        <div>
+            <span>Refund Status</span>
+            <strong>
+                <%= totalRefund > 0 ? "REFUNDED" : "NOT APPLICABLE" %>
+            </strong>
+        </div>
+
+        <div>
+            <span>Total Refund</span>
+            <strong>
+                ₹<%= totalRefund.toLocaleString("en-IN") %>
+            </strong>
+        </div>
+
+        <% if (totalRefund > 0) { %>
+            <p>Refunded to Chronix Wallet</p>
+        <% } %>
+
+    </div>
+
+<% } %>
+
 
                 </div>
 

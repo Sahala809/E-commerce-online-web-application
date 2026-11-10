@@ -1,0 +1,313 @@
+
+/* =========================
+   WALLET CONTAINER
+========================= */
+
+.wallet-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+
+    width: 100%;
+    max-width: 1400px;
+
+    margin: 30px auto;
+    padding: 0 30px;
+}
+
+/* =========================
+   WALLET CONTENT
+========================= */
+
+.wallet-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.content-header {
+    margin-bottom: 25px;
+}
+
+.content-header h2 {
+    font-size: 32px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.content-header p {
+    color: #777;
+    margin: 0;
+}
+
+/* =========================
+   WALLET BALANCE
+========================= */
+
+.wallet-balance-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 30px;
+
+    background: #111;
+    color: #fff;
+
+    border-radius: 15px;
+
+    margin-bottom: 35px;
+}
+
+.balance-details p {
+    color: #ccc;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.balance-details h2 {
+    color: #d4af37;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.wallet-icon {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #292929;
+    color: #d4af37;
+
+    font-size: 27px;
+}
+
+/* =========================
+   TRANSACTION SECTION
+========================= */
+
+.transaction-section {
+    background: #fff;
+
+    border-radius: 15px;
+
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+
+    overflow: hidden;
+}
+
+.transaction-section > h3 {
+    font-size: 20px;
+    margin: 0;
+    padding: 22px 25px;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid #eee;
+}
+
+/* =========================
+   TRANSACTION ITEM
+========================= */
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    padding: 22px 25px;
+
+    border-bottom: 1px solid #eee;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+/* =========================
+   TRANSACTION ICON
+========================= */
+
+.transaction-icon {
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #f5f5f5;
+
+    font-size: 19px;
+}
+
+.credit-icon {
+    background: #e8f7ee;
+    color: #198754;
+}
+
+.debit-icon {
+    background: #fdecec;
+    color: #dc3545;
+}
+
+/* =========================
+   TRANSACTION DETAILS
+========================= */
+
+.transaction-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.transaction-details h4 {
+    margin: 0 0 6px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    color: #222;
+}
+
+.transaction-details p {
+    margin: 0;
+
+    color: #777;
+    font-size: 13px;
+}
+
+/* =========================
+   TRANSACTION AMOUNT
+========================= */
+
+.transaction-amount {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.transaction-amount h4 {
+    margin: 0 0 6px;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.transaction-amount span {
+    font-size: 11px;
+    color: #888;
+}
+
+.credit-amount {
+    color: #198754;
+}
+
+.debit-amount {
+    color: #dc3545;
+}
+
+/* =========================
+   EMPTY WALLET
+========================= */
+
+.empty-wallet {
+    padding: 60px 20px;
+    text-align: center;
+    color: #777;
+}
+
+.empty-wallet i {
+    font-size: 45px;
+    color: #bbb;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.empty-wallet h3 {
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #333;
+}
+
+.empty-wallet p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+
+    .wallet-content {
+        max-width: 100%;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .content-header h2 {
+        font-size: 27px;
+    }
+
+    .wallet-balance-card {
+        padding: 25px;
+    }
+
+    .transaction-item {
+        padding: 20px;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .wallet-container {
+        gap: 20px;
+        padding: 0 15px;
+    }
+
+    .wallet-balance-card {
+        padding: 20px;
+    }
+
+    .balance-details h2 {
+        font-size: 28px;
+    }
+
+    .transaction-item {
+        gap: 12px;
+        padding: 18px 15px;
+    }
+
+    .transaction-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 17px;
+    }
+
+    .transaction-details h4 {
+        font-size: 13px;
+    }
+
+    .transaction-details p {
+        font-size: 12px;
+    }
+
+    .transaction-amount h4 {
+        font-size: 13px;
+    }
+
+}

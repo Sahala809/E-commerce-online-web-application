@@ -31,6 +31,12 @@ const orderItemSchema = new mongoose.Schema(
             required: true
         },
 
+        finalPrice: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+
         orderItemStatus: {
             type: String,
             enum: [

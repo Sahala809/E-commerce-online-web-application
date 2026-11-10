@@ -149,13 +149,23 @@
     align-items: start;
 }
 
-.left-section,
-.right-section {
+.left-section {
     display: flex;
     flex-direction: column;
     gap: 25px;
 }
 
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    height: fit-content;
+    z-index: 2;
+}
 
 /* =========================================
    COMMON CARD
@@ -357,8 +367,8 @@
 ========================================= */
 
 .summary-card {
-    position: sticky;
-    top: 20px;
+    position: static;
+    
 }
 
 .summary-card .card-header {
@@ -505,6 +515,148 @@
     transform: scale(0.97);
 }
 
+
+
+/* =========================================
+   REFUND INFORMATION
+========================================= */
+
+.refund-info {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
+    margin-top: 12px;
+    padding: 12px;
+
+    background: #f8fdf9;
+    border: 1px solid #ccebd5;
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+.refund-info span {
+    color: #666;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.refund-info strong {
+    color: #198754;
+    font-size: 13px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.refund-info small {
+    display: block;
+    flex-basis: 100%;
+    max-width: 100%;
+    color: #198754;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+/* REFUNDED STATUS BADGE */
+
+.refunded-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 100%;
+    box-sizing: border-box;
+
+    padding: 5px 10px;
+
+    background: #d1eedd;
+    color: #146c43 !important;
+
+    border-radius: 20px;
+    font-size: 10px !important;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: normal;
+}
+
+
+/* =========================================
+   ORDER REFUND SUMMARY
+========================================= */
+
+.refund-summary {
+    margin: 15px 22px 20px;
+    padding: 16px;
+    background: #fffaf0;
+    border: 1px solid #ead9a6;
+    border-radius: 8px;
+}
+
+.refund-summary h3 {
+    margin: 0 0 12px;
+    color: #222;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.refund-summary > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.refund-summary > div span {
+    color: #777;
+    font-size: 13px;
+}
+
+.refund-summary > div strong {
+    color: #198754;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.refund-summary p {
+    margin: 10px 0 0;
+    color: #198754;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Mobile refund summary */
+
+@media (max-width: 650px) {
+    .refund-summary {
+        margin: 12px 16px 16px;
+        padding: 13px;
+    }
+
+     .refund-info {
+        gap: 7px 9px;
+        padding: 10px;
+    }
+
+    .refund-info span,
+    .refund-info strong {
+        font-size: 11px;
+    }
+
+    .refund-info small {
+        font-size: 10px;
+    }
+}
+
+
 /* =========================================
    TABLET
 ========================================= */
@@ -528,8 +680,9 @@
     }
 
     .summary-card {
-        position: static;
-    }
+            position: static;
+            top: auto;
+        }
 
     .order-item {
         grid-template-columns: 80px 1fr 120px;
@@ -589,10 +742,21 @@
         gap: 18px;
     }
 
-    .left-section,
-    .right-section {
-        gap: 18px;
-    }
+    .left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+
+    position: sticky;
+    top: 20px;
+    align-self: start;
+}
 
     .card-header {
         padding: 16px;

@@ -59,10 +59,11 @@ export const loadUsersService = async (req) => {
     const blockedUsers = await User.countDocuments({
         isBlocked:true
     });
-
+    const userId = req.session.user
 
     console.log("SEARCH:", search);
     console.log("FOUND USERS:", users.length);
+
 
 
 

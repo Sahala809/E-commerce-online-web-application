@@ -5,7 +5,7 @@ import Address from "../../models/addressModel.js";
 import Variant from "../../models/variantModel.js";
 import Order from "../../models/ordermodel.js";
 import OrderItem from "../../models/orderItemModel.js";
-
+import Wallet from "../../models/walletModel.js";
 export const placeOrderService = async (
     userId,
     addressId,
@@ -194,65 +194,95 @@ export const placeOrderService = async (
             deliveryCharge
         });
 
+        // Calculate proportional discount for each item
+        let remainingDiscount = discountAmount;
+        let remainingSubTotal = subTotal;
 
-        // ==========================================
-        // CREATE ORDER ITEMS
-        // ==========================================
+        
+// ==========================================
+// CREATE ORDER ITEMS
+// ==========================================
 
-        const orderItemIds = [];
+const orderItemIds = [];
 
-        for (const item of cart.items) {
+let distributedDiscount = 0;
 
-            const variant = item.variantId;
+for (let i = 0; i < cart.items.length; i++) {
 
-            const price =
-                variant.offerPrice > 0
-                    ? variant.offerPrice
-                    : variant.price;
+    const item = cart.items[i];
+    const variant = item.variantId;
 
-            const orderItem = await OrderItem.create({
+    const price =
+        variant.offerPrice > 0
+            ? variant.offerPrice
+            : variant.price;
 
-                orderId: order._id,
+    const itemSubTotal = price * item.quantity;
 
-                productId: item.productId._id,
+    // Distribute discount proportionally
+    let itemDiscount;
 
-                variantId: variant._id,
+    if (i === cart.items.length - 1) {
+        // Adjust rounding difference in the last item
+        itemDiscount = discountAmount - distributedDiscount;
+    } else {
+        itemDiscount =
+            subTotal > 0
+                ? Number(
+                    (discountAmount * itemSubTotal / subTotal).toFixed(2)
+                )
+                : 0;
 
-                quantity: item.quantity,
+        distributedDiscount += itemDiscount;
+    }
 
-                price,
+    const finalPrice =
+        (itemSubTotal - itemDiscount) / item.quantity;
 
-                orderItemStatus: "PLACED",
+    const orderItem = await OrderItem.create({
 
-                returnReason: null,
+        orderId: order._id,
 
-                refundAmount: 0,
+        productId: item.productId._id,
 
-                cancelReason: null
-            });
+        variantId: variant._id,
 
-            orderItemIds.push(orderItem._id);
+        quantity: item.quantity,
 
-            // Reduce stock
+        price,
 
-            await Variant.findByIdAndUpdate(
-                variant._id,
-                {
-                    $inc: {
-                        stock: -item.quantity
-                    }
-                }
-            );
+        finalPrice: Number(finalPrice.toFixed(2)),
+
+        orderItemStatus: "PLACED",
+
+        returnReason: null,
+
+        refundAmount: 0,
+
+        cancelReason: null
+    });
+
+    orderItemIds.push(orderItem._id);
+
+    // Reduce stock
+    await Variant.findByIdAndUpdate(
+        variant._id,
+        {
+            $inc: {
+                stock: -item.quantity
+            }
         }
+    );
+}
 
+// ==========================================
+// UPDATE ORDER
+// ==========================================
 
-        // ==========================================
-        // UPDATE ORDER
-        // ==========================================
+order.orderItemId = orderItemIds;
 
-        order.orderItemId = orderItemIds;
+await order.save();
 
-        await order.save();
 
 
         // ==========================================
@@ -444,6 +474,19 @@ export const cancelOrderItemService = async (
             };
         }
 
+        // Check whether refund is applicable
+const isRefundApplicable =
+    order.paymentStatus === "SUCCESS" &&
+    ["ONLINE", "WALLET"].includes(order.paymentMethod);
+
+const unitPrice =
+    Number(orderItem.finalPrice) > 0
+        ? Number(orderItem.finalPrice)
+        : Number(orderItem.price);
+
+const refundAmount = isRefundApplicable
+    ? Number((unitPrice * orderItem.quantity).toFixed(2))
+    : 0;
 
         // 4. Cancel the item and save reason
 if (!cancelReason || !cancelReason.trim()) {
@@ -456,14 +499,46 @@ if (!cancelReason || !cancelReason.trim()) {
 orderItem.orderItemStatus = "CANCELLED";
 orderItem.cancelReason = cancelReason.trim();
 
+orderItem.refundAmount = refundAmount;
+
 
 try {
     await orderItem.save();
-    console.log("AFTER SAVE:", orderItem.cancelReason);
+    
 } catch (error) {
-    console.log("SAVE ERROR:", error);
+    
     throw error;
 }
+
+
+        // Credit refund to user's wallet
+if (refundAmount > 0) {
+
+    let wallet = await Wallet.findOne({
+        userId: order.userId
+    });
+
+    if (!wallet) {
+        wallet = await Wallet.create({
+            userId: order.userId,
+            balance: 0,
+            transactions: []
+        });
+    }
+
+    wallet.balance += refundAmount;
+
+    wallet.transactions.push({
+        type: "CREDIT",
+        amount: refundAmount,
+        description: `Refund for cancelled order item`,
+        status: "SUCCESS",
+        date: new Date()
+    });
+
+    await wallet.save();
+}
+
 
 
         // 5. Restore the cancelled quantity to stock
@@ -491,6 +566,7 @@ try {
 
         if (allItemsCancelled) {
             order.status = "CANCELLED";
+            order.cancelReason = cancelReason.trim();
             await order.save();
         }
 
@@ -513,6 +589,7 @@ try {
         };
     }
 };
+
 
 
 
@@ -564,22 +641,53 @@ export const cancelOrderService = async (
             };
         }
 
-        // 5. Cancel all items and save reason
-        for (const item of orderItems) {
+        // 5. Validate all items before cancelling
+        const allItemsPlaced = orderItems.every(
+            item => item.orderItemStatus === "PLACED"
+        );
 
-            if (item.orderItemStatus !== "PLACED") {
-                return {
-                    success: false,
-                    message: "This order cannot be cancelled because some items are already processed"
-                };
+        if (!allItemsPlaced) {
+            return {
+                success: false,
+                message: "This order cannot be cancelled because some items are already processed"
+            };
+        }
+
+        // 6. Calculate total refund
+        const isRefundApplicable =
+            order.paymentStatus === "SUCCESS" &&
+            ["ONLINE", "WALLET"].includes(order.paymentMethod);
+
+        let totalRefund = 0;
+
+        if (isRefundApplicable) {
+            for (const item of orderItems) {
+
+                const unitPrice =
+                    Number(item.finalPrice) > 0
+                        ? Number(item.finalPrice)
+                        : Number(item.price);
+
+                const itemRefund = Number(
+                    (unitPrice * item.quantity).toFixed(2)
+                );
+
+                item.refundAmount = itemRefund;
+
+                totalRefund += itemRefund;
             }
+
+            totalRefund = Number(totalRefund.toFixed(2));
+        }
+
+        // 7. Cancel all items and restore stock
+        for (const item of orderItems) {
 
             item.orderItemStatus = "CANCELLED";
             item.cancelReason = cancelReason.trim();
 
             await item.save();
 
-            // Restore stock
             await Variant.findByIdAndUpdate(
                 item.variantId,
                 {
@@ -590,7 +698,35 @@ export const cancelOrderService = async (
             );
         }
 
-        // 6. Update main order
+        // 8. Credit refund to wallet
+        if (totalRefund > 0) {
+
+            let wallet = await Wallet.findOne({
+                userId: order.userId
+            });
+
+            if (!wallet) {
+                wallet = await Wallet.create({
+                    userId: order.userId,
+                    balance: 0,
+                    transactions: []
+                });
+            }
+
+            wallet.balance += totalRefund;
+
+            wallet.transactions.push({
+                type: "CREDIT",
+                amount: totalRefund,
+                description: `Refund for cancelled order`,
+                status: "SUCCESS",
+                date: new Date()
+            });
+
+            await wallet.save();
+        }
+
+        // 9. Update main order
         order.status = "CANCELLED";
         order.cancelReason = cancelReason.trim();
 
@@ -598,7 +734,9 @@ export const cancelOrderService = async (
 
         return {
             success: true,
-            message: "Order cancelled successfully"
+            message: totalRefund > 0
+                ? `Order cancelled successfully. ₹${totalRefund} refunded to wallet`
+                : "Order cancelled successfully"
         };
 
     } catch (error) {
@@ -611,6 +749,7 @@ export const cancelOrderService = async (
         };
     }
 };
+
 
 export const requestReturnService = async (
     orderId,
@@ -662,8 +801,7 @@ export const requestReturnService = async (
         orderItem.returnReason = returnReason.trim();
 
         await orderItem.save();
-console.log("Saved Order Item:", orderItem);
-console.log("Saved Cancellation Reason:", orderItem.cancelReason);
+    
         return {
             success: true,
             message: "Return request submitted successfully"

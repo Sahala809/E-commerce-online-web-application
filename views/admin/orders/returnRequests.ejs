@@ -144,18 +144,21 @@
     <% if (request.returnStatus === "REQUESTED") { %>
 
         <button
-    type="button"
-    class="return-status return-status-btn"
-    data-bs-toggle="modal"
-    data-bs-target="#returnRequestModal"
-    data-order-item-id="<%= request._id %>"
-    data-customer="<%= request.orderId?.userId?.name || 'N/A' %>"
-    data-email="<%= request.orderId?.userId?.email || 'N/A' %>"
-    data-product="<%= request.productId?.productName || 'Product unavailable' %>"
-    data-color="<%= request.variantId?.color || 'N/A' %>"
-    data-quantity="<%= request.quantity %>"
-    data-reason="<%= request.returnReason || 'No reason provided' %>"
->
+        type="button"
+        class="return-status return-status-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#returnRequestModal"
+        data-order-item-id="<%= request._id %>"
+        data-customer="<%= request.orderId?.userId?.name || 'N/A' %>"
+        data-email="<%= request.orderId?.userId?.email || 'N/A' %>"
+        data-product="<%= request.productId?.productName || 'Product unavailable' %>"
+        data-color="<%= request.variantId?.color || 'N/A' %>"
+        data-quantity="<%= request.quantity %>"
+        data-date="<%= request.createdAt
+    ? new Date(request.createdAt).toLocaleDateString('en-IN')
+    : 'N/A' %>"
+data-reason="<%= request.returnReason || 'No reason provided' %>"
+    >
     Pending
 </button>
     <% } else if (request.returnStatus === "APPROVED") { %>
@@ -308,7 +311,9 @@
 
 <script>
 
-    document.addEventListener("DOMContentLoaded", () => {
+
+document.addEventListener("DOMContentLoaded", () => {
+
     const modal = document.getElementById("returnRequestModal");
     const approveForm = document.getElementById("approveReturnForm");
     const rejectForm = document.getElementById("rejectReturnForm");
@@ -319,14 +324,46 @@
     }
 
     modal.addEventListener("show.bs.modal", (event) => {
+
         const button = event.relatedTarget;
 
-        if (!button) return;
+        if (!button) {
+            console.error("Modal trigger button not found");
+            return;
+        }
 
-        const orderItemId = button.dataset.orderItemId;
+        // Get data from Pending button
+        const data = button.dataset;
+
+        console.log("Return Request Data:", data);
+
+        // Display data inside modal
+        document.getElementById("modalCustomer").textContent =
+            data.customer || "N/A";
+
+        document.getElementById("modalEmail").textContent =
+            data.email || "N/A";
+
+        document.getElementById("modalProduct").textContent =
+            data.product || "N/A";
+
+        document.getElementById("modalColor").textContent =
+            data.color || "N/A";
+
+        document.getElementById("modalQuantity").textContent =
+            data.quantity || "N/A";
+
+        document.getElementById("modalDate").textContent =
+            data.date || "N/A";
+
+        document.getElementById("modalReason").textContent =
+            data.reason || "N/A";
+
+        // Set approve and reject form actions
+        const orderItemId = data.orderItemId;
 
         if (!orderItemId) {
-            console.error("Missing data-order-item-id on modal trigger button");
+            console.error("Missing order item ID");
             approveForm.action = "";
             rejectForm.action = "";
             return;
@@ -343,10 +380,11 @@
         form.addEventListener("submit", (event) => {
             if (!form.action || form.action.endsWith("/return-requests")) {
                 event.preventDefault();
-                console.error("Invalid return request form action:", form.action);
+                console.error("Invalid form action:", form.action);
             }
         });
     });
+
 });
 
 </script>

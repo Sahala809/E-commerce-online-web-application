@@ -6,7 +6,7 @@ import Coupon from "../models/couponModel.js";
 import Wishlist from "../models/wishlistModel.js";
 import User from "../models/userModel.js";
 import Address from "../models/addressModel.js";
-
+import Wallet from "../models/walletModel.js";
 //import { checkUserExists } from "../services/userService.js";
 
 import generateOtp from "../utils/generateOtp.js";
@@ -1506,6 +1506,10 @@ export const placeOrder = async (req, res) => {
 
         console.log("Payment:", paymentMethod);
 
+        
+
+        
+
         // Place order
         const result = await placeOrderService(
             userId,
@@ -2261,6 +2265,35 @@ export const removeCoupon = async (req, res) => {
 
         req.session.errorMessage = "Unable to remove coupon";
         return res.redirect("/user/checkout");
+    }
+};
+
+
+
+// LOAD USER WALLET
+export const loadWallet = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        let wallet = await Wallet.findOne({ userId });
+
+        if (!wallet) {
+            wallet = await Wallet.create({
+                userId,
+                balance: 0,
+                transactions: []
+            });
+        }
+
+        res.render("user/wallet/wallet", {
+            wallet,
+            pageTitle: "My Wallet",
+            activePage: "wallet"
+        });
+
+    } catch (error) {
+        console.error("Load Wallet Error:", error);
+        res.status(500).send("Unable to load wallet");
     }
 };
 

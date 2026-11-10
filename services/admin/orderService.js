@@ -1,7 +1,7 @@
 import Order from "../../models/ordermodel.js";
 import OrderItem from "../../models/orderItemModel.js";
 import User from "../../models/userModel.js";
-
+import Wallet from "../../models/walletModel.js";
 export const loadOrdersService = async (
     search = "",
     status = "",
@@ -386,13 +386,23 @@ export const updateOrderItemStatusService = async (orderItemId, status) => {
         }
 
 
-        // 6. Update main Order status
-        await Order.findByIdAndUpdate(
-            orderItem.orderId,
-            {
-                status: orderStatus
-            }
-        );
+        
+// 6. Update main Order status and payment status
+const orderUpdate = {
+    status: orderStatus
+};
+
+// When all order items are delivered,
+// mark payment as SUCCESS for every payment method
+if (orderStatus === "DELIVERED") {
+    orderUpdate.paymentStatus = "SUCCESS";
+}
+
+await Order.findByIdAndUpdate(
+    orderItem.orderId,
+    orderUpdate
+);
+
 
 
         return {
@@ -450,6 +460,7 @@ export const loadReturnRequestsService = async () => {
     }
 };
 
+
 export const updateReturnRequestService = async (orderItemId, returnStatus) => {
     try {
         if (!["APPROVED", "REJECTED"].includes(returnStatus)) {
@@ -475,13 +486,81 @@ export const updateReturnRequestService = async (orderItemId, returnStatus) => {
             };
         }
 
-        orderItem.returnStatus = returnStatus;
+        // REJECT RETURN
+        if (returnStatus === "REJECTED") {
+            orderItem.returnStatus = "REJECTED";
+            await orderItem.save();
+
+            return {
+                success: true,
+                message: "Return request rejected successfully"
+            };
+        }
+
+        // Find original order
+        const order = await Order.findById(orderItem.orderId);
+
+        if (!order) {
+            return {
+                success: false,
+                message: "Order not found"
+            };
+        }
+
+        // Calculate refund amount
+        const unitPrice = Number(orderItem.finalPrice) > 0
+            ? Number(orderItem.finalPrice)
+            : Number(orderItem.price);
+
+        const refundAmount = Number(
+            (unitPrice * orderItem.quantity).toFixed(2)
+        );
+
+        if (order.paymentStatus !== "SUCCESS" || refundAmount <= 0) {
+            return {
+                success: false,
+                message: "Refund is not applicable for this order"
+            };
+        }
+
+        // Find or create wallet
+        let wallet = await Wallet.findOne({
+            userId: order.userId
+        });
+
+        if (!wallet) {
+            wallet = await Wallet.create({
+                userId: order.userId,
+                balance: 0,
+                transactions: []
+            });
+        }
+
+        // Credit refund
+        wallet.balance += refundAmount;
+
+        wallet.transactions.push({
+            type: "CREDIT",
+            amount: refundAmount,
+            description: "Refund for returned order item",
+            status: "SUCCESS",
+            date: new Date()
+        });
+
+        await wallet.save();
+
+        // Update return and item status
+        orderItem.returnStatus = "APPROVED";
+        orderItem.orderItemStatus = "RETURNED";
+        orderItem.refundAmount = refundAmount;
+
         await orderItem.save();
 
         return {
             success: true,
-            message: `Return request ${returnStatus.toLowerCase()} successfully`
+            message: "Return approved and refund credited to wallet successfully"
         };
+
     } catch (error) {
         console.log("UPDATE RETURN REQUEST SERVICE ERROR:", error);
 
