@@ -649,82 +649,128 @@
                 </div>
 
 
-                <!-- PAYMENT INFORMATION -->
-                <div class="details-card">
+                
+<!-- PAYMENT INFORMATION -->
+<div class="details-card">
 
-                    <div class="card-header">
+    <div class="card-header">
+        <h2>Payment</h2>
+    </div>
 
-                        <h2>Payment</h2>
-
-                    </div>
-
-
-                    <div class="payment-info">
-
-                        <div>
-
-                            <span>Method</span>
-
-                            <strong>
-                                <%= order.paymentMethod === "COD"
-                                    ? "Cash on Delivery"
-                                    : order.paymentMethod %>
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>Status</span>
-
-                            <strong>
-                                <%= order.paymentStatus %>
-                            </strong>
-
-                        </div>
-
-
-                        
-                    </div>
-
-                    <% if (order.status === "CANCELLED") { %>
-
-    <div class="refund-summary">
-
-        <h3>Refund Information</h3>
-
-        <% 
-            const totalRefund = order.orderItemId.reduce(
-                (total, item) => total + Number(item.refundAmount || 0),
-                0
-            );
-        %>
+    <div class="payment-info">
 
         <div>
-            <span>Refund Status</span>
+            <span>Method</span>
             <strong>
-                <%= totalRefund > 0 ? "REFUNDED" : "NOT APPLICABLE" %>
+                <%= order.paymentMethod === "COD"
+                    ? "Cash on Delivery"
+                    : order.paymentMethod %>
             </strong>
         </div>
 
         <div>
-            <span>Total Refund</span>
+            <span>Payment Status</span>
             <strong>
-                ₹<%= totalRefund.toLocaleString("en-IN") %>
+                <%= order.paymentStatus %>
             </strong>
         </div>
-
-        <% if (totalRefund > 0) { %>
-            <p>Refunded to Chronix Wallet</p>
-        <% } %>
 
     </div>
 
-<% } %>
+    <%
+        const returnedItems = order.orderItemId.filter(
+            item => item.returnStatus === "APPROVED" &&
+                    item.orderItemStatus === "RETURNED"
+        );
 
+        const returnRequests = order.orderItemId.filter(
+            item => item.returnStatus &&
+                    item.returnStatus !== "NONE"
+        );
 
+        const totalRefund = returnedItems.reduce(
+            (total, item) =>
+                total + Number(item.refundAmount || 0),
+            0
+        );
+    %>
+
+    <% if (returnRequests.length > 0) { %>
+
+        <div class="refund-summary">
+
+            <h3>Return & Refund Information</h3>
+
+            <% returnRequests.forEach(item => { %>
+
+                <div>
+                    <span>Return Request</span>
+                    <strong>
+                        <%= item.productId?.productName || "Product" %>
+                        -
+                        <%= item.returnStatus %>
+                    </strong>
                 </div>
+
+            <% }) %>
+
+            <div>
+                <span>Refund Status</span>
+                <strong>
+                    <%= totalRefund > 0
+                        ? "REFUNDED"
+                        : returnedItems.length > 0
+                            ? "REFUND NOT RECORDED"
+                            : "NOT REFUNDED" %>
+                </strong>
+            </div>
+
+            <div>
+                <span>Total Refund</span>
+                <strong>
+                    ₹<%= totalRefund.toLocaleString("en-IN") %>
+                </strong>
+            </div>
+
+            <% if (totalRefund > 0) { %>
+                <p>Refunded to Chronix Wallet</p>
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+    <% if (order.status === "CANCELLED") { %>
+
+        <div class="refund-summary">
+
+            <h3>Cancellation Refund Information</h3>
+
+            <div>
+                <span>Refund Status</span>
+                <strong>
+                    <%= totalRefund > 0
+                        ? "REFUNDED"
+                        : "NOT REFUNDED" %>
+                </strong>
+            </div>
+
+            <div>
+                <span>Total Refund</span>
+                <strong>
+                    ₹<%= totalRefund.toLocaleString("en-IN") %>
+                </strong>
+            </div>
+
+            <% if (totalRefund > 0) { %>
+                <p>Refunded to Chronix Wallet</p>
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>
 
             </div>
 
