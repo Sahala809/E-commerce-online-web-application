@@ -82,10 +82,15 @@ import {
     requestReturnService
 } from "../services/orderManagement/orderService.js"
 
+
 import {
     getAvailableCouponsService,
     validateCouponService
 } from "../services/coupon/couponService.js";
+
+import {
+    getInvoiceOrderService
+} from "../services/admin/invoiceService.js";
 
 
 const razorpay = new Razorpay({
@@ -538,6 +543,7 @@ export const changePassword = async (req, res) => {
             success: null,
             formData:req.body,
             activePage: "changePassword"
+
         });
 
     }
@@ -2135,6 +2141,7 @@ export const requestReturn = async (req, res) => {
 
 
 
+
 export const loadMyCoupons = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -2298,3 +2305,41 @@ export const loadWallet = async (req, res) => {
 };
 
 
+export const getUserInvoice = async (req, res) => {
+    try {
+
+        const userId = req.session.user;
+        const { orderId } = req.params;
+
+        const order = await Order.findOne({
+            _id: orderId,
+            userId: userId
+        });
+
+        if (!order) {
+            return res.redirect("/user/orders");
+        }
+
+        if (!["DELIVERED", "RETURNED"].includes(order.status)) {
+            return res.redirect(
+                `/user/orders/${orderId}`
+            );
+        }
+
+        await getInvoiceOrderService(
+            orderId,
+            res
+        );
+
+    } catch (error) {
+
+        console.log(
+            "GET USER INVOICE ERROR:",
+            error
+        );
+
+        return res.redirect(
+            `/user/orders/${req.params.orderId}`
+        );
+    }
+};

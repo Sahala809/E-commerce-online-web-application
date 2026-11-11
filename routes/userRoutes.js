@@ -80,6 +80,7 @@ import {
     requestReturn
 } from "../controllers/userController.js"
 
+
 import {
     loadMyCoupons,
     applyCoupon,
@@ -88,8 +89,11 @@ import {
 
 import {
     loadWallet
-} from "../controllers/userController.js"
+} from "../controllers/userController.js";
 
+import {
+    getUserInvoice
+} from "../controllers/userController.js";
 const router = express.Router();
 
 
@@ -148,7 +152,15 @@ router.patch("/reset-password", resetPassword)
 router.get("/profile", isLogin, noCache, loadProfile);
 router.patch("/profile/edit", isLogin, editProfile);
 
-router.get("/profile/edit-password", isLogin, nocache, loadChangePassword);
+router.get(
+    "/profile/edit-password",
+    (req, res, next) => {
+        console.log("EDIT PASSWORD ROUTE REACHED");
+        next();
+    },
+    isLogin,
+    loadChangePassword
+);
 router.post("/profile/edit-password", isLogin, changePassword);
 
 router.get("/profile/edit-email", isLogin, noCache, loadChangeEmail);
@@ -233,9 +245,16 @@ router.post(
 
 
 router.get("/coupons", isLogin, noCache, loadMyCoupons);
+
 router.post("/checkout/apply-coupon", isLogin, applyCoupon);
+
 router.post("/checkout/remove-coupon", isLogin, removeCoupon);
 
 router.get("/wallet", isLogin, loadWallet);
+
+router.get(
+    "/orders/:orderId/invoice",
+    getUserInvoice
+);
 
 export default router;
