@@ -111,6 +111,11 @@ const orderSchema = new mongoose.Schema(
             default: undefined
         },
 
+        razorpayRefundId: {
+            type: String,
+            default: null
+        },
+
         subTotal: {
             type: Number,
             required: true
@@ -133,6 +138,7 @@ const orderSchema = new mongoose.Schema(
                 "PENDING",
                 "SUCCESS",
                 "FAILED",
+                "REFUND-PENDING",
                 "REFUNDED"
             ],
             default: "PENDING"

@@ -735,7 +735,7 @@ export const cancelOrderService = async (
         return {
             success: true,
             message: totalRefund > 0
-                ? `Order cancelled successfully. ₹${totalRefund} refunded to wallet`
+                ? `Order cancelled successfully. \u20B9${totalRefund} refunded to wallet`
                 : "Order cancelled successfully"
         };
 
