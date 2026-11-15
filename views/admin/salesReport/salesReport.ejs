@@ -1,0 +1,275 @@
+
+<%- include("../partials/header") %>
+
+<link rel="stylesheet" href="/css/admin/salesReport.css">
+
+<body>
+<div class="wrapper">
+
+    <%- include("../partials/sidebar") %>
+
+    <div class="flex-grow-1">
+        <%- include("../partials/navbar", { pageTitle: "Sales Report" }) %>
+
+        <div class="container-fluid sales-report-container">
+
+            <div class="page-heading">
+                <div>
+                    <h2>Sales Report</h2>
+                    <p>Monitor your store performance and revenue</p>
+                </div>
+            </div>
+
+            <!-- DATE FILTER -->
+            
+<form action="/admin/sales-report" method="GET" class="filter-section">
+
+    <select name="period" id="periodFilter">
+        <option value="daily" <%= period === "daily" ? "selected" : "" %>>Today</option>
+        <option value="weekly" <%= period === "weekly" ? "selected" : "" %>>Last 7 Days</option>
+        <option value="monthly" <%= period === "monthly" ? "selected" : "" %>>This Month</option>
+        <option value="custom" <%= period === "custom" ? "selected" : "" %>>Custom Range</option>
+    </select>
+
+    <input type="date" name="from" id="fromDate"
+        value="<%= fromDate ? fromDate.toISOString().slice(0,10) : '' %>">
+
+    <input type="date" name="to" id="toDate"
+        value="<%= toDate ? toDate.toISOString().slice(0,10) : '' %>">
+
+    <a href="/admin/sales-report/pdf?period=<%= period %>&from=<%= fromDate.toISOString().slice(0,10) %>&to=<%= toDate.toISOString().slice(0,10) %>"
+       class="download-btn pdf-btn">
+        <i class="bi bi-file-earmark-pdf"></i> Download PDF
+    </a>
+
+    <a href="/admin/sales-report/excel?period=<%= period %>&from=<%= fromDate.toISOString().slice(0,10) %>&to=<%= toDate.toISOString().slice(0,10) %>"
+       class="download-btn excel-btn">
+        <i class="bi bi-file-earmark-excel"></i> Download Excel
+    </a>
+
+</form>
+
+
+            <!-- SUMMARY CARDS -->
+            <div class="summary-grid">
+
+                <div class="summary-card">
+                    <div class="card-icon">₹</div>
+                    <p>Gross Sales</p>
+                    <h3>₹<%= Number(grossSales || 0).toFixed(2) %></h3>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">%</div>
+                    <p>Total Discounts</p>
+                    <h3>₹<%= Number(totalDiscounts || 0).toFixed(2) %></h3>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">↩</div>
+                    <p>Total Refunds</p>
+                    <h3>₹<%= Number(totalRefunds || 0).toFixed(2) %></h3>
+                </div>
+
+                <div class="summary-card highlight-card">
+                    <div class="card-icon">₹</div>
+                    <p>Net Sales</p>
+                    <h3>₹<%= Number(netSales || 0).toFixed(2) %></h3>
+                </div>
+
+            </div>
+
+            <!-- SALES CHART -->
+            <div class="report-card">
+                <div class="section-heading">
+                    <h4>Sales Overview</h4>
+                    <span><%= period === "daily" ? "Today" : period === "monthly" ? "This Month" : period === "custom" ? "Custom Range" : "Last 7 Days" %></span>
+                </div>
+
+                <% const maxRevenue = Math.max(1, ...(chartData || []).map(day => day.revenue)); %>
+
+                <div class="sales-chart">
+                    <% if (chartData && chartData.length > 0) { %>
+                        <% chartData.forEach(day => { %>
+                            <div class="chart-column">
+                                <div class="bar-area">
+                                    <div class="bar"
+                                        style="height: <%= Math.max(day.revenue > 0 ? 5 : 0, (day.revenue / maxRevenue) * 100) %>%"
+                                        title="₹<%= day.revenue.toFixed(2) %>">
+                                    </div>
+                                </div>
+                                <small><%= day.label %></small>
+                                <span>₹<%= day.revenue.toFixed(0) %></span>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="empty-message">No sales data available for this period.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- BEST SELLING PRODUCTS -->
+            <div class="report-card">
+                <div class="section-heading">
+                    <h4>Best-Selling Products</h4>
+                </div>
+
+                <% if (bestSellingProducts && bestSellingProducts.length > 0) { %>
+                    <div class="product-list">
+                        <% bestSellingProducts.forEach((product, index) => { %>
+                            <div class="product-row">
+                                <span class="product-rank">#<%= index + 1 %></span>
+
+                                <% if (product.image) { %>
+                                    <img src="<%= product.image %>" alt="Product">
+                                <% } else { %>
+                                    <div class="product-image-placeholder">No Image</div>
+                                <% } %>
+
+                                <div class="product-info">
+                                    <h6><%= product.productName %></h6>
+                                    <small><%= product.totalSold %> units sold</small>
+                                </div>
+
+                                <strong>₹<%= product.revenue.toFixed(2) %></strong>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p class="empty-message">No product sales found for this period.</p>
+                <% } %>
+            </div>
+
+           
+<!-- RECENT SALES -->
+<div class="report-card">
+
+    <div class="section-heading">
+        <h4>Recent Sales</h4>
+        <span><%= totalOrders || 0 %> records</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table sales-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Payment</th>
+                    <th>Net Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (recentSales && recentSales.length > 0) { %>
+
+                    <% recentSales.forEach(sale => { %>
+                        <tr>
+                            <td>#<%= sale.orderId %></td>
+                            <td><%= new Date(sale.date).toLocaleDateString("en-IN") %></td>
+                            <td><%= sale.customerName %></td>
+                            <td><%= sale.paymentMethod %></td>
+                            <td>₹<%= sale.amount.toFixed(2) %></td>
+                            <td>
+                                <span class="status-badge">
+                                    <%= sale.status %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+
+                <% } else { %>
+
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            No sales records found.
+                        </td>
+                    </tr>
+
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <% if (totalPages > 1) { %>
+
+        <div class="sales-pagination">
+
+            <% if (currentPage > 1) { %>
+                <a href="/admin/sales-report?period=<%= period %>&from=<%= fromDate.toISOString().slice(0,10) %>&to=<%= toDate.toISOString().slice(0,10) %>&page=<%= currentPage - 1 %>"
+                   class="pagination-btn">
+                    Previous
+                </a>
+            <% } else { %>
+                <span class="pagination-disabled">Previous</span>
+            <% } %>
+
+            <span class="pagination-info">
+                Page <%= currentPage %> of <%= totalPages %>
+            </span>
+
+            <% if (currentPage < totalPages) { %>
+                <a href="/admin/sales-report?period=<%= period %>&from=<%= fromDate.toISOString().slice(0,10) %>&to=<%= toDate.toISOString().slice(0,10) %>&page=<%= currentPage + 1 %>"
+                   class="pagination-btn">
+                    Next
+                </a>
+            <% } else { %>
+                <span class="pagination-disabled">Next</span>
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    
+const periodFilter = document.getElementById("periodFilter");
+const fromDate = document.getElementById("fromDate");
+const toDate = document.getElementById("toDate");
+
+function updateDateFields() {
+    const isCustom = periodFilter.value === "custom";
+
+    fromDate.style.display = isCustom ? "block" : "none";
+    toDate.style.display = isCustom ? "block" : "none";
+
+    fromDate.required = isCustom;
+    toDate.required = isCustom;
+}
+
+periodFilter.addEventListener("change", () => {
+    updateDateFields();
+
+    if (periodFilter.value !== "custom") {
+        periodFilter.form.submit();
+    }
+});
+
+fromDate.addEventListener("change", submitCustomFilter);
+toDate.addEventListener("change", submitCustomFilter);
+
+function submitCustomFilter() {
+    if (
+        periodFilter.value === "custom" &&
+        fromDate.value &&
+        toDate.value
+    ) {
+        periodFilter.form.submit();
+    }
+}
+
+updateDateFields();
+
+</script>
+
+</body>

@@ -340,6 +340,10 @@ export const updateOrderItemStatusService = async (orderItemId, status) => {
 
         orderItem.orderItemStatus = status;
 
+if (status === "DELIVERED" && !orderItem.deliveredAt) {
+    orderItem.deliveredAt = new Date();
+}
+
         await orderItem.save();
 
         

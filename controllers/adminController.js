@@ -1,3 +1,6 @@
+import PDFDocument from "pdfkit";
+import ExcelJS from "exceljs";
+
 import Address from "../models/addressModel.js";
 import User from "../models/userModel.js";
 import Category from "../models/categoryModel.js";
@@ -74,6 +77,10 @@ import {
     toggleOfferStatusService,
     deleteOfferService
 } from "../services/admin/offerService.js";
+
+import { 
+    salesReportService
+} from "../services/admin/salesReportService.js";
 
 
 export const loadAdminLogin = (req, res) => {
@@ -1667,5 +1674,239 @@ export const deleteOffer = async (req, res) => {
         console.log("DELETE OFFER ERROR:", error);
         req.session.errorMessage = "Failed to delete offer.";
         return res.redirect("/admin/offers");
+    }
+};
+
+
+
+
+export const loadSalesReport = async (req, res) => {
+    try {
+        const result = await salesReportService({
+            period: req.query.period || "weekly",
+            from: req.query.from,
+            to: req.query.to,
+            page: req.query.page
+        });
+
+        return res.render("admin/salesReport/salesReport", {
+            activePage: "salesReport",
+            pageTitle: "Sales Report",
+            ...result
+        });
+
+    } catch (error) {
+        console.log("LOAD SALES REPORT ERROR:", error);
+        return res.redirect("/admin/dashboard");
+    }
+};
+
+
+
+export const downloadSalesReportPDF = async (req, res) => {
+    try {
+        const report = await salesReportService({
+            period: req.query.period || "weekly",
+            from: req.query.from,
+            to: req.query.to
+        });
+
+        if (!report.success) {
+            return res.redirect("/admin/sales-report");
+        }
+
+        const doc = new PDFDocument({
+            size: "A4",
+            margin: 40
+        });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            'attachment; filename="Chronix-Sales-Report.pdf"'
+        );
+
+        doc.pipe(res);
+
+        doc.fontSize(20)
+            .text("CHRONIX - SALES REPORT", { align: "center" });
+
+        doc.moveDown();
+
+        doc.fontSize(10)
+            .text(`Period: ${report.period.toUpperCase()}`);
+
+        doc.text(
+            `From: ${new Date(report.fromDate).toLocaleDateString("en-IN")}`
+        );
+
+        doc.text(
+            `To: ${new Date(report.toDate).toLocaleDateString("en-IN")}`
+        );
+
+        doc.moveDown();
+
+        doc.fontSize(14).text("Sales Summary");
+        doc.moveDown(0.5);
+
+        doc.fontSize(11)
+            .text(`Gross Sales: Rs. ${report.grossSales.toFixed(2)}`)
+            .text(`Total Discounts: Rs. ${report.totalDiscounts.toFixed(2)}`)
+            .text(`Total Refunds: Rs. ${report.totalRefunds.toFixed(2)}`)
+            .text(`Net Sales: Rs. ${report.netSales.toFixed(2)}`)
+            .text(`Total Orders: ${report.totalOrders}`);
+
+        doc.moveDown();
+
+        doc.fontSize(14).text("Best Selling Products");
+        doc.moveDown(0.5);
+
+        doc.fontSize(10);
+
+        if (report.bestSellingProducts.length === 0) {
+            doc.text("No product sales found.");
+        }
+
+        for (const product of report.bestSellingProducts) {
+            doc.text(
+                `${product.productName} | Sold: ${product.totalSold} | Revenue: Rs. ${product.revenue.toFixed(2)}`
+            );
+        }
+
+        doc.moveDown();
+
+        doc.fontSize(14).text("Recent Sales");
+        doc.moveDown(0.5);
+
+        doc.fontSize(9);
+
+        for (const sale of report.recentSales) {
+            if (doc.y > 730) {
+                doc.addPage();
+            }
+
+            doc.text(
+                `Order: ${sale.orderId} | Customer: ${sale.customerName}`
+            );
+
+            doc.text(
+                `Date: ${new Date(sale.date).toLocaleDateString("en-IN")} | Payment: ${sale.paymentMethod} | Amount: Rs. ${sale.amount.toFixed(2)} | Status: ${sale.status}`
+            );
+
+            doc.moveDown(0.5);
+        }
+
+        doc.end();
+
+    } catch (error) {
+        console.log("SALES REPORT PDF ERROR:", error);
+
+        if (!res.headersSent) {
+            return res.redirect("/admin/sales-report");
+        }
+    }
+};
+
+
+
+
+export const downloadSalesReportExcel = async (req, res) => {
+    try {
+        const report = await salesReportService({
+            period: req.query.period || "weekly",
+            from: req.query.from,
+            to: req.query.to
+        });
+
+        if (!report.success) {
+            return res.redirect("/admin/sales-report");
+        }
+
+        const workbook = new ExcelJS.Workbook();
+
+        // SALES SUMMARY SHEET
+        const summarySheet = workbook.addWorksheet("Sales Summary");
+
+        summarySheet.columns = [
+            { header: "Description", key: "description", width: 25 },
+            { header: "Amount", key: "amount", width: 20 }
+        ];
+
+        summarySheet.addRows([
+            { description: "Period", amount: report.period },
+            {
+                description: "From Date",
+                amount: new Date(report.fromDate).toLocaleDateString("en-IN")
+            },
+            {
+                description: "To Date",
+                amount: new Date(report.toDate).toLocaleDateString("en-IN")
+            },
+            { description: "Gross Sales", amount: report.grossSales },
+            { description: "Total Discounts", amount: report.totalDiscounts },
+            { description: "Total Refunds", amount: report.totalRefunds },
+            { description: "Net Sales", amount: report.netSales },
+            { description: "Total Orders", amount: report.totalOrders }
+        ]);
+
+        summarySheet.getRow(1).font = { bold: true };
+
+        // RECENT SALES SHEET
+        const salesSheet = workbook.addWorksheet("Recent Sales");
+
+        salesSheet.columns = [
+            { header: "Order ID", key: "orderId", width: 18 },
+            { header: "Date", key: "date", width: 18 },
+            { header: "Customer", key: "customerName", width: 25 },
+            { header: "Payment Method", key: "paymentMethod", width: 18 },
+            { header: "Amount", key: "amount", width: 15 },
+            { header: "Status", key: "status", width: 20 }
+        ];
+
+        salesSheet.addRows(
+            report.recentSales.map(sale => ({
+                orderId: sale.orderId,
+                date: new Date(sale.date).toLocaleDateString("en-IN"),
+                customerName: sale.customerName,
+                paymentMethod: sale.paymentMethod,
+                amount: sale.amount,
+                status: sale.status
+            }))
+        );
+
+        salesSheet.getRow(1).font = { bold: true };
+
+        // BEST SELLING PRODUCTS SHEET
+        const productSheet = workbook.addWorksheet("Best Selling Products");
+
+        productSheet.columns = [
+            { header: "Product Name", key: "productName", width: 30 },
+            { header: "Quantity Sold", key: "totalSold", width: 18 },
+            { header: "Revenue", key: "revenue", width: 18 }
+        ];
+
+        productSheet.addRows(report.bestSellingProducts);
+
+        productSheet.getRow(1).font = { bold: true };
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            'attachment; filename="Chronix-Sales-Report.xlsx"'
+        );
+
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        console.log("SALES REPORT EXCEL ERROR:", error);
+
+        if (!res.headersSent) {
+            return res.redirect("/admin/sales-report");
+        }
     }
 };

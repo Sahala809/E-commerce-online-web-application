@@ -50,6 +50,11 @@ const orderItemSchema = new mongoose.Schema(
             default: "PLACED"
         },
 
+        deliveredAt: {
+            type: Date,
+            default: null
+        },
+
         returnStatus: {
             type: String,
             enum: [

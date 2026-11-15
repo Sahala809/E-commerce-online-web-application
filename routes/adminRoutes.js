@@ -85,6 +85,13 @@ import {
     deleteOffer
 } from "../controllers/adminController.js"
 
+import {
+    loadSalesReport,
+    downloadSalesReportExcel,
+    downloadSalesReportPDF
+} from "../controllers/adminController.js";
+
+
 
 router.get("/login", noCache,loadAdminLogin)
 router.post("/login", adminLogin);
@@ -275,6 +282,29 @@ router.post(
     isAdminLogin,
     noCache,
     deleteOffer
+);
+
+
+router.get(
+    "/sales-report",
+    isAdminLogin,
+    noCache,
+    loadSalesReport
+);
+
+
+router.get(
+    "/sales-report/pdf",
+    isAdminLogin,
+    noCache,
+    downloadSalesReportPDF
+);
+
+router.get(
+    "/sales-report/excel",
+    isAdminLogin,
+    noCache,
+    downloadSalesReportExcel
 );
 
 export default router;
