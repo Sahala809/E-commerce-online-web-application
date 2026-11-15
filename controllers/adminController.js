@@ -109,10 +109,8 @@ export const adminLogin = async (req, res) => {
 
 
 export const loadDashboard = async (req, res) => {
-
     try {
-
-        const result = await dashboardService()
+        const result = await dashboardService();
 
         const successMessage = req.session.successMessage || "";
         const errorMessage = req.session.errorMessage || "";
@@ -120,41 +118,35 @@ export const loadDashboard = async (req, res) => {
         req.session.successMessage = null;
         req.session.errorMessage = null;
 
-        if(!result.success){
-            return  res.render('admin/dashboard',{
-
-                activePage: "dashboard",
-                pageTitle: "Dashboard",
-                totalUsers:0,
-                totalProducts:0,
-                totalOrders: 0,
-                totalRevenue:0 ,
-                successMessage,
-                errorMessage
-
-            })
-        }
-
-        return res.render('admin/dashboard', {
+        return res.render("admin/dashboard", {
             activePage: "dashboard",
             pageTitle: "Dashboard",
-            totalUsers: result.totalUsers,
-            totalProducts:result.totalProducts,
-            totalOrders: result.totalOrders,
-            totalRevenue:result.totalRevenue,
+
+            // Summary
+            totalUsers: result.totalUsers || 0,
+            totalProducts: result.totalProducts || 0,
+            totalOrders: result.totalOrders || 0,
+            totalRevenue: result.totalRevenue || 0,
+
+            // Dashboard sections
+            bestSellingProducts: result.bestSellingProducts || [],
+            recentOrders: result.recentOrders || [],
+            weeklyTopCustomers: result.weeklyTopCustomers || [],
+            salesChartData: result.salesChartData || [],
+            
             successMessage,
             errorMessage
-        })
-        
+        });
+
     } catch (error) {
         console.log("LOAD DASHBOARD ERROR:", error);
 
         req.session.errorMessage = "Something went wrong.";
-        return res.redirect("/admin/login");
 
-        
+        return res.redirect("/admin/login");
     }
-}
+};
+
 
 export const adminLogout = async (req, res) => {
 
