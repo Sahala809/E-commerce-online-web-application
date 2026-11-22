@@ -158,7 +158,7 @@ export const loadCartService = async (userId) => {
             return;
         }
 
-
+        
         if (variant.stock <= 0) {
 
             item.isOutOfStock = true;
@@ -176,6 +176,7 @@ export const loadCartService = async (userId) => {
             item.stockMessage = "";
         }
 
+        
         let price = variant.price;
 
         if (

@@ -188,6 +188,14 @@
                             <% } %>
 
 
+                            <% if (item.variantId){%>
+                                <p>
+                                <strong>
+                                    <%= item.variantId.stock %>
+                                </strong>
+                                </p>
+
+                            <% } %>
                             <!-- Price -->
 
                             <% if (item.variantId) { %>
