@@ -238,13 +238,15 @@ export const salesReportService = async (filters = {}) => {
             }));
 
         // PAGINATE RECENT SALES
-        const totalOrders = recentSales.length;
-        const totalPages = Math.ceil(totalOrders / limit);
+const totalOrders = recentSales.length;
+const totalPages = Math.ceil(totalOrders / limit);
 
-        const paginatedSales = recentSales.slice(
-            (page - 1) * limit,
-            page * limit
-        );
+const paginatedSales = filters.exportAll
+    ? recentSales
+    : recentSales.slice(
+        (page - 1) * limit,
+        page * limit
+    );
 
         return {
             success: true,

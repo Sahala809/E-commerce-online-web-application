@@ -1703,12 +1703,14 @@ export const loadSalesReport = async (req, res) => {
 
 
 
+
 export const downloadSalesReportPDF = async (req, res) => {
     try {
         const report = await salesReportService({
             period: req.query.period || "weekly",
             from: req.query.from,
-            to: req.query.to
+            to: req.query.to,
+            exportAll: true
         });
 
         if (!report.success) {
@@ -1717,8 +1719,19 @@ export const downloadSalesReportPDF = async (req, res) => {
 
         const doc = new PDFDocument({
             size: "A4",
-            margin: 40
+            margin: 40,
+            bufferPages: true
         });
+
+        const PAGE_WIDTH = 595.28;
+        const LEFT = 40;
+        const RIGHT = 555;
+        const TABLE_WIDTH = RIGHT - LEFT;
+        const BOTTOM_LIMIT = 755;
+
+        const NAVY = "#142F50";
+        const LIGHT_BLUE = "#DCEBFA";
+        const BORDER = "#AAB4BF";
 
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
@@ -1728,72 +1741,264 @@ export const downloadSalesReportPDF = async (req, res) => {
 
         doc.pipe(res);
 
-        doc.fontSize(20)
-            .text("CHRONIX - SALES REPORT", { align: "center" });
+        const formatMoney = amount =>
+            `Rs. ${Number(amount || 0).toFixed(2)}`;
 
-        doc.moveDown();
+        const formatDate = date =>
+            new Date(date).toLocaleDateString("en-IN");
 
-        doc.fontSize(10)
-            .text(`Period: ${report.period.toUpperCase()}`);
+        // FIRST PAGE HEADER
+        doc.fillColor(NAVY)
+            .font("Helvetica-Bold")
+            .fontSize(23)
+            .text("CHRONIX", LEFT, 40);
 
-        doc.text(
-            `From: ${new Date(report.fromDate).toLocaleDateString("en-IN")}`
-        );
+        doc.font("Helvetica-Bold")
+            .fontSize(15)
+            .text("SALES REPORT", LEFT, 69);
 
-        doc.text(
-            `To: ${new Date(report.toDate).toLocaleDateString("en-IN")}`
-        );
+        doc.font("Helvetica")
+            .fontSize(9)
+            .fillColor("#555555")
+            .text("E-commerce Sales Analytics", LEFT, 89);
 
-        doc.moveDown();
+        doc.moveTo(LEFT, 110)
+            .lineTo(RIGHT, 110)
+            .lineWidth(1)
+            .strokeColor(NAVY)
+            .stroke();
 
-        doc.fontSize(14).text("Sales Summary");
-        doc.moveDown(0.5);
+        // REPORT PERIOD
+        doc.roundedRect(LEFT, 120, TABLE_WIDTH, 28, 4)
+            .fill(NAVY);
 
-        doc.fontSize(11)
-            .text(`Gross Sales: Rs. ${report.grossSales.toFixed(2)}`)
-            .text(`Total Discounts: Rs. ${report.totalDiscounts.toFixed(2)}`)
-            .text(`Total Refunds: Rs. ${report.totalRefunds.toFixed(2)}`)
-            .text(`Net Sales: Rs. ${report.netSales.toFixed(2)}`)
-            .text(`Total Orders: ${report.totalOrders}`);
-
-        doc.moveDown();
-
-        doc.fontSize(14).text("Best Selling Products");
-        doc.moveDown(0.5);
-
-        doc.fontSize(10);
-
-        if (report.bestSellingProducts.length === 0) {
-            doc.text("No product sales found.");
-        }
-
-        for (const product of report.bestSellingProducts) {
-            doc.text(
-                `${product.productName} | Sold: ${product.totalSold} | Revenue: Rs. ${product.revenue.toFixed(2)}`
+        doc.fillColor("#FFFFFF")
+            .font("Helvetica-Bold")
+            .fontSize(10)
+            .text(
+                `Period: ${report.period.toUpperCase()}    |    From: ${formatDate(report.fromDate)}    To: ${formatDate(report.toDate)}`,
+                LEFT + 10,
+                129,
+                {
+                    width: TABLE_WIDTH - 20,
+                    align: "center"
+                }
             );
-        }
 
-        doc.moveDown();
+        doc.y = 165;
 
-        doc.fontSize(14).text("Recent Sales");
-        doc.moveDown(0.5);
-
-        doc.fontSize(9);
-
-        for (const sale of report.recentSales) {
-            if (doc.y > 730) {
+        // CHECK AVAILABLE PAGE SPACE
+        const checkPageSpace = requiredHeight => {
+            if (doc.y + requiredHeight > BOTTOM_LIMIT) {
                 doc.addPage();
             }
+        };
 
-            doc.text(
-                `Order: ${sale.orderId} | Customer: ${sale.customerName}`
-            );
-
-            doc.text(
-                `Date: ${new Date(sale.date).toLocaleDateString("en-IN")} | Payment: ${sale.paymentMethod} | Amount: Rs. ${sale.amount.toFixed(2)} | Status: ${sale.status}`
-            );
+        // SECTION HEADING
+        const drawSectionHeading = title => {
+            checkPageSpace(55);
 
             doc.moveDown(0.5);
+
+            doc.fillColor(NAVY)
+                .font("Helvetica-Bold")
+                .fontSize(14)
+                .text(title, LEFT, doc.y);
+
+            doc.moveDown(0.7);
+        };
+
+        // REUSABLE TABLE FUNCTION
+        const drawTable = (columns, rows) => {
+            const headerHeight = 25;
+            const padding = 5;
+            const fontSize = 8;
+
+            const drawTableHeader = () => {
+                let x = LEFT;
+                const y = doc.y;
+
+                columns.forEach(column => {
+                    doc.rect(x, y, column.width, headerHeight)
+                        .fillAndStroke(NAVY, BORDER);
+
+                    doc.fillColor("#FFFFFF")
+                        .font("Helvetica-Bold")
+                        .fontSize(fontSize)
+                        .text(
+                            column.header,
+                            x + padding,
+                            y + 7,
+                            {
+                                width: column.width - padding * 2,
+                                align: column.align || "left"
+                            }
+                        );
+
+                    x += column.width;
+                });
+
+                doc.y = y + headerHeight;
+            };
+
+            checkPageSpace(headerHeight + 25);
+            drawTableHeader();
+
+            rows.forEach(row => {
+                doc.font("Helvetica")
+                    .fontSize(fontSize);
+
+                // CALCULATE ROW HEIGHT
+                const cellHeights = columns.map((column, index) => {
+                    const value = String(row[index] ?? "");
+
+                    return doc.heightOfString(value, {
+                        width: column.width - padding * 2,
+                        align: column.align || "left",
+                        lineGap: 1
+                    });
+                });
+
+                const rowHeight = Math.max(
+                    22,
+                    ...cellHeights.map(height => height + padding * 2)
+                );
+
+                // MOVE TO NEXT PAGE IF REQUIRED
+                if (doc.y + rowHeight > BOTTOM_LIMIT) {
+                    doc.addPage();
+                    drawTableHeader();
+                }
+
+                const y = doc.y;
+                let x = LEFT;
+
+                columns.forEach((column, index) => {
+                    doc.rect(x, y, column.width, rowHeight)
+                        .fillAndStroke("#FFFFFF", BORDER);
+
+                    doc.fillColor("#222222")
+                        .font("Helvetica")
+                        .fontSize(fontSize)
+                        .text(
+                            String(row[index] ?? ""),
+                            x + padding,
+                            y + padding,
+                            {
+                                width: column.width - padding * 2,
+                                height: rowHeight - padding * 2,
+                                align: column.align || "left",
+                                lineGap: 1
+                            }
+                        );
+
+                    x += column.width;
+                });
+
+                doc.y = y + rowHeight;
+            });
+
+            doc.moveDown(0.8);
+        };
+
+        // 1. SALES SUMMARY
+        drawSectionHeading("Sales Summary");
+
+        drawTable(
+            [
+                { header: "Description", width: 300 },
+                { header: "Amount", width: 215, align: "right" }
+            ],
+            [
+                ["Gross Sales", formatMoney(report.grossSales)],
+                ["Total Discounts", formatMoney(report.totalDiscounts)],
+                ["Total Refunds", formatMoney(report.totalRefunds)],
+                ["Net Sales", formatMoney(report.netSales)],
+                ["Total Orders", String(report.totalOrders)]
+            ]
+        );
+
+        // 2. BEST SELLING PRODUCTS
+        drawSectionHeading("Best Selling Products");
+
+        const productRows = report.bestSellingProducts.map(product => [
+            product.productName || "Unknown",
+            String(product.totalSold || 0),
+            formatMoney(product.revenue)
+        ]);
+
+        drawTable(
+            [
+                { header: "Product Name", width: 235 },
+                { header: "Quantity Sold", width: 115, align: "center" },
+                { header: "Revenue", width: 165, align: "right" }
+            ],
+            productRows.length
+                ? productRows
+                : [["No product sales found", "-", "-"]]
+        );
+
+        // 3. RECENT SALES
+        drawSectionHeading("Recent Sales");
+
+        const recentSalesRows = report.recentSales.map(sale => [
+            sale.orderId || "-",
+            formatDate(sale.date),
+            sale.customerName || "Unknown",
+            sale.paymentMethod || "-",
+            formatMoney(sale.amount),
+            sale.status || "-"
+        ]);
+
+        drawTable(
+            [
+                { header: "Order ID", width: 65 },
+                { header: "Date", width: 65 },
+                { header: "Customer", width: 95 },
+                { header: "Payment", width: 80 },
+                { header: "Amount", width: 105, align: "right" },
+                { header: "Status", width: 105 }
+            ],
+            recentSalesRows.length
+                ? recentSalesRows
+                : [["-", "-", "No sales found", "-", "-", "-"]]
+        );
+
+        // ADD FOOTER AND PAGE NUMBERS
+        const pageRange = doc.bufferedPageRange();
+        const totalPages = pageRange.count;
+
+        for (
+            let pageIndex = pageRange.start;
+            pageIndex < pageRange.start + totalPages;
+            pageIndex++
+        ) {
+            doc.switchToPage(pageIndex);
+
+            doc.moveTo(LEFT, 775)
+                .lineTo(RIGHT, 775)
+                .lineWidth(0.7)
+                .strokeColor(BORDER)
+                .stroke();
+
+            doc.fillColor("#555555")
+                .font("Helvetica")
+                .fontSize(8)
+                .text(
+                    "Chronix E-commerce",
+                    LEFT,
+                    784
+                );
+
+            doc.text(
+                `Page ${pageIndex + 1} of ${totalPages}`,
+                LEFT,
+                784,
+                {
+                    width: TABLE_WIDTH,
+                    align: "right"
+                }
+            );
         }
 
         doc.end();
@@ -1806,6 +2011,7 @@ export const downloadSalesReportPDF = async (req, res) => {
         }
     }
 };
+
 
 
 
