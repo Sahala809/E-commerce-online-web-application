@@ -1,10 +1,10 @@
+
 import PDFDocument from "pdfkit";
 import Order from "../../models/ordermodel.js";
 
 export const getInvoiceOrderService = async (orderId, res) => {
     try {
         const order = await Order.findById(orderId)
-            .populate("userId")
             .populate({
                 path: "orderItemId",
                 populate: [
@@ -20,7 +20,7 @@ export const getInvoiceOrderService = async (orderId, res) => {
             };
         }
 
-        // Invoice is available for delivered or returned orders
+        // Invoice is available only for delivered or returned orders
         if (!["DELIVERED", "RETURNED"].includes(order.status)) {
             return {
                 success: false,
@@ -30,13 +30,7 @@ export const getInvoiceOrderService = async (orderId, res) => {
 
         const doc = new PDFDocument({
             size: "A4",
-            margins: {
-                top: 45,
-                bottom: 50,
-                left: 50,
-                right: 50
-            },
-            bufferPages: true
+            margin: 0
         });
 
         res.setHeader("Content-Type", "application/pdf");
@@ -48,17 +42,15 @@ export const getInvoiceOrderService = async (orderId, res) => {
 
         doc.pipe(res);
 
-        // =====================================================
-        // CONSTANTS AND HELPERS
-        // =====================================================
+        // ==========================================
+        // PAGE AND STYLE CONSTANTS
+        // ==========================================
 
         const PAGE_WIDTH = doc.page.width;
-        const PAGE_HEIGHT = doc.page.height;
 
-        const LEFT = doc.page.margins.left;
-        const RIGHT = PAGE_WIDTH - doc.page.margins.right;
-        const CONTENT_WIDTH = RIGHT - LEFT;
-        const BOTTOM = PAGE_HEIGHT - doc.page.margins.bottom;
+        const LEFT = 42;
+        const RIGHT = PAGE_WIDTH - 42;
+        const WIDTH = RIGHT - LEFT;
 
         const COLORS = {
             black: "#171717",
@@ -68,27 +60,46 @@ export const getInvoiceOrderService = async (orderId, res) => {
             border: "#DDDDDD",
             light: "#F7F7F7",
             white: "#FFFFFF",
-            green: "#237A45",
-            red: "#B33A3A"
+            green: "#198754"
         };
 
-        const formatAmount = (amount) =>
-            `Rs. ${Number(amount || 0).toFixed(2)}`;
+        // ==========================================
+        // HELPER FUNCTIONS
+        // ==========================================
 
-        const formatDate = (date) =>
-            date
+        const formatAmount = (amount) => {
+            return `Rs. ${Number(amount || 0).toFixed(2)}`;
+        };
+
+        const formatDate = (date) => {
+            return date
                 ? new Date(date).toLocaleDateString("en-IN")
                 : "N/A";
+        };
 
-        const safeText = (value) =>
-            value === null || value === undefined || value === ""
+        const safeText = (value) => {
+            return value === null || value === undefined || value === ""
                 ? "N/A"
                 : String(value);
+        };
 
-        const ensureSpace = (requiredHeight) => {
-            if (doc.y + requiredHeight > BOTTOM) {
-                doc.addPage();
-            }
+        const drawText = (
+            text,
+            x,
+            y,
+            width,
+            options = {}
+        ) => {
+            doc
+                .font(options.bold ? "Helvetica-Bold" : "Helvetica")
+                .fontSize(options.fontSize || 9)
+                .fillColor(options.color || COLORS.text)
+                .text(safeText(text), x, y, {
+                    width,
+                    align: options.align || "left",
+                    lineBreak: options.lineBreak ?? true,
+                    ellipsis: options.ellipsis || false
+                });
         };
 
         const drawLine = (y, color = COLORS.border) => {
@@ -96,29 +107,23 @@ export const getInvoiceOrderService = async (orderId, res) => {
                 .moveTo(LEFT, y)
                 .lineTo(RIGHT, y)
                 .strokeColor(color)
-                .lineWidth(0.7)
+                .lineWidth(0.8)
                 .stroke();
         };
 
-        const drawSectionTitle = (title) => {
-            ensureSpace(42);
-
-            const y = doc.y;
-
-            doc
-                .font("Helvetica-Bold")
-                .fontSize(13)
-                .fillColor(COLORS.black)
-                .text(title, LEFT, y);
+        const drawSectionTitle = (title, y) => {
+            drawText(title, LEFT, y, WIDTH, {
+                bold: true,
+                fontSize: 12,
+                color: COLORS.black
+            });
 
             doc
                 .moveTo(LEFT, y + 21)
                 .lineTo(RIGHT, y + 21)
                 .strokeColor(COLORS.gold)
-                .lineWidth(1.5)
+                .lineWidth(1.4)
                 .stroke();
-
-            doc.y = y + 32;
         };
 
         const drawLabelValue = (
@@ -127,264 +132,129 @@ export const getInvoiceOrderService = async (orderId, res) => {
             x,
             y,
             width,
-            options = {}
+            labelWidth = 100
         ) => {
-            const labelWidth = options.labelWidth || 90;
-            const valueWidth = width - labelWidth;
+            drawText(label, x, y, labelWidth, {
+                fontSize: 8,
+                color: COLORS.muted
+            });
 
-            doc
-                .font("Helvetica")
-                .fontSize(9)
-                .fillColor(COLORS.muted)
-                .text(label, x, y, {
-                    width: labelWidth - 5
-                });
-
-            doc
-                .font(options.bold ? "Helvetica-Bold" : "Helvetica")
-                .fontSize(9)
-                .fillColor(options.color || COLORS.text)
-                .text(safeText(value), x + labelWidth, y, {
-                    width: valueWidth,
-                    align: "left"
-                });
+            drawText(value, x + labelWidth, y, width - labelWidth, {
+                fontSize: 8.5,
+                bold: true,
+                color: COLORS.text,
+                lineBreak: false
+            });
         };
 
-        const drawCard = (x, y, width, height, title) => {
-            doc
-                .roundedRect(x, y, width, height, 5)
-                .fillAndStroke(COLORS.light, COLORS.border);
-
-            doc
-                .font("Helvetica-Bold")
-                .fontSize(10)
-                .fillColor(COLORS.black)
-                .text(title, x + 12, y + 12, {
-                    width: width - 24
-                });
-        };
-
-        // =====================================================
+        // ==========================================
         // ORDER DATA
-        // =====================================================
+        // ==========================================
 
-        const orderItems = order.orderItemId.filter(Boolean);
-
-        const returnedItems = orderItems.filter((item) => {
-            const returnStatus = item.returnStatus || "NONE";
-
-            return (
-                returnStatus !== "NONE" ||
-                item.orderItemStatus === "RETURNED" ||
-                Number(item.refundAmount) > 0
-            );
-        });
-
-        const totalRefund = returnedItems.reduce(
-            (total, item) =>
-                total + Math.max(0, Number(item.refundAmount) || 0),
-            0
-        );
+        const orderItems = (order.orderItemId || []).filter(Boolean);
 
         const originalGrandTotal = Number(order.totalAmount) || 0;
 
-        const netAmountRetained = Math.max(
+        // Calculate total refund for returned items
+        const totalRefund = orderItems.reduce((total, item) => {
+            return total + Math.max(
+                0,
+                Number(item.refundAmount) || 0
+            );
+        }, 0);
+
+        // Amount after deducting refunds
+        const finalAmountAfterRefund = Math.max(
             0,
             originalGrandTotal - totalRefund
         );
 
-        // =====================================================
+        // ==========================================
         // HEADER
-        // =====================================================
+        // ==========================================
 
-        doc
-            .font("Helvetica-Bold")
-            .fontSize(27)
-            .fillColor(COLORS.black)
-            .text("CHRONIX", LEFT, 42, {
-                align: "center",
-                width: CONTENT_WIDTH
-            });
+        drawText("CHRONIX", LEFT, 35, WIDTH, {
+            bold: true,
+            fontSize: 27,
+            color: COLORS.black,
+            align: "center"
+        });
 
-        doc
-            .font("Helvetica-Bold")
-            .fontSize(16)
-            .fillColor(COLORS.gold)
-            .text("INVOICE", {
-                align: "center"
-            });
+        drawText("INVOICE", LEFT, 68, WIDTH, {
+            bold: true,
+            fontSize: 15,
+            color: COLORS.gold,
+            align: "center"
+        });
 
-        doc.moveDown(0.4);
+        drawText("ORDER INVOICE", LEFT, 90, WIDTH, {
+            fontSize: 8,
+            color: COLORS.muted,
+            align: "center"
+        });
 
-        doc
-            .font("Helvetica")
-            .fontSize(8)
-            .fillColor(COLORS.muted)
-            .text("ORDER INVOICE", {
-                align: "center"
-            });
+        drawLine(110, COLORS.gold);
 
-        doc.moveDown(1.5);
-
-        drawLine(doc.y, COLORS.gold);
-
-        doc.moveDown(1);
-
-        // =====================================================
+        // ==========================================
         // INVOICE INFORMATION
-        // =====================================================
+        // ==========================================
 
-        drawSectionTitle("Invoice Information");
+        drawSectionTitle("Invoice Information", 128);
 
-        const invoiceInfoY = doc.y;
-
-        const halfWidth = CONTENT_WIDTH / 2;
+        const infoY = 164;
+        const halfWidth = WIDTH / 2;
 
         drawLabelValue(
             "Invoice Number",
             `CH-${String(order._id).slice(-8).toUpperCase()}`,
             LEFT,
-            invoiceInfoY,
+            infoY,
             halfWidth,
-            { labelWidth: 105 }
+            100
         );
 
         drawLabelValue(
             "Invoice Date",
             formatDate(new Date()),
             LEFT + halfWidth,
-            invoiceInfoY,
+            infoY,
             halfWidth,
-            { labelWidth: 85 }
-        );
-
-        drawLabelValue(
-            "Order ID",
-            order._id,
-            LEFT,
-            invoiceInfoY + 23,
-            halfWidth,
-            { labelWidth: 105 }
+            85
         );
 
         drawLabelValue(
             "Order Date",
             formatDate(order.createdAt),
-            LEFT + halfWidth,
-            invoiceInfoY + 23,
-            halfWidth,
-            { labelWidth: 85 }
-        );
-
-        doc.y = invoiceInfoY + 48;
-
-        // =====================================================
-        // CUSTOMER AND SHIPPING DETAILS
-        // =====================================================
-
-        drawSectionTitle("Customer & Shipping Details");
-
-        const address = order.shippingAddress || {};
-
-        const cardGap = 12;
-        const cardWidth = (CONTENT_WIDTH - cardGap) / 2;
-        const cardY = doc.y;
-        const cardHeight = 145;
-
-        ensureSpace(cardHeight + 10);
-
-        const actualCardY = doc.y;
-
-        // Customer card
-        drawCard(
             LEFT,
-            actualCardY,
-            cardWidth,
-            cardHeight,
-            "CUSTOMER DETAILS"
+            infoY + 25,
+            halfWidth,
+            100
         );
 
         drawLabelValue(
-            "Name",
-            address.fullName,
-            LEFT + 12,
-            actualCardY + 38,
-            cardWidth - 24,
-            { labelWidth: 48 }
+            "Customer",
+            order.shippingAddress?.fullName,
+            LEFT + halfWidth,
+            infoY + 25,
+            halfWidth,
+            85
         );
 
-        drawLabelValue(
-            "Phone",
-            address.phone,
-            LEFT + 12,
-            actualCardY + 62,
-            cardWidth - 24,
-            { labelWidth: 48 }
-        );
+        // ==========================================
+        // PAYMENT INFORMATION
+        // ==========================================
 
-        drawLabelValue(
-            "Email",
-            order.userId?.email,
-            LEFT + 12,
-            actualCardY + 86,
-            cardWidth - 24,
-            { labelWidth: 48 }
-        );
+        drawSectionTitle("Payment Information", 225);
 
-        // Shipping card
-        const shippingX = LEFT + cardWidth + cardGap;
-
-        drawCard(
-            shippingX,
-            actualCardY,
-            cardWidth,
-            cardHeight,
-            "SHIPPING ADDRESS"
-        );
-
-        const addressLines = [
-            address.houseName,
-            address.street,
-            `${address.city || ""}, ${address.district || ""}`,
-            `${address.state || ""}, ${address.country || ""}`,
-            `Pincode: ${address.pincode || "N/A"}`
-        ].filter(Boolean);
-
-        doc
-            .font("Helvetica")
-            .fontSize(8.5)
-            .fillColor(COLORS.text)
-            .text(
-                addressLines.join("\n"),
-                shippingX + 12,
-                actualCardY + 38,
-                {
-                    width: cardWidth - 24,
-                    lineGap: 4
-                }
-            );
-
-        doc.y = actualCardY + cardHeight + 18;
-
-        // =====================================================
-        // PAYMENT DETAILS
-        // =====================================================
-
-        drawSectionTitle("Payment Information");
-
-        const paymentY = doc.y;
-        const paymentCardHeight = 76;
-
-        ensureSpace(paymentCardHeight + 10);
-
-        const actualPaymentY = doc.y;
+        const paymentY = 261;
+        const paymentHeight = 65;
 
         doc
             .roundedRect(
                 LEFT,
-                actualPaymentY,
-                CONTENT_WIDTH,
-                paymentCardHeight,
+                paymentY,
+                WIDTH,
+                paymentHeight,
                 5
             )
             .fillAndStroke(COLORS.light, COLORS.border);
@@ -393,66 +263,52 @@ export const getInvoiceOrderService = async (orderId, res) => {
             "Payment Method",
             order.paymentMethod,
             LEFT + 12,
-            actualPaymentY + 17,
+            paymentY + 15,
             halfWidth - 12,
-            { labelWidth: 105, bold: true }
+            100
         );
 
         drawLabelValue(
             "Payment Status",
             order.paymentStatus,
             LEFT + halfWidth,
-            actualPaymentY + 17,
+            paymentY + 15,
             halfWidth - 12,
-            { labelWidth: 95, bold: true }
+            95
         );
 
         drawLabelValue(
             "Order Status",
             order.status,
             LEFT + 12,
-            actualPaymentY + 45,
+            paymentY + 40,
             halfWidth - 12,
-            { labelWidth: 105 }
+            100
         );
 
         drawLabelValue(
             "Order Amount",
             formatAmount(originalGrandTotal),
             LEFT + halfWidth,
-            actualPaymentY + 45,
+            paymentY + 40,
             halfWidth - 12,
-            { labelWidth: 95, bold: true }
+            95
         );
 
-        doc.y = actualPaymentY + paymentCardHeight + 20;
-
-        // =====================================================
+        // ==========================================
         // ORDER ITEMS TABLE
-        // =====================================================
+        // ==========================================
 
-        drawSectionTitle("Order Items");
+        drawSectionTitle("Order Items", 347);
 
-        const columnWidths = [
-            24,  // #
-            105, // Product
-            52,  // Variant
-            32,  // Qty
-            58,  // Price
-            68,  // Discount
-            78,  // Total
-            78   // Status
-        ];
+        const columnWidths = [28, 230, 45, 100, 108];
 
         const headers = [
             "#",
             "Product",
-            "Variant",
             "Qty",
-            "Price",
-            "Discount",
-            "Total",
-            "Status"
+            "Unit Price",
+            "Total"
         ];
 
         const tableWidth = columnWidths.reduce(
@@ -460,43 +316,61 @@ export const getInvoiceOrderService = async (orderId, res) => {
             0
         );
 
-        const headerHeight = 30;
+        const tableX = LEFT;
+        const tableHeaderY = 376;
+        const headerHeight = 27;
 
-        const drawTableHeader = (y) => {
-            doc
-                .rect(LEFT, y, tableWidth, headerHeight)
-                .fill(COLORS.black);
+        const tableBottom = 650;
 
-            let x = LEFT;
+        const availableRowHeight =
+            tableBottom - tableHeaderY - headerHeight;
 
-            headers.forEach((header, index) => {
-                doc
-                    .font("Helvetica-Bold")
-                    .fontSize(7.5)
-                    .fillColor(COLORS.white)
-                    .text(
-                        header,
-                        x + 3,
-                        y + 9,
-                        {
-                            width: columnWidths[index] - 6,
-                            align:
-                                index === 0 || index === 3
-                                    ? "center"
-                                    : index >= 4 && index <= 6
-                                        ? "right"
-                                        : "left",
-                            lineBreak: false
-                        }
-                    );
+        // Keep all item rows within the one-page table area
+        const rowHeight = orderItems.length > 0
+            ? Math.min(32, availableRowHeight / orderItems.length)
+            : 28;
 
-                x += columnWidths[index];
-            });
+        const rowFontSize = Math.max(
+            5.8,
+            Math.min(8, rowHeight * 0.29)
+        );
 
-            return y + headerHeight;
-        };
+        // TABLE HEADER
 
-        const drawTableRow = (y, item, index) => {
+        doc
+            .rect(tableX, tableHeaderY, tableWidth, headerHeight)
+            .fill(COLORS.black);
+
+        let headerX = tableX;
+
+        headers.forEach((header, index) => {
+            drawText(
+                header,
+                headerX + 3,
+                tableHeaderY + 9,
+                columnWidths[index] - 6,
+                {
+                    bold: true,
+                    fontSize: 7.5,
+                    color: COLORS.white,
+                    align:
+                        index === 0 || index === 2
+                            ? "center"
+                            : index >= 3
+                                ? "right"
+                                : "left",
+                    lineBreak: false
+                }
+            );
+
+            headerX += columnWidths[index];
+        });
+
+        // TABLE ROWS
+
+        let currentY = tableHeaderY + headerHeight;
+
+        orderItems.forEach((item, index) => {
             const price = Number(item.price) || 0;
             const quantity = Number(item.quantity) || 0;
 
@@ -507,126 +381,130 @@ export const getInvoiceOrderService = async (orderId, res) => {
                     ? savedFinalPrice
                     : price;
 
-            const itemDiscount = Math.max(
-                0,
-                (price - finalPrice) * quantity
-            );
-
             const itemTotal = finalPrice * quantity;
+
+            const productName =
+                item.productId?.productName || "Product";
 
             const values = [
                 String(index + 1),
-                safeText(item.productId?.productName || "Product"),
-                safeText(item.variantId?.color),
+                productName,
                 String(quantity),
-                formatAmount(price),
-                formatAmount(itemDiscount),
-                formatAmount(itemTotal),
-                safeText(item.orderItemStatus)
+                formatAmount(finalPrice),
+                formatAmount(itemTotal)
             ];
 
-            // Calculate row height based on wrapped text
-            let rowHeight = 30;
+            // Alternate row background
+            doc
+                .rect(
+                    tableX,
+                    currentY,
+                    tableWidth,
+                    rowHeight
+                )
+                .fill(
+                    index % 2 === 0
+                        ? COLORS.white
+                        : COLORS.light
+                );
+
+            // Row border
+            doc
+                .rect(
+                    tableX,
+                    currentY,
+                    tableWidth,
+                    rowHeight
+                )
+                .strokeColor(COLORS.border)
+                .lineWidth(0.5)
+                .stroke();
+
+            let cellX = tableX;
 
             values.forEach((value, valueIndex) => {
-                doc
-                    .font("Helvetica")
-                    .fontSize(7.2);
-
-                const textHeight = doc.heightOfString(
+                drawText(
                     value,
+                    cellX + 3,
+                    currentY + Math.max(
+                        2,
+                        (rowHeight - rowFontSize) / 2 - 1
+                    ),
+                    columnWidths[valueIndex] - 6,
                     {
-                        width: columnWidths[valueIndex] - 7,
-                        lineGap: 1
+                        fontSize: rowFontSize,
+                        color: COLORS.text,
+                        align:
+                            valueIndex === 0 || valueIndex === 2
+                                ? "center"
+                                : valueIndex >= 3
+                                    ? "right"
+                                    : "left",
+                        lineBreak: false,
+                        ellipsis: true
                     }
                 );
 
-                rowHeight = Math.max(
-                    rowHeight,
-                    textHeight + 14
-                );
+                cellX += columnWidths[valueIndex];
             });
 
-            // Avoid splitting a table row across pages
-            if (y + rowHeight > BOTTOM - 10) {
-                doc.addPage();
-                y = doc.page.margins.top;
-                y = drawTableHeader(y);
-            }
-
-            doc
-                .rect(LEFT, y, tableWidth, rowHeight)
-                .fill(index % 2 === 0 ? COLORS.white : COLORS.light);
-
-            doc
-                .strokeColor(COLORS.border)
-                .lineWidth(0.5)
-                .rect(LEFT, y, tableWidth, rowHeight)
-                .stroke();
-
-            let x = LEFT;
-
-            values.forEach((value, valueIndex) => {
-                doc
-                    .font("Helvetica")
-                    .fontSize(7.2)
-                    .fillColor(COLORS.text)
-                    .text(
-                        value,
-                        x + 3,
-                        y + 7,
-                        {
-                            width: columnWidths[valueIndex] - 7,
-                            align:
-                                valueIndex === 0 || valueIndex === 3
-                                    ? "center"
-                                    : valueIndex >= 4 && valueIndex <= 6
-                                        ? "right"
-                                        : "left",
-                            lineGap: 1
-                        }
-                    );
-
-                x += columnWidths[valueIndex];
-            });
-
-            // Draw vertical column borders
-            let borderX = LEFT;
+            // Vertical column borders
+            let borderX = tableX;
 
             columnWidths.forEach((width, columnIndex) => {
                 if (columnIndex > 0) {
                     borderX += width;
 
                     doc
-                        .moveTo(borderX, y)
-                        .lineTo(borderX, y + rowHeight)
+                        .moveTo(borderX, currentY)
+                        .lineTo(borderX, currentY + rowHeight)
                         .strokeColor(COLORS.border)
                         .lineWidth(0.5)
                         .stroke();
                 }
             });
 
-            return y + rowHeight;
-        };
-
-        let tableY = doc.y;
-
-        tableY = drawTableHeader(tableY);
-
-        orderItems.forEach((item, index) => {
-            tableY = drawTableRow(tableY, item, index);
+            currentY += rowHeight;
         });
 
-        doc.y = tableY + 22;
+        // Empty order items message
+        if (orderItems.length === 0) {
+            drawText(
+                "No order items found",
+                LEFT,
+                currentY + 10,
+                tableWidth,
+                {
+                    fontSize: 9,
+                    color: COLORS.muted,
+                    align: "center"
+                }
+            );
+        }
 
-        // =====================================================
-        // ORIGINAL ORDER SUMMARY
-        // =====================================================
+        // ==========================================
+        // ORDER SUMMARY
+        // ==========================================
 
-        drawSectionTitle("Original Order Summary");
+       const summaryTitleY = currentY + 20;
 
-        const summaryWidth = 270;
-        const summaryX = RIGHT - summaryWidth;
+drawSectionTitle("Order Summary", summaryTitleY);
+
+const summaryWidth = 275;
+const summaryHeight = 110;
+const summaryX = RIGHT - summaryWidth;
+const summaryY = summaryTitleY + 29;
+
+
+        doc
+            .roundedRect(
+                summaryX,
+                summaryY,
+                summaryWidth,
+                summaryHeight,
+                5
+            )
+            .fillAndStroke(COLORS.light, COLORS.border);
 
         const drawSummaryRow = (
             label,
@@ -634,441 +512,113 @@ export const getInvoiceOrderService = async (orderId, res) => {
             y,
             options = {}
         ) => {
-            doc
-                .font(options.bold ? "Helvetica-Bold" : "Helvetica")
-                .fontSize(options.bold ? 10 : 9)
-                .fillColor(options.labelColor || COLORS.text)
-                .text(label, summaryX, y, {
-                    width: 150
-                });
+            drawText(
+                label,
+                summaryX + 12,
+                y,
+                145,
+                {
+                    fontSize: options.fontSize || 8.5,
+                    bold: options.bold || false,
+                    color: options.color || COLORS.text
+                }
+            );
 
-            doc
-                .font(options.bold ? "Helvetica-Bold" : "Helvetica")
-                .fontSize(options.bold ? 10 : 9)
-                .fillColor(options.valueColor || COLORS.text)
-                .text(value, summaryX + 150, y, {
-                    width: summaryWidth - 150,
-                    align: "right"
-                });
+            drawText(
+                value,
+                summaryX + 157,
+                y,
+                summaryWidth - 169,
+                {
+                    fontSize: options.fontSize || 8.5,
+                    bold: options.bold || false,
+                    color: options.color || COLORS.text,
+                    align: "right",
+                    lineBreak: false
+                }
+            );
         };
-
-        ensureSpace(145);
-
-        let summaryY = doc.y;
-
-        doc
-            .roundedRect(
-                summaryX,
-                summaryY,
-                summaryWidth,
-                125,
-                5
-            )
-            .fillAndStroke(COLORS.light, COLORS.border);
-
-        summaryY += 14;
 
         drawSummaryRow(
             "Subtotal",
             formatAmount(order.subTotal),
-            summaryY
+            summaryY + 8
         );
-
-        summaryY += 21;
 
         drawSummaryRow(
             "Total Discount",
             `- ${formatAmount(order.discountAmount)}`,
-            summaryY
+            summaryY + 24
         );
-
-        summaryY += 21;
 
         drawSummaryRow(
             "Delivery Charge",
             formatAmount(order.deliveryCharge),
-            summaryY
+            summaryY + 40
         );
-
-        summaryY += 12;
-
-        doc
-            .moveTo(summaryX + 10, summaryY)
-            .lineTo(summaryX + summaryWidth - 10, summaryY)
-            .strokeColor(COLORS.border)
-            .stroke();
-
-        summaryY += 12;
 
         drawSummaryRow(
             "Original Grand Total",
             formatAmount(originalGrandTotal),
-            summaryY,
+            summaryY + 56,
             {
-                bold: true,
-                valueColor: COLORS.gold
+                bold: true
             }
         );
 
-        doc.y = doc.y + 145;
-
-        // =====================================================
-        // RETURN AND REFUND DETAILS
-        // =====================================================
-
-        if (returnedItems.length > 0) {
-            drawSectionTitle("Return & Refund Details");
-
-            returnedItems.forEach((item, index) => {
-                ensureSpace(115);
-
-                const returnStatus = item.returnStatus || "NONE";
-
-                const refundAmount = Math.max(
-                    0,
-                    Number(item.refundAmount) || 0
-                );
-
-                const productName =
-                    item.productId?.productName || "Product";
-
-                const variant =
-                    item.variantId?.color || "N/A";
-
-                const itemBlockY = doc.y;
-
-                const reasonText = item.returnReason
-                    ? `Return Reason: ${item.returnReason}`
-                    : "Return Reason: N/A";
-
-                const reasonHeight = doc.heightOfString(
-                    reasonText,
-                    { width: CONTENT_WIDTH - 24, fontSize: 8.5 }
-                );
-
-                const blockHeight = Math.max(
-                    105,
-                    90 + reasonHeight
-                );
-
-                if (doc.y + blockHeight > BOTTOM) {
-                    doc.addPage();
-                }
-
-                const actualBlockY = doc.y;
-
-                doc
-                    .roundedRect(
-                        LEFT,
-                        actualBlockY,
-                        CONTENT_WIDTH,
-                        blockHeight,
-                        5
-                    )
-                    .fillAndStroke(COLORS.light, COLORS.border);
-
-                doc
-                    .font("Helvetica-Bold")
-                    .fontSize(10)
-                    .fillColor(COLORS.black)
-                    .text(
-                        `${index + 1}. ${productName}`,
-                        LEFT + 12,
-                        actualBlockY + 10,
-                        {
-                            width: CONTENT_WIDTH - 24
-                        }
-                    );
-
-                doc
-                    .font("Helvetica")
-                    .fontSize(8.5)
-                    .fillColor(COLORS.text)
-                    .text(
-                        `Variant: ${variant}`,
-                        LEFT + 12,
-                        actualBlockY + 29
-                    );
-
-                doc.text(
-                    `Item Status: ${safeText(item.orderItemStatus)}`,
-                    LEFT + 12,
-                    actualBlockY + 44
-                );
-
-                doc.text(
-                    `Return Status: ${returnStatus === "NONE"
-                        ? item.orderItemStatus === "RETURNED"
-                            ? "RETURNED"
-                            : "N/A"
-                        : returnStatus
-                    }`,
-                    LEFT + 12,
-                    actualBlockY + 59
-                );
-
-                doc.text(
-                    reasonText,
-                    LEFT + 12,
-                    actualBlockY + 74,
-                    {
-                        width: CONTENT_WIDTH - 24,
-                        fontSize: 8.5
-                    }
-                );
-
-                const refundStatus =
-                    returnStatus === "REQUESTED"
-                        ? "Awaiting return approval"
-                        : returnStatus === "REJECTED"
-                            ? "No refund - Return rejected"
-                            : refundAmount > 0
-                                ? "REFUNDED"
-                                : returnStatus === "APPROVED"
-                                    ? "Approved - Refund not recorded"
-                                    : "No refund recorded";
-
-                const refundY =
-                    actualBlockY + 74 + reasonHeight + 5;
-
-                doc
-                    .font("Helvetica-Bold")
-                    .fontSize(8.5)
-                    .fillColor(
-                        refundAmount > 0
-                            ? COLORS.green
-                            : COLORS.text
-                    )
-                    .text(
-                        `Refund Status: ${refundStatus}`,
-                        LEFT + 12,
-                        refundY
-                    );
-
-                doc
-                    .font("Helvetica-Bold")
-                    .fontSize(9)
-                    .fillColor(COLORS.black)
-                    .text(
-                        `Refund Amount: ${formatAmount(refundAmount)}`,
-                        LEFT + 12,
-                        refundY + 15
-                    );
-
-                doc.y = actualBlockY + blockHeight + 12;
-            });
-
-            // =================================================
-            // REFUND SUMMARY
-            // =================================================
-
-            ensureSpace(145);
-
-            drawSectionTitle("Refund Summary");
-
-            const refundBoxY = doc.y;
-            const refundBoxHeight = 105;
-
-            doc
-                .roundedRect(
-                    LEFT,
-                    refundBoxY,
-                    CONTENT_WIDTH,
-                    refundBoxHeight,
-                    5
-                )
-                .fillAndStroke("#F8F8F8", COLORS.border);
-
-            const refundLabelX = LEFT + 14;
-            const refundValueX = LEFT + 200;
-            const refundValueWidth = CONTENT_WIDTH - 214;
-
-            const drawRefundRow = (
-                label,
-                value,
-                y,
-                options = {}
-            ) => {
-                doc
-                    .font(options.bold ? "Helvetica-Bold" : "Helvetica")
-                    .fontSize(options.bold ? 10 : 9)
-                    .fillColor(options.color || COLORS.text)
-                    .text(label, refundLabelX, y, {
-                        width: 180
-                    });
-
-                doc
-                    .font(options.bold ? "Helvetica-Bold" : "Helvetica")
-                    .fontSize(options.bold ? 10 : 9)
-                    .fillColor(options.color || COLORS.text)
-                    .text(value, refundValueX, y, {
-                        width: refundValueWidth,
-                        align: "right"
-                    });
-            };
-
-            drawRefundRow(
-                "Original Grand Total",
-                formatAmount(originalGrandTotal),
-                refundBoxY + 15
-            );
-
-            drawRefundRow(
-                "Total Refunded",
-                `- ${formatAmount(totalRefund)}`,
-                refundBoxY + 38,
-                {
-                    bold: true,
-                    color: COLORS.green
-                }
-            );
-
-            doc
-                .moveTo(refundLabelX, refundBoxY + 62)
-                .lineTo(RIGHT - 14, refundBoxY + 62)
-                .strokeColor(COLORS.border)
-                .stroke();
-
-            drawRefundRow(
-                "Net Amount Retained",
-                formatAmount(netAmountRetained),
-                refundBoxY + 75,
-                {
-                    bold: true,
-                    color: COLORS.gold
-                }
-            );
-
-            doc.y = refundBoxY + refundBoxHeight + 12;
-
-            if (totalRefund > 0) {
-                doc
-                    .font("Helvetica")
-                    .fontSize(9)
-                    .fillColor(COLORS.green)
-                    .text(
-                        "Refund Destination: Chronix Wallet",
-                        LEFT,
-                        doc.y
-                    );
-
-                doc.y += 22;
+        drawSummaryRow(
+            "Returned Items Refund",
+            `- ${formatAmount(totalRefund)}`,
+            summaryY + 72,
+            {
+                bold: true,
+                color: COLORS.green
             }
-        }
+        );
 
-        // =====================================================
-        // FINAL PAYMENT SUMMARY
-        // =====================================================
-
-        ensureSpace(105);
-
-        drawSectionTitle("Final Payment Summary");
-
-        const finalBoxY = doc.y;
-        const finalBoxHeight = 70;
-
+        // Divider
         doc
-            .roundedRect(
-                LEFT,
-                finalBoxY,
-                CONTENT_WIDTH,
-                finalBoxHeight,
-                5
+            .moveTo(
+                summaryX + 12,
+                summaryY + 88
             )
-            .fillAndStroke("#FFFDF6", COLORS.gold);
-
-        doc
-            .font("Helvetica")
-            .fontSize(9)
-            .fillColor(COLORS.text)
-            .text(
-                "Original Grand Total",
-                LEFT + 14,
-                finalBoxY + 13
-            );
-
-        doc
-            .font("Helvetica")
-            .fontSize(9)
-            .fillColor(COLORS.text)
-            .text(
-                formatAmount(originalGrandTotal),
-                LEFT + 200,
-                finalBoxY + 13,
-                {
-                    width: CONTENT_WIDTH - 214,
-                    align: "right"
-                }
-            );
-
-        doc
-            .font("Helvetica")
-            .fontSize(9)
-            .fillColor(COLORS.green)
-            .text(
-                "Total Refunded",
-                LEFT + 14,
-                finalBoxY + 32
-            );
-
-        doc
-            .font("Helvetica")
-            .fontSize(9)
-            .fillColor(COLORS.green)
-            .text(
-                `- ${formatAmount(totalRefund)}`,
-                LEFT + 200,
-                finalBoxY + 32,
-                {
-                    width: CONTENT_WIDTH - 214,
-                    align: "right"
-                }
-            );
-
-        doc
-            .moveTo(LEFT + 14, finalBoxY + 51)
-            .lineTo(RIGHT - 14, finalBoxY + 51)
-            .strokeColor(COLORS.gold)
+            .lineTo(
+                summaryX + summaryWidth - 12,
+                summaryY + 88
+            )
+            .strokeColor(COLORS.border)
             .stroke();
 
-        doc.y = finalBoxY + finalBoxHeight + 18;
+        // Final amount after refund
+        drawSummaryRow(
+            "Final Amount",
+            formatAmount(finalAmountAfterRefund),
+            summaryY + 94,
+            {
+                bold: true,
+                fontSize: 9,
+                color: COLORS.gold
+            }
+        );
 
-        // =====================================================
+        // ==========================================
         // FOOTER
-        // =====================================================
+        // ==========================================
 
-        ensureSpace(55);
+        drawLine(820);
 
-        drawLine(doc.y, COLORS.border);
-
-        doc.y += 12;
-
-        doc
-            .font("Helvetica-Bold")
-            .fontSize(10)
-            .fillColor(COLORS.black)
-            .text(
-                "Thank you for shopping with Chronix!",
-                LEFT,
-                doc.y,
-                {
-                    width: CONTENT_WIDTH,
-                    align: "center"
-                }
-            );
-
-        doc.moveDown(0.5);
-
-        doc
-            .font("Helvetica")
-            .fontSize(8)
-            .fillColor(COLORS.muted)
-            .text(
-                "This is a computer-generated invoice.",
-                {
-                    align: "center"
-                }
-            );
+        drawText(
+            "Thank you for shopping with Chronix!",
+            LEFT,
+            828,
+            WIDTH,
+            {
+                bold: true,
+                fontSize: 9,
+                color: COLORS.black,
+                align: "center"
+            }
+        );
 
         doc.end();
 
