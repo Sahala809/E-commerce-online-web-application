@@ -179,7 +179,7 @@ export const loadUsers = async (req, res) => {
 
         const result = await loadUsersService(req);
         const message = req.message || "";
-console.log("SEARCH VALUE:", req.query.search);
+
         return res.render("admin/users/users", {
             activePage: "users",
             pageTitle: "Users",
