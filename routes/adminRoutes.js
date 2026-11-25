@@ -4,11 +4,22 @@ import upload from "../middleware/multer.js";
 import brandUpload from "../middleware/brandMulter.js";
 const router = express.Router();
 
+
 import {
     loadAdminLogin,
-    loadDashboard,
     adminLogin,
     adminLogout
+} from "../controllers/adminController/adminAuth.js"
+
+
+
+
+
+import {
+
+    loadDashboard,
+
+    
 } from "../controllers/adminController.js"
 
 import {
