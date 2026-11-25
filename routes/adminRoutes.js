@@ -12,15 +12,9 @@ import {
 } from "../controllers/adminController/adminAuth.js"
 
 
-
-
-
 import {
-
     loadDashboard,
-
-    
-} from "../controllers/adminController.js"
+} from "../controllers/adminController/dashboard.js"
 
 import {
     loadUsers,
