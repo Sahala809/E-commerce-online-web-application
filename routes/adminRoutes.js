@@ -30,7 +30,7 @@ import {
     loadEditCategory,
     editCategory,
     deleteCategory
-} from "../controllers/adminController.js"
+} from "../controllers/adminController/categoryManagemant.js";
 
 import {
     loadProduct,
@@ -110,12 +110,12 @@ router.get('/users/:id', loadUserDetails)
 router.patch('/block/:id',isAdminLogin, blockUser)
 router.patch('/unblock/:id', isAdminLogin, unblockUser)
 
-router.get("/category", loadCategory)
-router.get("/category/add", loadAddCategory)
-router.post("/category/add", addCategory)
-router.get("/category/edit/:id", loadEditCategory)
-router.patch('/category/edit/:id', editCategory)
-router.delete('/category/:id', deleteCategory)
+router.get("/category", isAdminLogin, noCache, loadCategory)
+router.get("/category/add", isAdminLogin, noCache, loadAddCategory)
+router.post("/category/add", isAdminLogin, noCache, addCategory)
+router.get("/category/edit/:id", isAdminLogin, noCache, loadEditCategory)
+router.patch('/category/edit/:id', isAdminLogin, noCache, editCategory)
+router.delete('/category/:id', isAdminLogin, noCache , deleteCategory)
 
 router.get("/products", loadProduct)
 router.get("/products/add", loadAddProduct)

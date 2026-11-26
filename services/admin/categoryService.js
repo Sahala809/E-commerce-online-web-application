@@ -1,4 +1,6 @@
 import Category from "../../models/categoryModel.js";
+import Product from "../../models/productModel.js";
+
 import { validateAddCategory } from "./validationService.js";
 
 
@@ -133,4 +135,28 @@ export const editCategoryService =  async(req, res) => {
     return {
         success: true
     }
+}
+
+export const deleteCategoryService = async(req, res) => {
+    
+    const {id} = req.params;
+
+    const productExists = await Product.exists({
+        categoryId : id
+    })
+
+    if(productExists){
+        return {
+            success:false,
+            message:"Cannot delete category. Products are available in this category."
+        }
+    }
+
+    await Category.findByIdAndDelete(id)
+
+    return {
+        success:true,
+        message:"Category deleted successfully."
+    }
+
 }
