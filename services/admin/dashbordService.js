@@ -7,10 +7,7 @@ import OrderItem from "../../models/orderItemModel.js";
 export const dashboardService = async () => {
     try {
 
-        // =====================================
-        // 1. SUMMARY COUNTS
-        // =====================================
-
+        
         const totalUsers = await User.countDocuments({
             role: "user"
         });
@@ -20,10 +17,7 @@ export const dashboardService = async () => {
         const totalOrders = await Order.countDocuments();
 
 
-        // =====================================
-        // 2. PAID ORDERS
-        // =====================================
-
+        
         const paidOrders = await Order.find({
             paymentStatus: {
                 $in: ["SUCCESS", "REFUNDED", "REFUND-PENDING"]
@@ -35,10 +29,7 @@ export const dashboardService = async () => {
         const paidOrderIds = paidOrders.map(order => order._id);
 
 
-        // =====================================
-        // 3. ORDER ITEMS
-        // =====================================
-
+        
         const paidOrderItems = paidOrderIds.length
     ? await OrderItem.find({
         orderId: { $in: paidOrderIds }
@@ -54,10 +45,7 @@ if (paidOrderItems.length > 0) {
     console.log("VARIANT ID:", paidOrderItems[0].variantId);
 }
 
-        // =====================================
-        // 4. CALCULATE COMPLETED REFUNDS
-        // =====================================
-
+       
         const orderMap = {};
 
         for (const order of paidOrders) {
@@ -82,15 +70,12 @@ if (paidOrderItems.length > 0) {
                 continue;
             }
 
-            // Cancellation refund:
-            // Only ONLINE and WALLET payments are refundable
-            const isCancelledRefund =
+                const isCancelledRefund =
                 item.orderItemStatus === "CANCELLED" &&
                 ["ONLINE", "WALLET"].includes(order.paymentMethod);
 
-            // Return refund:
-            // Only approved returns are refundable
-            const isApprovedReturn =
+
+              const isApprovedReturn =
                 item.orderItemStatus === "RETURNED" &&
                 item.returnStatus === "APPROVED";
 
@@ -102,10 +87,7 @@ if (paidOrderItems.length > 0) {
         }
 
 
-        // =====================================
-        // 5. TOTAL REVENUE
-        // =====================================
-
+        
         let totalRevenue = 0;
 
         for (const order of paidOrders) {
@@ -126,10 +108,6 @@ if (paidOrderItems.length > 0) {
 
         totalRevenue = Number(totalRevenue.toFixed(2));
 
-
-        // =====================================
-        // 6. SALES SUMMARY - LAST 7 DAYS
-        // =====================================
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -201,10 +179,7 @@ if (paidOrderItems.length > 0) {
         }));
 
 
-        // =====================================
-        // 7. BEST-SELLING PRODUCTS - TOP 3
-        // =====================================
-
+       
         const productSales = {};
 
         for (const item of paidOrderItems) {
@@ -247,10 +222,7 @@ if (paidOrderItems.length > 0) {
             .slice(0, 3);
 
 
-        // =====================================
-        // 8. RECENT ORDERS - LATEST 5
-        // =====================================
-
+       
         const recentOrderDocuments = await Order.find()
             .populate("userId", "name email")
             .sort({ createdAt: -1 })
@@ -260,11 +232,7 @@ if (paidOrderItems.length > 0) {
 
             const orderId = order._id.toString();
 
-            // Option A:
-            // Show original order amount.
-            // Fully cancelled COD orders with no collected
-            // payment should show zero.
-
+            
             const isUnpaidCancelledCOD =
                 order.paymentMethod === "COD" &&
                 order.status === "CANCELLED" &&
@@ -294,10 +262,7 @@ if (paidOrderItems.length > 0) {
         });
 
 
-        // =====================================
-        // 9. WEEKLY TOP CUSTOMERS - TOP 3
-        // =====================================
-
+        
         const sevenDaysAgo = new Date();
 
         sevenDaysAgo.setDate(
@@ -369,10 +334,7 @@ if (paidOrderItems.length > 0) {
             }));
 
 
-        // =====================================
-        // 10. RETURN DASHBOARD DATA
-        // =====================================
-
+       
         return {
             success: true,
 
