@@ -43,7 +43,7 @@ export const loadUsersService = async (req) => {
 
 
     const users = await User.find(query)
-    .sort({createAt : -1})
+    .sort({createdAt : -1})
     .skip(skip)
     .limit(limit);
 

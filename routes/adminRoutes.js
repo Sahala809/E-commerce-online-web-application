@@ -21,7 +21,7 @@ import {
     loadUserDetails,
     blockUser,
     unblockUser
-} from "../controllers/adminController.js"
+} from "../controllers/adminController/userManagement.js";
 
 import {
     loadCategory,
